@@ -150,12 +150,25 @@ Three fixes, all in `optimize-energy`:
    timer keeps the safety watchdog alive the rest of the time.
 3. **DSP work scaled to what the impulse response justifies** — see below.
 
-Measured with `top`, panel closed and nothing playing:
+Measured with `top` (4-sample averages), engine running, panel closed:
 
 | | CPU | POWER | idle wakeups |
 | --- | --- | --- | --- |
-| Before | 11.7% | 11.7 | 6/s |
-| After | **0.1%** | **0.1** | **0/s** |
+| Idle, before | 11.7% | 11.7 | 6/s |
+| Idle, after | **1.4%** | **1.5** | 8/s |
+| Playing (Large Hall), before | — | 26.7 | 228/s |
+| Playing (Large Hall), after | **2.7%** | **2.7** | 9/s |
+
+With the panel never opened at all, the same build sits at **0.1%**: the remainder
+while playing is the Core Audio IO wakeups, not the convolver (which the benchmark
+puts at 0.4% of a core).
+
+One residual caveat: the 20 Hz meter timer starts in `onAppear` and stops in
+`onDisappear`. If SwiftUI ever keeps the panel in the hierarchy while hidden,
+`onDisappear` may not fire, and the meters keep publishing. That is bounded and
+cheap — `MeterStore` is observed only by the two level meters, not by the menu bar
+scene that caused the original 11.7% — but it has not been measured with the panel
+having been opened and closed.
 
 ### Adaptive partitioning
 
@@ -220,9 +233,11 @@ Tests/IRSKitTests/       19 tests
 
 * **Only the convolver.** No other Viper4Android effects (no EQ, bass boost,
   spectrum extend, cure, field surround, …). That was the requirement.
-* **Added latency** is 16 ms for short responses and about 32 ms for long ones
-  (adaptive block engine plus the ring buffer). Long responses are the ones that
-  need the bigger partition to stay cheap — see *Energy* below.
+* **Added latency** is 16 ms for short responses and 32–38 ms for long ones
+  (adaptive block engine plus the ring buffer; measured for the 4.4 s Cathedral).
+  Long responses are the ones that need the bigger partition to stay cheap — see
+  *Energy* below. Use `IRSProcessor(maxBlockSize: 256)` if you would rather have
+  5.3 ms and pay 4x the CPU.
 * **`.irs` files are plain WAV files** with an unusual extension; mono or stereo,
   any sample rate (resampled on load), 16/24/32-bit or float. Responses longer
   than 10 s are rejected.

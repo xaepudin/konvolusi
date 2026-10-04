@@ -176,8 +176,7 @@ final class AudioEngine: @unchecked Sendable {
                 self.state = .running
                 self.onStateChange?(self.state)
                 AppLog.write("engine running: \(Int(rate)) Hz, tap \(self.captureFormatDescription), "
-                    + "device '\(self.sourceDescription)', buffer target \(self.bufferTargetFrames), "
-                    + "added latency \(Int(self.totalLatencyMilliseconds)) ms")
+                    + "device '\(self.sourceDescription)', buffer target \(self.bufferTargetFrames)")
             }
         } catch {
             DispatchQueue.main.async { [weak self] in
@@ -321,9 +320,12 @@ final class AudioEngine: @unchecked Sendable {
             do {
                 let response = try IRFile.load(url: url, targetSampleRate: rate, normalize: normalize)
                 self.processor.load(response)
+                let block = self.processor.latency
                 AppLog.write("loaded impulse response '\(response.name)' "
                     + "\(response.frameCount) taps, \(response.channelCount)ch, "
-                    + "\(String(format: "%.2f", response.duration))s at \(Int(rate)) Hz")
+                    + "\(String(format: "%.2f", response.duration))s at \(Int(rate)) Hz -> "
+                    + "block \(block) (\(String(format: "%.1f", Double(block) / rate * 1000)) ms), "
+                    + "total added latency \(Int(self.totalLatencyMilliseconds)) ms")
                 DispatchQueue.main.async {
                     self.impulseResponseName = response.name
                     self.impulseResponseError = nil
