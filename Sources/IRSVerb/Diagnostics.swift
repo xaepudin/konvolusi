@@ -64,7 +64,7 @@ enum Diagnostics {
         var temporary: URL?
         var impulseResponseURL = locateImpulseResponse()
         if impulseResponseURL == nil {
-            let responses = IRSynthesis.demoResponses()
+            let responses = IRSynthesis.builtInLibrary()
             let generated = responses.first { $0.name == "Large Hall" } ?? responses[0]
             let target = FileManager.default.temporaryDirectory
                 .appendingPathComponent("irsverb-diagnostic-\(UUID().uuidString).irs")

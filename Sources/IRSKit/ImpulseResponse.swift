@@ -118,6 +118,36 @@ public struct Biquad: Sendable {
                           Float(1 + alpha / A), Float(-2 * cosw0), Float(1 - alpha / A))
     }
 
+    /// Low shelf (RBJ cookbook), `slope` of 1 is the gentlest useful setting.
+    public static func lowShelf(frequency: Double, sampleRate: Double, gainDB: Double, slope: Double = 1) -> Biquad {
+        let A = pow(10, gainDB / 40)
+        let w0 = 2 * Double.pi * frequency / sampleRate
+        let cosw0 = cos(w0)
+        let alpha = sin(w0) / 2 * ((A + 1 / A) * (1 / slope - 1) + 2).squareRoot()
+        let twoSqrtAAlpha = 2 * A.squareRoot() * alpha
+        return normalized(Float(A * ((A + 1) - (A - 1) * cosw0 + twoSqrtAAlpha)),
+                          Float(2 * A * ((A - 1) - (A + 1) * cosw0)),
+                          Float(A * ((A + 1) - (A - 1) * cosw0 - twoSqrtAAlpha)),
+                          Float((A + 1) + (A - 1) * cosw0 + twoSqrtAAlpha),
+                          Float(-2 * ((A - 1) + (A + 1) * cosw0)),
+                          Float((A + 1) + (A - 1) * cosw0 - twoSqrtAAlpha))
+    }
+
+    /// High shelf (RBJ cookbook).
+    public static func highShelf(frequency: Double, sampleRate: Double, gainDB: Double, slope: Double = 1) -> Biquad {
+        let A = pow(10, gainDB / 40)
+        let w0 = 2 * Double.pi * frequency / sampleRate
+        let cosw0 = cos(w0)
+        let alpha = sin(w0) / 2 * ((A + 1 / A) * (1 / slope - 1) + 2).squareRoot()
+        let twoSqrtAAlpha = 2 * A.squareRoot() * alpha
+        return normalized(Float(A * ((A + 1) + (A - 1) * cosw0 + twoSqrtAAlpha)),
+                          Float(-2 * A * ((A - 1) + (A + 1) * cosw0)),
+                          Float(A * ((A + 1) + (A - 1) * cosw0 - twoSqrtAAlpha)),
+                          Float((A + 1) - (A - 1) * cosw0 + twoSqrtAAlpha),
+                          Float(2 * ((A - 1) - (A + 1) * cosw0)),
+                          Float((A + 1) - (A - 1) * cosw0 - twoSqrtAAlpha))
+    }
+
     /// Impulse response of a cascade of biquads, computed by feeding a unit impulse.
     public static func impulseResponse(of chain: [Biquad], length: Int, sampleRate: Double) -> [Float] {
         var states = [State](repeating: State(), count: chain.count)

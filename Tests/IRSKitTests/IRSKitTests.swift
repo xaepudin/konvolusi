@@ -171,12 +171,13 @@ final class IRFileTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: directory) }
 
         let written = try IRSynthesis.writeDemoFiles(to: directory)
-        XCTAssertEqual(written.count, 5)
+        XCTAssertEqual(written.count, 15)
 
         for url in written {
             XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
             let response = try IRFile.load(url: url)
-            XCTAssertGreaterThan(response.frameCount, 100)
+            // The Identity control is deliberately a single sample.
+            XCTAssertGreaterThan(response.frameCount, response.name.hasPrefix("Identity") ? 0 : 100)
             XCTAssertEqual(response.sampleRate, 44100, accuracy: 0.5)
             XCTAssertLessThanOrEqual(response.duration, IRFile.maximumDuration)
             // 16-bit PCM with unit energy normalization.
@@ -544,5 +545,193 @@ final class OptimizationTests: XCTestCase {
         }
         let worst = maxDifference(Array(outLeft[blockSize...]), left, count: length - blockSize)
         XCTAssertLessThan(worst, 1e-4, "dry/wet lost alignment at block size \(blockSize)")
+    }
+}
+
+
+/// Magnitude of an impulse response at one frequency (a single DFT bin).
+///
+/// Rotates a phasor rather than calling cos/sin per sample, which matters
+/// because the long responses have hundreds of thousands of samples.
+func responseMagnitude(_ samples: [Float], at frequency: Double, sampleRate: Double) -> Double {
+    let omega = 2 * Double.pi * frequency / sampleRate
+    let stepCos = cos(omega)
+    let stepSin = sin(omega)
+    var cosPhase = 1.0
+    var sinPhase = 0.0
+    var real = 0.0
+    var imaginary = 0.0
+    var sinceRenormalise = 0
+    for sample in samples {
+        real += Double(sample) * cosPhase
+        imaginary -= Double(sample) * sinPhase
+        let nextCos = cosPhase * stepCos - sinPhase * stepSin
+        sinPhase = sinPhase * stepCos + cosPhase * stepSin
+        cosPhase = nextCos
+        sinceRenormalise += 1
+        if sinceRenormalise == 4096 {
+            sinceRenormalise = 0
+            let magnitude = (cosPhase * cosPhase + sinPhase * sinPhase).squareRoot()
+            if magnitude > 0 { cosPhase /= magnitude; sinPhase /= magnitude }
+        }
+    }
+    return (real * real + imaginary * imaginary).squareRoot()
+}
+
+final class LibraryTests: XCTestCase {
+
+    private let sampleRate = 48000.0
+    /// Synthesised once per test run: the 4.4 s cathedral is not free.
+    private static let sharedLibrary = IRSynthesis.builtInLibrary(sampleRate: 48000)
+    private var library: [ImpulseResponse] { Self.sharedLibrary }
+
+    private func response(_ name: String) -> ImpulseResponse {
+        guard let match = library.first(where: { $0.name == name }) else {
+            XCTFail("library is missing \(name)")
+            return ImpulseResponse(name: name, sampleRate: sampleRate, channels: [[0]])
+        }
+        return match
+    }
+
+    private func level(_ name: String, _ frequency: Double) -> Double {
+        responseMagnitude(response(name).channels[0], at: frequency, sampleRate: sampleRate)
+    }
+
+    /// How ragged the magnitude response is across a band. Diffuse reverberation
+    /// sits around 0.5; a sparse modal response is far higher.
+    private func ripple(_ name: String, from: Double = 300, to: Double = 3000, step: Double = 7) -> Double {
+        let samples = response(name).channels[0]
+        var values: [Double] = []
+        var frequency = from
+        while frequency <= to {
+            values.append(responseMagnitude(samples, at: frequency, sampleRate: sampleRate))
+            frequency += step
+        }
+        let mean = values.reduce(0, +) / Double(values.count)
+        guard mean > 0 else { return 0 }
+        let variance = values.reduce(0) { $0 + ($1 - mean) * ($1 - mean) } / Double(values.count)
+        return variance.squareRoot() / mean
+    }
+
+    func testLibraryContentsAreSane() {
+        XCTAssertEqual(library.count, 15, "the built-in library should stay small and curated")
+        var names = Set<String>()
+        for item in library {
+            XCTAssertTrue(names.insert(item.name).inserted, "duplicate name \(item.name)")
+            XCTAssertGreaterThan(item.frameCount, 0, "\(item.name) is empty")
+            XCTAssertLessThanOrEqual(item.duration, IRFile.maximumDuration, "\(item.name) is too long")
+            XCTAssertLessThanOrEqual(item.peak, 1.0001, "\(item.name) clips")
+            XCTAssertEqual(Double(item.energy), 1.0, accuracy: 1e-3, "\(item.name) is not energy normalised")
+            // One assertion for the whole response: per-sample XCTAssert calls
+            // dominated the test runtime.
+            for channel in item.channels {
+                XCTAssertTrue(channel.allSatisfy { $0.isFinite }, "\(item.name) has a non-finite sample")
+            }
+        }
+    }
+
+    func testIdentityIsATransparentControl() {
+        let identity = response("Identity (control)")
+        XCTAssertEqual(identity.frameCount, 1)
+        XCTAssertEqual(identity.channels[0][0], 1)
+        // Flat across the spectrum, which is what makes it a usable A/B control.
+        for frequency in [60.0, 1000, 12000] {
+            XCTAssertEqual(level("Identity (control)", frequency), 1, accuracy: 1e-6)
+        }
+    }
+
+    func testSpeechLiftRemovesRumbleAndLiftsPresence() {
+        // Measured: 60 Hz ~0.16, 3 kHz ~1.94.
+        XCTAssertLessThan(level("Speech Lift", 60), level("Speech Lift", 3000) * 0.25)
+        XCTAssertGreaterThan(level("Speech Lift", 3000), level("Speech Lift", 1000))
+    }
+
+    func testNightModeLiftsBothExtremes() {
+        // Equal-loudness compensation: bass and treble up, middle untouched.
+        let middle = level("Night Mode", 1000)
+        XCTAssertGreaterThan(level("Night Mode", 60), middle * 1.5)
+        XCTAssertGreaterThan(level("Night Mode", 12000), middle * 1.25)
+        XCTAssertLessThan(level("Night Mode", 2600), middle)
+    }
+
+    func testRadioAndTelephoneAreBandLimited() {
+        // Measured: radio 60 Hz ~0.005 / 12 kHz ~0.026; telephone ~0.001 / ~0.004.
+        XCTAssertLessThan(level("Old Radio Speaker", 60), level("Old Radio Speaker", 2600) * 0.1)
+        XCTAssertLessThan(level("Old Radio Speaker", 12000), level("Old Radio Speaker", 2600) * 0.1)
+        XCTAssertLessThan(level("Telephone", 60), level("Telephone", 2600) * 0.05)
+        XCTAssertLessThan(level("Telephone", 12000), level("Telephone", 2600) * 0.05)
+    }
+
+    func testCassetteTapeHasHeadBumpAndSoftTop() {
+        XCTAssertGreaterThan(level("Cassette Tape", 60), level("Cassette Tape", 1000) * 1.2)
+        XCTAssertLessThan(level("Cassette Tape", 12000), level("Cassette Tape", 2600) * 0.3)
+    }
+
+    /// The flutter train is what makes a stairwell sound like a stairwell, so it
+    /// is tested directly: same parameters, with and without the echoes.
+    func testFlutterEchoesChangeTheResponse() {
+        var plain = ReverbParameters()
+        plain.duration = 0.5
+        plain.t60 = 0.35
+        plain.predelay = 0.004
+        plain.earlyReflectionCount = 8
+        plain.seed = 0x1234_5678
+
+        var flutter = plain
+        flutter.flutter = FlutterEcho(spacing: 0.045, count: 12, decay: 0.4,
+                                      amplitude: 0.45, alternatingPolarity: true)
+
+        let plainResponse = IRSynthesis.reverb(name: "plain", sampleRate: sampleRate, parameters: plain)
+        let flutterResponse = IRSynthesis.reverb(name: "flutter", sampleRate: sampleRate, parameters: flutter)
+
+        // Both responses are energy normalised, so an absolute comparison would
+        // be dominated by that gain difference. Peak normalise first.
+        let plainScale = 1 / Double(plainResponse.peak)
+        let flutterScale = 1 / Double(flutterResponse.peak)
+        var worst = 0.0
+        for index in 0..<min(plainResponse.frameCount, flutterResponse.frameCount) {
+            let a = Double(plainResponse.channels[0][index]) * plainScale
+            let b = Double(flutterResponse.channels[0][index]) * flutterScale
+            worst = max(worst, abs(a - b))
+        }
+        XCTAssertGreaterThan(worst, 0.1, "the flutter train had no measurable effect (worst \(worst))")
+    }
+
+    func testStairwellUsesFlutterAndCarCabinIsLowHeavy() {
+        // The stairwell's echoes should be visible as distinct peaks well after
+        // the direct sound.
+        let stairwell = response("Stairwell").channels[0]
+        let spacing = Int(0.045 * sampleRate)
+        var echoEnergy: Float = 0
+        var betweenEnergy: Float = 0
+        for step in 1...8 {
+            let index = spacing * step
+            guard index + 2 < stairwell.count else { break }
+            for offset in 0..<3 { echoEnergy += abs(stairwell[index + offset]) }
+            for offset in 0..<3 { betweenEnergy += abs(stairwell[index + spacing / 2 + offset]) }
+        }
+        XCTAssertGreaterThan(echoEnergy, betweenEnergy * 1.5,
+                             "stairwell echoes are not standing out from the tail")
+
+        // Car cabin: the glass comb plus the low shelf make it strongly bass
+        // heavy compared with its midrange.
+        XCTAssertGreaterThan(level("Car Cabin", 60), level("Car Cabin", 1000) * 1.8)
+    }
+
+    func testTinCanIsModalNotDiffuse() {
+        // A physical model of a shell: sparse resonances, so far more ragged than
+        // any of the reverberant responses.
+        XCTAssertGreaterThan(ripple("Tin Can"), 1.0)
+        XCTAssertGreaterThan(ripple("Tin Can"), ripple("Large Hall") * 2)
+        XCTAssertGreaterThan(ripple("Tin Can"), ripple("Cathedral") * 2)
+        // Its modelled fundamental dominates its neighbours.
+        XCTAssertGreaterThan(level("Tin Can", 384), level("Tin Can", 620) * 5)
+    }
+
+    func testFilterColourationsAreSmootherThanSpaces() {
+        // Perception and tape curves are filters, not rooms: no comb structure.
+        XCTAssertLessThan(ripple("Night Mode"), 0.2)
+        XCTAssertLessThan(ripple("Cassette Tape"), 0.2)
+        XCTAssertLessThan(ripple("Speech Lift"), 0.35)
     }
 }

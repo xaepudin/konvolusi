@@ -208,6 +208,63 @@ skipped. Once every partition in the delay line has been cleared the output is
 provably zero, and `testSilenceFastPathIsExact` checks the result against a naive
 direct convolution sample for sample.
 
+## The built-in library, and what a useful collection looks like
+
+`irsconv make-ir` writes all fifteen; the app generates them on first run. They
+are synthesised (`Sources/IRSKit/IRSynthesis.swift`), which costs no download and
+makes room for things nobody records: perception curves and physical models.
+
+The useful realisation is that you do not need five hundred files. You need about
+a dozen covering six jobs:
+
+| File | Length | Job | Try at |
+| --- | --- | --- | --- |
+| Identity (control) | 1 tap | Prove the engine is transparent; A/B reference | 100% |
+| Speech Lift | 0.16 s | Rumble out, consonant band up: calls and podcasts on laptop speakers | 100% |
+| Night Mode | 0.16 s | Equal-loudness bass/treble lift for quiet listening | 100% |
+| Warm Desk | 0.24 s | Barely-there space so headphones stop feeling sealed | 20–30% |
+| Studio Room | 0.42 s | General-purpose small space for music | 25–40% |
+| Plate | 1.35 s | Dense, bright, no discrete early reflections: classic mix glue | 30–60% |
+| Small Room | 0.70 s | Everyday room: obvious but unobtrusive | 20–40% |
+| Car Cabin | 0.22 s | Glass comb plus low-end boom; instantly recognisable | 40–70% |
+| Stairwell | 1.70 s | Flutter echo off parallel hard surfaces | 25–50% |
+| Cassette Tape | 0.12 s | Head bump and a dull top: warm and forgiving | 60–100% |
+| Old Radio Speaker | 0.18 s | 1930s box: 60 Hz sits 46 dB below 2.6 kHz | 100% |
+| Telephone | 0.12 s | 300 Hz–3.4 kHz band: the "on the phone" effect | 100% |
+| Large Hall | 2.60 s | The canonical big reverb | 40–80% |
+| Cathedral | 4.40 s | Enormous and slow; impressive, then tiring | 20–40% |
+| Tin Can | 0.30 s | Physical model of a thin metal shell: inharmonic modes | 100% |
+
+The six jobs, and why each earns its place:
+
+1. **A control.** `Identity` convolving to nothing is how you prove the effect is
+   off, and it separates "the engine is wrong" from "this impulse response is
+   wrong" when debugging.
+2. **Perception rather than place.** `Night Mode` and `Speech Lift` cannot be
+   downloaded, because nobody records an equal-loudness curve. They are ordinary
+   filter curves expressed as impulse responses: a way to get EQ out of a
+   convolver that has none.
+3. **Everyday spaces.** Short and direct-heavy, so they colour without smearing
+   timing or destroying speech. These are the ones you leave switched on.
+4. **Character.** Radio, telephone, tape, cabin: the Viper4Android-style joy, and
+   the reason to own a convolver at all.
+5. **Big spaces.** Hall and cathedral. Use them deliberately and at low mix.
+6. **One physical model.** `Tin Can` is a bank of damped inharmonic resonances
+   rather than a space, and sounds like nothing else here. Its magnitude response
+   is three times as ragged as any of the reverberant ones, which is exactly what
+   makes it sound like a struck object.
+
+Honest caveat: synthesised *spaces* are plausible rather than measured. A
+synthesised short room has a more ragged magnitude response than a real one, so if
+one sounds honky, drop the mix or reach for a measured library. The perceptual
+curves and the physical model are where synthesis actually wins.
+
+`LibraryTests` asserts this character rather than trusting it: that Speech Lift
+really does push 3 kHz up while pulling 60 Hz down, that Night Mode lifts both
+extremes, that radio and telephone are band limited, that tape has its head bump,
+that the flutter train measurably changes a response, and that Tin Can is modal
+rather than diffuse.
+
 ## Layout
 
 ```

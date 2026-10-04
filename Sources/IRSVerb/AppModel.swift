@@ -265,6 +265,9 @@ final class AppModel: ObservableObject {
     func panelAppeared() {
         guard !panelVisible else { return }
         panelVisible = true
+        // Pick up impulse responses dropped into the folder since launch.
+        refreshList()
+        selectFallbackIfNeeded()
         // `.common` modes keep the timer alive while a menu or the panel is
         // tracking events, which would otherwise pause default-mode timers.
         let timer = Timer(timeInterval: 0.05, repeats: true) { [weak self] _ in
