@@ -38,6 +38,8 @@ struct LevelMeter: View {
 
 struct PanelView: View {
     @ObservedObject var model: AppModel
+    @ObservedObject var meters: MeterStore
+    @ObservedObject var status: StatusStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -47,7 +49,7 @@ struct PanelView: View {
             Divider()
             controls
             Divider()
-            meters
+            metersSection
             if let hint = model.hintMessage {
                 Text(hint)
                     .font(.caption)
@@ -69,17 +71,20 @@ struct PanelView: View {
         }
         .padding(14)
         .frame(width: 380)
+        // The 20 Hz meter timer only runs while this panel is actually on screen.
+        .onAppear { model.panelAppeared() }
+        .onDisappear { model.panelDisappeared() }
     }
 
     private var header: some View {
         HStack(spacing: 8) {
             Circle()
-                .fill(model.isRunning ? Color.green : Color.secondary.opacity(0.5))
+                .fill(status.isRunning ? Color.green : Color.secondary.opacity(0.5))
                 .frame(width: 8, height: 8)
             Text("IRSVerb")
                 .font(.headline)
             Spacer()
-            Button(model.isRunning ? "Stop" : "Start") { model.toggleRunning() }
+            Button(status.isRunning ? "Stop" : "Start") { model.toggleRunning() }
                 .controlSize(.small)
         }
     }
@@ -145,10 +150,10 @@ struct PanelView: View {
         }
     }
 
-    private var meters: some View {
+    private var metersSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            LevelMeter(label: "In", level: model.inputLevel)
-            LevelMeter(label: "Out", level: model.outputLevel)
+            LevelMeter(label: "In", level: meters.input)
+            LevelMeter(label: "Out", level: meters.output)
         }
     }
 

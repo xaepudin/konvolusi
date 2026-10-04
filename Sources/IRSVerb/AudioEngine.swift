@@ -17,7 +17,7 @@ final class AudioEngine: @unchecked Sendable {
         case failed(String)
     }
 
-    let processor = IRSProcessor(blockSize: 256)
+    let processor = IRSProcessor(maxBlockSize: 1024)
     let inputLevel = AtomicLevel(0)
     let outputLevel = AtomicLevel(0)
     /// Incremented by every render callback; watched by the UI's safety net.

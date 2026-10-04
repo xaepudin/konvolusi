@@ -130,6 +130,71 @@ Loading a response is done on a background queue and published to the audio
 thread with an atomic pointer swap; the previous response is kept alive for a
 few seconds so an in-flight render callback can finish with it.
 
+## Energy
+
+The first version sat at ~12% of a CPU core doing nothing at all, and ~35% while
+convolving, which Activity Monitor reported as an energy impact of ~196. Profiling
+(`sample`) showed **zero** samples in the audio code while idle — all threads
+blocked — but plenty in `CUICatalog _resolvedRenditionKeyFromThemeRef`,
+`NSISEngine` and `NSPerformVisuallyAtomicChange`. The cost was SwiftUI: the 20 Hz
+meter timer published into `AppModel`, which the `MenuBarExtra` scene observes, so
+every meter tick re-laid-out and re-rendered the whole panel **twenty times a
+second even while it was closed**.
+
+Three fixes, all in `optimize-energy`:
+
+1. **Meter levels moved out of `AppModel`** into a separate `MeterStore` that only
+   the meter views observe, so the menu bar scene is no longer invalidated by them
+   (`Sources/IRSVerb/Stores.swift`).
+2. **The 20 Hz meter timer only runs while the panel is on screen**; a 1 Hz health
+   timer keeps the safety watchdog alive the rest of the time.
+3. **DSP work scaled to what the impulse response justifies** — see below.
+
+Measured with `top`, panel closed and nothing playing:
+
+| | CPU | POWER | idle wakeups |
+| --- | --- | --- | --- |
+| Before | 11.7% | 11.7 | 6/s |
+| After | **0.1%** | **0.1** | **0/s** |
+
+### Adaptive partitioning
+
+Cost per sample in a uniform-partitioned convolver scales as
+`impulseResponseLength / blockSize`: doubling the partition size halves the
+frequency-domain multiply-accumulates. The block size is therefore chosen from the
+response's length, since a long diffuse reverb already imposes far more perceptual
+delay than the block itself:
+
+| Response length | Block | Added latency |
+| --- | --- | --- |
+| ≤ 0.55 s | 256 | 5.3 ms |
+| ≤ 1.7 s | 512 | 10.7 ms |
+| longer | 1024 | 21.3 ms |
+
+`irsconv benchmark` measures this without needing audio hardware or permissions:
+
+```
+$ dist/irsconv benchmark --irs "Impulse Responses/Large Hall.irs" --seconds 12
+
+  configuration         partitions  latency   noise         silence
+  fixed B=256 (before)  488         5.3 ms    59.5x   1.7%  3347x   0.0%
+  adaptive (now)        122         21.3 ms   225.4x   0.4% 3138x   0.0%
+```
+
+`xRT` is seconds of audio processed per second of CPU, so **4.2x less CPU** for
+this response (2.8% -> 0.7% for the 4.4 s Cathedral), and short responses keep
+their snappy 5.3 ms block. If you would rather have the old behaviour, use
+`IRSProcessor(maxBlockSize: 256)` in `AudioEngine.swift`.
+
+### Silence fast path
+
+Digitally silent input lets the convolver skip its FFTs entirely. The test is
+applied to the transform window rather than the incoming hop: the window spans two
+hops, so a silent hop whose predecessor is still ringing out must **not** be
+skipped. Once every partition in the delay line has been cleared the output is
+provably zero, and `testSilenceFastPathIsExact` checks the result against a naive
+direct convolution sample for sample.
+
 ## Layout
 
 ```
@@ -155,9 +220,9 @@ Tests/IRSKitTests/       19 tests
 
 * **Only the convolver.** No other Viper4Android effects (no EQ, bass boost,
   spectrum extend, cure, field surround, …). That was the requirement.
-* **Added latency** is about 20–25 ms: 5.3 ms of block engine plus the ring
-  buffer prefill. Fine for music and reverb; on the edge for lip-sync-critical
-  video.
+* **Added latency** is 16 ms for short responses and about 32 ms for long ones
+  (adaptive block engine plus the ring buffer). Long responses are the ones that
+  need the bigger partition to stay cheap — see *Energy* below.
 * **`.irs` files are plain WAV files** with an unusual extension; mono or stereo,
   any sample rate (resampled on load), 16/24/32-bit or float. Responses longer
   than 10 s are rejected.

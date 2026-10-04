@@ -28,6 +28,9 @@ public final class PartitionedConvolver: @unchecked Sendable {
     /// Input-to-output delay of the block engine, in samples.
     public var latency: Int { blockSize }
 
+    /// True when the engine is currently producing exact silence.
+    public var isSilent: Bool { silentHops > partitionCount }
+
     private let log2N: vDSP_Length
     private let halfN: Int
     private let fftSetup: FFTSetup
@@ -51,6 +54,10 @@ public final class PartitionedConvolver: @unchecked Sendable {
     // Streaming state.
     private let pendingInput: UnsafeMutablePointer<Float>
     private var pendingCount = 0
+    /// Consecutive hops whose input was digitally silent. Once this reaches the
+    /// partition count the whole delay line is zero, so the output is provably
+    /// zero and the FFT work can be skipped entirely.
+    private var silentHops = 0
 
     /// Ring of computed output frames waiting to be emitted, capacity 4 hops.
     private let staging: UnsafeMutablePointer<Float>
@@ -143,6 +150,7 @@ public final class PartitionedConvolver: @unchecked Sendable {
         staging.update(repeating: 0, count: stagingCapacity)
         histIndex = 0
         pendingCount = 0
+        silentHops = 0
         // Prime the output with one hop of silence: this is what makes the
         // input-to-output delay exactly `latency`.
         stagingRead = 0
@@ -213,18 +221,37 @@ public final class PartitionedConvolver: @unchecked Sendable {
     /// Transforms one hop and stages one hop of output.
     private func processHop() {
         let n = halfN
+        let slot = histIndex
 
-        // Slide the window: [previous hop | current hop].
+        // Slide the window: [previous hop | current hop]. This happens on every
+        // hop, silent or not, because the window is what gets transformed.
         memmove(window, window + blockSize, blockSize * MemoryLayout<Float>.size)
         window.advanced(by: blockSize).update(from: pendingInput, count: blockSize)
 
-        // Forward transform of the current window into the delay line.
-        let slot = histIndex
-        var spectrum = DSPSplitComplex(realp: xReal + slot * n, imagp: xImag + slot * n)
-        window.withMemoryRebound(to: DSPComplex.self, capacity: n) { complex in
-            vDSP_ctoz(complex, 2, &spectrum, 1, vDSP_Length(n))
+        if windowIsSilent() {
+            // The spectrum of an all-zero window is exactly zero, so the forward
+            // FFT can be skipped. The slot must still be cleared, because the
+            // accumulate below reads the whole delay line.
+            silentHops += 1
+            vDSP_vclr(xReal + slot * n, 1, vDSP_Length(n))
+            vDSP_vclr(xImag + slot * n, 1, vDSP_Length(n))
+            if silentHops > partitionCount {
+                // Every slot in the delay line has been cleared by now, so the
+                // output is provably zero: skip the accumulate and inverse FFT.
+                hopOutput.update(repeating: 0, count: blockSize)
+                stage(hopOutput, count: blockSize)
+                advanceHistory()
+                return
+            }
+        } else {
+            silentHops = 0
+            // Forward transform of the current window into the delay line.
+            var spectrum = DSPSplitComplex(realp: xReal + slot * n, imagp: xImag + slot * n)
+            window.withMemoryRebound(to: DSPComplex.self, capacity: n) { complex in
+                vDSP_ctoz(complex, 2, &spectrum, 1, vDSP_Length(n))
+            }
+            vDSP_fft_zrip(fftSetup, &spectrum, 1, log2N, FFTDirection(FFT_FORWARD))
         }
-        vDSP_fft_zrip(fftSetup, &spectrum, 1, log2N, FFTDirection(FFT_FORWARD))
 
         // Accumulate X[t-k] * H[k] over the partition delay line.
         accReal.update(repeating: 0, count: n)
@@ -257,8 +284,20 @@ public final class PartitionedConvolver: @unchecked Sendable {
             }
         }
         stage(hopOutput, count: blockSize)
+        advanceHistory()
+    }
 
+    private func advanceHistory() {
         histIndex += 1
         if histIndex == partitionCount { histIndex = 0 }
+    }
+
+    /// Cheap O(fftSize) test that stands in for O(partitions * blockSize) of
+    /// frequency-domain multiply-accumulate work when nothing is playing.
+    @inline(__always)
+    private func windowIsSilent() -> Bool {
+        var maximum: Float = 0
+        vDSP_maxmgv(window, 1, &maximum, vDSP_Length(fftSize))
+        return maximum == 0
     }
 }

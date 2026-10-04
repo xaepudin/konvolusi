@@ -296,7 +296,7 @@ final class ProcessorTests: XCTestCase {
         let right = (0..<length).map { _ in generator.gaussian() }
 
         for wet in [Float(1), 0.5, 0] {
-            let processor = IRSProcessor(blockSize: blockSize)
+            let processor = IRSProcessor(maxBlockSize: blockSize)
             processor.wet = wet
             processor.load(ImpulseResponse(name: "delta", sampleRate: 48000, channels: [[1]]))
 
@@ -323,7 +323,7 @@ final class ProcessorTests: XCTestCase {
     }
 
     func testBypassIsLatencyFreePassThrough() {
-        let processor = IRSProcessor(blockSize: 64)
+        let processor = IRSProcessor(maxBlockSize: 64)
         processor.gain = 0.5
         processor.isBypassed = true
         processor.load(ImpulseResponse(name: "delta", sampleRate: 48000, channels: [[1]]))
@@ -340,7 +340,7 @@ final class ProcessorTests: XCTestCase {
     }
 
     func testUnloadRestoresTransparency() {
-        let processor = IRSProcessor(blockSize: 64)
+        let processor = IRSProcessor(maxBlockSize: 64)
         processor.load(ImpulseResponse(name: "hall", sampleRate: 48000,
                                        channels: [[Float](repeating: 0.1, count: 5000)]))
         processor.unload()
@@ -358,7 +358,7 @@ final class ProcessorTests: XCTestCase {
     }
 
     func testGainDecibelsRoundTrip() {
-        let processor = IRSProcessor(blockSize: 64)
+        let processor = IRSProcessor(maxBlockSize: 64)
         processor.gainDecibels = -6
         XCTAssertEqual(processor.gain, 0.5011872, accuracy: 1e-4)
         XCTAssertEqual(processor.gainDecibels, -6, accuracy: 1e-3)
@@ -433,5 +433,116 @@ final class RingBufferTests: XCTestCase {
         }
         XCTAssertEqual(read, 0)
         XCTAssertEqual(ring.missingFrames.load(), 10)
+    }
+}
+
+
+/// Tests for the energy optimisations: the silence fast path and the adaptive
+/// partition size.
+final class OptimizationTests: XCTestCase {
+
+    private func process(_ convolver: PartitionedConvolver,
+                         _ input: [Float],
+                         into output: inout [Float],
+                         offset: Int) {
+        input.withUnsafeBufferPointer { source in
+            output.withUnsafeMutableBufferPointer { destination in
+                convolver.process(input: source.baseAddress!,
+                                  output: destination.baseAddress! + offset,
+                                  frameCount: input.count)
+            }
+        }
+    }
+
+    func testSilenceFastPathIsExact() {
+        let blockSize = 64
+        var generator = SplitMix64(seed: 4242)
+        let impulse = (0..<200).map { index in generator.gaussian() * exp(-Float(index) / 80) }
+        let convolver = PartitionedConvolver(impulseResponse: impulse, blockSize: blockSize)
+        let partitions = convolver.partitionCount
+        XCTAssertGreaterThan(partitions, 1)
+
+        let head = (0..<512).map { _ in generator.gaussian() }
+        // Long enough to drain the impulse response completely.
+        let silence = [Float](repeating: 0, count: (partitions + 2) * blockSize)
+        let tail = (0..<512).map { _ in generator.gaussian() }
+        let signal = head + silence + tail
+
+        var output = [Float](repeating: 0, count: signal.count)
+        process(convolver, head, into: &output, offset: 0)
+        XCTAssertFalse(convolver.isSilent, "must not report silence while signal is playing")
+        process(convolver, silence, into: &output, offset: head.count)
+        XCTAssertTrue(convolver.isSilent, "fast path should have engaged after a full tail of silence")
+        process(convolver, tail, into: &output, offset: head.count + silence.count)
+        XCTAssertFalse(convolver.isSilent, "must leave the fast path as soon as signal returns")
+
+        // The whole point: skipping the FFTs must not change a single sample.
+        let reference = directConvolution(signal: signal, impulse: impulse)
+        let compared = signal.count - blockSize
+        let worst = maxDifference(Array(output[blockSize..<(blockSize + compared)]), reference, count: compared)
+        XCTAssertLessThan(worst, peak(reference) * 1e-4,
+                          "silence fast path changed the result (worst \(worst))")
+    }
+
+    func testSilenceFastPathRecognisesDigitalSilenceOnly() {
+        // A tiny non-zero value must keep the engine on the exact path.
+        let convolver = PartitionedConvolver(impulseResponse: [0.5, 0.25], blockSize: 64)
+        var output = [Float](repeating: 0, count: 128)
+        var quiet = [Float](repeating: 0, count: 128)
+        quiet[3] = 1e-30
+        process(convolver, quiet, into: &output, offset: 0)
+        XCTAssertFalse(convolver.isSilent)
+    }
+
+    func testAdaptiveBlockSizeSelection() {
+        // Thresholds are by duration: <=0.55 s -> 256, <=1.7 s -> 512, else 1024.
+        func block(seconds: Double, maximum: Int = 1024) -> Int {
+            IRSProcessor.preferredBlockSize(forFrameCount: Int(seconds * 48000),
+                                            sampleRate: 48000,
+                                            maximum: maximum)
+        }
+        XCTAssertEqual(block(seconds: 0.1), 256)
+        XCTAssertEqual(block(seconds: 0.55), 256)
+        XCTAssertEqual(block(seconds: 0.6), 512)
+        XCTAssertEqual(block(seconds: 1.7), 512)
+        XCTAssertEqual(block(seconds: 1.8), 1024)
+        XCTAssertEqual(block(seconds: 4.0), 1024)
+        // Never exceeds the caller's ceiling.
+        XCTAssertEqual(block(seconds: 4.0, maximum: 256), 256)
+        XCTAssertEqual(block(seconds: 4.0, maximum: 512), 512)
+    }
+
+    func testLongImpulseResponseKeepsDryWetAligned() {
+        // A 1.8 s response selects the 1024-sample block, which changes the dry
+        // delay line length; getting that wrong would smear the mix.
+        let blockSize = 1024
+        let processor = IRSProcessor(maxBlockSize: blockSize)
+        processor.wet = 0.5
+        var impulse = [Float](repeating: 0, count: 86_400)
+        impulse[0] = 1
+        processor.load(ImpulseResponse(name: "long delta", sampleRate: 48000, channels: [impulse]))
+        XCTAssertEqual(processor.latency, blockSize)
+
+        var generator = SplitMix64(seed: 77)
+        let length = 4096
+        let left = (0..<length).map { _ in generator.gaussian() }
+        let right = (0..<length).map { _ in generator.gaussian() }
+        var outLeft = [Float](repeating: 0, count: length)
+        var outRight = [Float](repeating: 0, count: length)
+        left.withUnsafeBufferPointer { sourceLeft in
+            right.withUnsafeBufferPointer { sourceRight in
+                outLeft.withUnsafeMutableBufferPointer { destinationLeft in
+                    outRight.withUnsafeMutableBufferPointer { destinationRight in
+                        processor.process(inputLeft: sourceLeft.baseAddress!,
+                                          inputRight: sourceRight.baseAddress!,
+                                          outputLeft: destinationLeft.baseAddress!,
+                                          outputRight: destinationRight.baseAddress!,
+                                          frameCount: length)
+                    }
+                }
+            }
+        }
+        let worst = maxDifference(Array(outLeft[blockSize...]), left, count: length - blockSize)
+        XCTAssertLessThan(worst, 1e-4, "dry/wet lost alignment at block size \(blockSize)")
     }
 }

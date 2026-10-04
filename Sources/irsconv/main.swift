@@ -54,6 +54,7 @@ func printUsage() {
 
     USAGE
       irsconv render <input...> --irs <file.irs> [options]
+      irsconv benchmark [--irs <file.irs>] [--seconds 10] [--block 256] [--chunk 512]
       irsconv make-ir [--out <dir>] [--rate <hz>]
       irsconv info <file...>
       irsconv selftest
@@ -177,7 +178,7 @@ private func render(input: ImpulseResponse,
                     wet: Float,
                     gainDB: Float) throws -> Rendered {
     let blockSize = 256
-    let processor = IRSProcessor(blockSize: blockSize)
+    let processor = IRSProcessor(maxBlockSize: blockSize)
     processor.wet = wet
     processor.gainDecibels = gainDB
     processor.load(impulse)
@@ -263,6 +264,134 @@ func makeIRCommand(_ parser: ArgumentParser) throws {
     let urls = try IRSynthesis.writeDemoFiles(to: directory, sampleRate: rate)
     print("wrote \(urls.count) impulse responses to \(directory.path):")
     for url in urls { print("  \(url.lastPathComponent)") }
+}
+
+// MARK: - benchmark
+
+private struct BenchmarkOutcome {
+    var wall: Double
+    var audio: Double
+    var realtime: Double { audio > 0 ? audio / wall : 0 }
+    var cpuPercent: Double { realtime > 0 ? 100 / realtime : 0 }
+}
+
+/// Drives the real-time processor as fast as it will go and reports how much
+/// audio it can handle per second of CPU. No audio hardware, no permissions.
+private func measure(processor: IRSProcessor,
+                     sampleRate: Double,
+                     seconds: Double,
+                     silent: Bool,
+                     chunk: Int,
+                     primeFramesForSilence: Int) -> BenchmarkOutcome {
+    let totalFrames = Int(seconds * sampleRate)
+    var inputLeft = [Float](repeating: 0, count: chunk)
+    var inputRight = [Float](repeating: 0, count: chunk)
+    var outputLeft = [Float](repeating: 0, count: chunk)
+    var outputRight = [Float](repeating: 0, count: chunk)
+    if !silent {
+        var generator = SplitMix64(seed: 0xB0A2D)
+        for index in 0..<chunk {
+            inputLeft[index] = generator.uniform() * 0.2
+            inputRight[index] = generator.uniform() * 0.2
+        }
+    }
+
+    func pump(_ frames: Int) {
+        var remaining = frames
+        while remaining > 0 {
+            let count = min(chunk, remaining)
+            inputLeft.withUnsafeBufferPointer { sourceLeft in
+                inputRight.withUnsafeBufferPointer { sourceRight in
+                    outputLeft.withUnsafeMutableBufferPointer { destinationLeft in
+                        outputRight.withUnsafeMutableBufferPointer { destinationRight in
+                            processor.process(inputLeft: sourceLeft.baseAddress!,
+                                              inputRight: sourceRight.baseAddress!,
+                                              outputLeft: destinationLeft.baseAddress!,
+                                              outputRight: destinationRight.baseAddress!,
+                                              frameCount: count)
+                        }
+                    }
+                }
+            }
+            remaining -= count
+        }
+    }
+
+    processor.reset()
+    // Let the impulse response tail fully drain into digital silence first, so
+    // the silent measurement reflects the steady state rather than the decay.
+    if primeFramesForSilence > 0 { pump(primeFramesForSilence) }
+
+    let start = DispatchTime.now().uptimeNanoseconds
+    pump(totalFrames)
+    let elapsed = Double(DispatchTime.now().uptimeNanoseconds - start) / 1_000_000_000
+    return BenchmarkOutcome(wall: elapsed, audio: Double(totalFrames) / sampleRate)
+}
+
+func benchmarkCommand(_ parser: ArgumentParser) throws {
+    let seconds = parser.value("seconds").flatMap(Double.init) ?? 10
+    let sampleRate = parser.value("rate").flatMap(Double.init) ?? 48_000
+    let chunk = parser.value("chunk").flatMap(Int.init) ?? 512
+    let requestedBlock = parser.value("block").flatMap(Int.init)
+
+    var url = parser.value("irs").map { URL(fileURLWithPath: $0) }
+    if url == nil {
+        let candidate = URL(fileURLWithPath: "Impulse Responses/Large Hall.irs")
+        if FileManager.default.fileExists(atPath: candidate.path) { url = candidate }
+    }
+
+    let impulse: ImpulseResponse
+    if let url {
+        impulse = try IRFile.load(url: url, targetSampleRate: sampleRate)
+        print("benchmark: \(url.lastPathComponent) — \(impulse.frameCount) taps, "
+            + "\(impulse.channelCount)ch, \(Int(sampleRate)) Hz")
+    } else {
+        impulse = IRSynthesis.reverb(name: "Large Hall", sampleRate: sampleRate)
+        print("benchmark: synthesized Large Hall — \(impulse.frameCount) taps, \(Int(sampleRate)) Hz")
+    }
+    print(String(format: "  %.0f s of stereo audio per run, %d-frame buffers\n", seconds, chunk))
+
+    // The old build used a fixed 256-sample block for everything, so that row is
+    // the honest "before" number.
+    var configurations: [(label: String, maximum: Int)] = []
+    if let requestedBlock {
+        configurations.append(("fixed B=\(requestedBlock)", requestedBlock))
+    } else {
+        configurations.append(("fixed B=256 (before)", 256))
+        configurations.append(("adaptive (now)", 1024))
+    }
+
+    print("  \(pad("configuration", 21)) \(pad("partitions", 11)) \(pad("latency", 9))"
+        + " \(pad("noise", 13)) \(pad("silence", 13))")
+
+    for configuration in configurations {
+        let processor = IRSProcessor(maxBlockSize: configuration.maximum)
+        processor.load(impulse)
+        let block = max(1, processor.latency)
+        let partitions = (impulse.frameCount + block - 1) / block
+        let latencyMS = Double(block) / sampleRate * 1000
+
+        let noise = measure(processor: processor, sampleRate: sampleRate, seconds: seconds,
+                            silent: false, chunk: chunk, primeFramesForSilence: 0)
+        let silence = measure(processor: processor, sampleRate: sampleRate, seconds: seconds,
+                              silent: true, chunk: chunk,
+                              primeFramesForSilence: (partitions + 2) * block)
+
+        let noiseText = String(format: "%.1fx %5.1f%%", noise.realtime, noise.cpuPercent)
+        let silenceText = String(format: "%.0fx %5.1f%%", silence.realtime, silence.cpuPercent)
+        print("  \(pad(configuration.label, 21)) \(pad("\(partitions)", 11))"
+            + " \(pad(String(format: "%.1f ms", latencyMS), 9))"
+            + " \(pad(noiseText, 13)) \(pad(silenceText, 13))")
+    }
+    print("")
+    print("  xRT = seconds of audio processed per second of CPU (higher is better)")
+    print("  %   = share of one CPU core")
+    print("  noise   = continuous signal, the worst case")
+    print("  silence = digitally silent input: the convolver skips its FFT work")
+}
+
+private func pad(_ text: String, _ width: Int) -> String {
+    text.count >= width ? text : text + String(repeating: " ", count: width - text.count)
 }
 
 // MARK: - info
@@ -411,6 +540,8 @@ do {
         try renderCommand(parser)
     case "make-ir":
         try makeIRCommand(parser)
+    case "benchmark":
+        try benchmarkCommand(parser)
     case "info":
         try infoCommand(parser)
     case "selftest":

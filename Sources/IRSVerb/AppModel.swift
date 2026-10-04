@@ -34,18 +34,25 @@ final class AppModel: ObservableObject {
         didSet { engine.normalizeImpulseResponse = normalize }
     }
 
-    @Published private(set) var isRunning = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var hintMessage: String?
-    @Published private(set) var inputLevel: Double = 0
-    @Published private(set) var outputLevel: Double = 0
     @Published private(set) var infoLines: [String] = []
     @Published private(set) var isPreparingLibrary = false
+
+    /// Meter levels are published here, never through `AppModel`, so the menu bar
+    /// scene is not invalidated twenty times a second.
+    let meters = MeterStore()
+    let status = StatusStore()
+
+    var isRunning: Bool { status.isRunning }
 
     let engine = AudioEngine()
     private(set) var folderURL: URL
 
+    private var healthTimer: Timer?
     private var meterTimer: Timer?
+    private var panelVisible = false
+    private var silenceHintActive = false
     private var silentCallbacks = 0
     private var stalledTicks = 0
     private var lastCallbackCount: Float = 0
@@ -104,7 +111,7 @@ final class AppModel: ObservableObject {
         }
 
         prepareLibrary()
-        startMeterTimer()
+        startHealthTimer()
     }
 
     // MARK: - Library
@@ -234,14 +241,14 @@ final class AppModel: ObservableObject {
     private func apply(_ state: AudioEngine.State) {
         switch state {
         case .stopped:
-            isRunning = false
+            status.isRunning = false
         case .starting:
-            isRunning = false
+            status.isRunning = false
         case .running:
-            isRunning = true
+            status.isRunning = true
             errorMessage = nil
         case .failed(let message):
-            isRunning = false
+            status.isRunning = false
             errorMessage = message
             if engine.isWaitingForPermission {
                 hintMessage = "Approve IRSVerb under System Settings › Privacy & Security › "
@@ -253,30 +260,66 @@ final class AppModel: ObservableObject {
 
     // MARK: - Meters and status
 
-    private func startMeterTimer() {
-        meterTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.tick() }
+    /// The panel tells us when it is on screen so the 20 Hz meter timer only runs
+    /// while someone can actually see the meters.
+    func panelAppeared() {
+        guard !panelVisible else { return }
+        panelVisible = true
+        // `.common` modes keep the timer alive while a menu or the panel is
+        // tracking events, which would otherwise pause default-mode timers.
+        let timer = Timer(timeInterval: 0.05, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.meterTick() }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        meterTimer = timer
+        healthTick()
     }
 
-    private func tick() {
+    func panelDisappeared() {
+        panelVisible = false
+        meterTimer?.invalidate()
+        meterTimer = nil
+    }
+
+    /// 1 Hz, always: the safety watchdog has to keep running even with the panel
+    /// closed, because a stalled output would leave system audio muted.
+    private func startHealthTimer() {
+        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.healthTick() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        healthTimer = timer
+    }
+
+    private func meterTick() {
         let input = Double(engine.inputLevel.load())
         let output = Double(engine.outputLevel.load())
         // Peak-style decay so the meters are readable.
-        inputLevel = max(input, inputLevel * 0.72)
-        outputLevel = max(output, outputLevel * 0.72)
+        meters.input = max(input, meters.input * 0.72)
+        meters.output = max(output, meters.output * 0.72)
+    }
 
+    private func healthTick() {
+        checkOutputWatchdog()
+        guard panelVisible else { return }
+
+        let input = engine.inputLevel.load()
         if isRunning && input < 1e-7 {
             silentCallbacks += 1
-            if silentCallbacks > 60, hintMessage == nil {
-                hintMessage = "No audio is being captured. Check System Settings › Privacy & Security › "
-                    + "Screen & System Audio Recording, then restart IRSVerb."
+            if silentCallbacks > 5 {
+                silenceHintActive = true
+                if hintMessage == nil {
+                    hintMessage = "No audio is being captured. Check System Settings › Privacy & Security › "
+                        + "Screen & System Audio Recording, then restart IRSVerb."
+                }
             }
         } else {
             silentCallbacks = 0
-            if input > 1e-7 { hintMessage = nil }
+            if input > 1e-7, silenceHintActive {
+                silenceHintActive = false
+                hintMessage = nil
+            }
         }
-        checkOutputWatchdog()
         refreshInfo()
     }
 

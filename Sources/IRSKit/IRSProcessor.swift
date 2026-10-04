@@ -43,7 +43,10 @@ public final class ConvolverPair: @unchecked Sendable {
 /// bypass. Loading a new impulse response is done from a control thread and
 /// published to the audio thread through an atomic pointer swap.
 public final class IRSProcessor: @unchecked Sendable {
-    public let blockSize: Int
+    /// Upper bound on the partition size. The size actually used is chosen per
+    /// impulse response (see `preferredBlockSize`), because the cost per sample
+    /// scales as impulseResponseLength / blockSize.
+    public let maxBlockSize: Int
 
     private let pairSlot = Atomic<UInt>(0)          // Unmanaged<ConvolverPair> bit pattern
     private var retired: [(pair: ConvolverPair, at: Date)] = []
@@ -62,12 +65,35 @@ public final class IRSProcessor: @unchecked Sendable {
     public private(set) var impulseResponseName: String?
     public private(set) var impulseResponseLatency: Int = 0
 
-    public init(blockSize: Int = 256) {
-        self.blockSize = blockSize
-        dryLeft = UnsafeMutablePointer<Float>.allocate(capacity: blockSize)
-        dryRight = UnsafeMutablePointer<Float>.allocate(capacity: blockSize)
-        dryLeft.initialize(repeating: 0, count: blockSize)
-        dryRight.initialize(repeating: 0, count: blockSize)
+    public init(maxBlockSize: Int = 1024) {
+        self.maxBlockSize = max(8, maxBlockSize)
+        // The dry delay line is sized for the largest possible delay and only
+        // part of it is used, so switching impulse responses never has to
+        // reallocate on the audio thread.
+        dryLeft = UnsafeMutablePointer<Float>.allocate(capacity: self.maxBlockSize)
+        dryRight = UnsafeMutablePointer<Float>.allocate(capacity: self.maxBlockSize)
+        dryLeft.initialize(repeating: 0, count: self.maxBlockSize)
+        dryRight.initialize(repeating: 0, count: self.maxBlockSize)
+    }
+
+    /// Larger partitions mean fewer frequency-domain multiply-accumulates per
+    /// sample, at the cost of added latency. Long, diffuse impulse responses
+    /// (halls, cathedrals) already impose far more perceptual delay than the
+    /// block itself, so they can afford to pay in latency and save CPU; short
+    /// coloration responses stay snappy.
+    public static func preferredBlockSize(forFrameCount frames: Int,
+                                         sampleRate: Double,
+                                         maximum: Int) -> Int {
+        let seconds = sampleRate > 0 ? Double(frames) / sampleRate : 0
+        let preferred: Int
+        if seconds <= 0.55 {
+            preferred = 256
+        } else if seconds <= 1.7 {
+            preferred = 512
+        } else {
+            preferred = 1024
+        }
+        return min(preferred, maximum)
     }
 
     deinit {
@@ -117,6 +143,9 @@ public final class IRSProcessor: @unchecked Sendable {
     /// audio is running; the previous response is kept alive for a few seconds
     /// so any in-flight render callback can finish with it.
     public func load(_ impulseResponse: ImpulseResponse) {
+        let blockSize = Self.preferredBlockSize(forFrameCount: impulseResponse.frameCount,
+                                               sampleRate: impulseResponse.sampleRate,
+                                               maximum: maxBlockSize)
         let pair = ConvolverPair(impulseResponse: impulseResponse, blockSize: blockSize)
         let newBits = UInt(bitPattern: Unmanaged.passRetained(pair).toOpaque())
         let oldBits = pairSlot.exchange(newBits, ordering: .acquiringAndReleasing)
@@ -150,8 +179,8 @@ public final class IRSProcessor: @unchecked Sendable {
 
     public func reset() {
         currentPair()?.reset()
-        dryLeft.update(repeating: 0, count: blockSize)
-        dryRight.update(repeating: 0, count: blockSize)
+        dryLeft.update(repeating: 0, count: maxBlockSize)
+        dryRight.update(repeating: 0, count: maxBlockSize)
         dryIndex = 0
     }
 
@@ -183,16 +212,17 @@ public final class IRSProcessor: @unchecked Sendable {
                          frameCount: frameCount)
         }
 
-        // The dry signal always runs through the block-sized delay line while an
-        // impulse response is loaded, so sweeping wet/dry never shifts in time.
+        // The dry signal always runs through a delay line matching the block
+        // engine's own delay, so sweeping wet/dry never shifts in time.
         let dryAmount = max(0, 1 - wetAmount)
+        let delayLength = pair.latency
         for frame in 0..<frameCount {
             let delayedLeft = dryLeft[dryIndex]
             let delayedRight = dryRight[dryIndex]
             dryLeft[dryIndex] = inputLeft[frame]
             dryRight[dryIndex] = inputRight[frame]
             dryIndex += 1
-            if dryIndex == blockSize { dryIndex = 0 }
+            if dryIndex >= delayLength { dryIndex = 0 }
 
             if dryAmount > 0 {
                 outputLeft[frame] = (outputLeft[frame] * wetAmount + delayedLeft * dryAmount) * gain

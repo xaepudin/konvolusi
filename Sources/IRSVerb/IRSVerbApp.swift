@@ -28,11 +28,20 @@ struct IRSVerbApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            PanelView(model: model)
+            PanelView(model: model, meters: model.meters, status: model.status)
         } label: {
-            Image(systemName: model.isRunning ? "waveform.circle.fill" : "waveform.circle")
+            MenuBarLabel(status: model.status)
         }
         .menuBarExtraStyle(.window)
+    }
+}
+
+/// Isolated so that meter updates cannot invalidate the `MenuBarExtra` scene.
+private struct MenuBarLabel: View {
+    @ObservedObject var status: StatusStore
+
+    var body: some View {
+        Image(systemName: status.isRunning ? "waveform.circle.fill" : "waveform.circle")
     }
 }
 
