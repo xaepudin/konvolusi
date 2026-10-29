@@ -37,11 +37,11 @@ All notable user-visible changes are recorded here. The format follows
   wider impulse response picker, and consistent spacing.
 - The welcome sheet uses aligned icon rows, readable body text, and a card for the
   permission explanation.
-- Added tooltips for the impulse response picker, Choose/Folder/Show in Finder
-  buttons, mix, output gain, bypass, normalize, Start/Stop, meters, and diagnostic
-  actions.
-- Renamed **Reveal** to **Show in Finder** and **Reveal Logs** to **Show Logs in
-  Finder**.
+- Added visible **ⓘ** buttons with click-to-open explanations, plus hover tooltips,
+  for the impulse response picker, library actions, Mix, Output gain, Bypass,
+  Normalize, Levels, Start/Stop, and diagnostic actions.
+- Renamed the confusing library actions to **Add File…**, **Change Folder…**, and
+  **Open Folder**. **Reveal Logs** is now **Show Logs in Finder**.
 - The level meters show **Silent** instead of an unexplained dash when there is no
   signal.
 - The silent-input hint now appears only after output has started, so a quiet Mac

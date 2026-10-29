@@ -90,13 +90,35 @@ struct LibraryView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("Impulse responses")
                     .font(.title2.bold())
+                InfoButton(
+                    title: "Library",
+                    message: "Every supported response in the current folder. Add File uses a "
+                        + "single .irs, WAV, AIFF, CAF, FLAC, or M4A file from anywhere. Change "
+                        + "Folder switches the whole library. Open Folder shows the current "
+                        + "library folder in Finder."
+                )
                 Spacer()
-                Button("Choose .irs…") { model.chooseImpulseResponseFile() }
-                    .help("Add a single impulse response file from anywhere on disk.")
-                Button("Folder…") { model.chooseFolder() }
-                    .help("Use a folder on this Mac as the impulse response library.")
-                Button("Show in Finder") { model.revealFolder() }
-                    .help("Show the current impulse response folder in Finder.")
+                Button {
+                    model.chooseImpulseResponseFile()
+                } label: {
+                    Label("Add File…", systemImage: "plus")
+                }
+                .buttonStyle(.bordered)
+                .help("Add a single impulse response file from anywhere on disk.")
+                Button {
+                    model.chooseFolder()
+                } label: {
+                    Label("Change Folder…", systemImage: "folder")
+                }
+                .buttonStyle(.bordered)
+                .help("Use a folder on this Mac as the impulse response library.")
+                Button {
+                    model.revealFolder()
+                } label: {
+                    Label("Open Folder", systemImage: "arrow.up.forward.app")
+                }
+                .buttonStyle(.bordered)
+                .help("Show the current impulse response folder in Finder.")
             }
 
             Text("Folder: \(model.folderURL.path)")
@@ -160,8 +182,16 @@ struct DiagnosticsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Diagnostics")
-                    .font(.title2.bold())
+                HStack(spacing: 6) {
+                    Text("Diagnostics")
+                        .font(.title2.bold())
+                    InfoButton(
+                        title: "Diagnostics",
+                        message: "Live sample rate, device, loaded response, latency, dropout, "
+                            + "and drift information. Open Log shows the app log, Show Logs in "
+                            + "Finder reveals it, and Copy Report copies a support summary."
+                    )
+                }
 
                 Text("IRSVerb captures system audio, convolves it, and plays the result. "
                     + "These values update while this window is open.")

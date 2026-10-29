@@ -104,9 +104,10 @@ is reflected in the other.
 | Control | What it does |
 | --- | --- |
 | **Impulse response** | Pick any supported response in the current folder |
-| **Choose .irs…** | Add one file from anywhere on disk |
-| **Folder…** | Point the library at your own folder of responses |
-| **Show in Finder** | Open the current folder in Finder |
+| **Add File…** | Use one file from anywhere on disk without changing the folder |
+| **Change Folder…** | Point the whole library at your own folder of responses |
+| **Open Folder** | Show the current folder in Finder |
+| **ⓘ buttons** | Click any info button for an explanation of that control |
 | **Mix** | Wet/dry blend. 100% is fully convolved; lower values mix the dry signal back in, time-aligned |
 | **Output gain** | Make-up gain after the effect, from −24 dB to +24 dB |
 | **Bypass** | Instant A/B without unloading the response |
@@ -121,9 +122,10 @@ The footer shows the sample rate, output device, loaded response, added latency,
 and buffer diagnostics. Dropouts and drift trims should stay at zero. The level
 meters show **Silent** when no audio is being captured.
 
-Hover any control for a one-line explanation — the impulse response picker, mix,
-output gain, bypass, normalize, Start/Stop, and the diagnostic buttons all have
-tooltips.
+Hover any control for a one-line explanation, or click the **ⓘ** button next to a
+control for a short description. The impulse response picker, Add File, Change
+Folder, Open Folder, Mix, Output gain, Bypass, Normalize, Levels, Start/Stop, and
+the diagnostic actions all have info.
 
 The **Library** section lists every supported response in the current folder, with
 buttons to add a file, change the folder, show it in Finder, normalize, and
@@ -180,7 +182,7 @@ how to use your own files.
 
 ## Using your own impulse responses
 
-1. Click **Folder…** and choose a folder, or **Choose .irs…** for a single file.
+1. Click **Change Folder…** and choose a folder, or **Add File…** for a single file.
 2. Select the response in the picker.
 
 For Viper4Android collections, copy the `Kernel` folder to your Mac first, then

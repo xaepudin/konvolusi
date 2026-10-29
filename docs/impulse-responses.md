@@ -13,7 +13,7 @@ running output rate. Bit depths 16/24/32-bit integer and 32-bit float are
 supported through AVFoundation. Responses longer than 10 seconds are rejected.
 
 The app lists only files with the extensions above in the selected folder.
-"Choose .irs…" adds a single file from anywhere; it is remembered across launches
+"Add File…" adds a single file from anywhere; it is remembered across launches
 even if it is outside the folder.
 
 ## The built-in library
@@ -129,8 +129,8 @@ Viper4Android stores kernels under:
 /storage/emulated/0/Android/data/com.pittvandewitt.viperfx/files/Kernel/  (Android 10+)
 ```
 
-Copy the folder to the Mac (or copy individual files) and use **Folder…** or
-**Choose .irs…**. IRSVerb does not need root, a virtual audio driver, or an
+Copy the folder to the Mac (or copy individual files) and use **Change Folder…**
+or **Add File…**. IRSVerb does not need root, a virtual audio driver, or an
 Android device.
 
 Hosted impulse response files are often 44.1 kHz or 48 kHz mono WAV data. IRSVerb

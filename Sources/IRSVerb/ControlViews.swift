@@ -18,16 +18,73 @@ extension View {
     }
 }
 
+struct InfoContent {
+    let title: String
+    let message: String
+}
+
+/// A visible ⓘ affordance. Clicking opens a popover; hovering also shows the
+/// short title as a standard tooltip. The old `.help`-only approach depended on
+/// the user discovering hover, which was too easy to miss.
+struct InfoButton: View {
+    let title: String
+    let message: String
+
+    @State private var isShowing = false
+    @State private var isHovering = false
+
+    var body: some View {
+        Button {
+            isShowing.toggle()
+        } label: {
+            Image(systemName: "info.circle")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isHovering ? Color.primary : Color.secondary)
+                .frame(width: 22, height: 22)
+                .background(
+                    Color.primary.opacity(isHovering ? 0.12 : 0.06),
+                    in: Circle()
+                )
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovering = $0 }
+        .help("About \(title)")
+        .accessibilityLabel("About \(title)")
+        .accessibilityHint(message)
+        .popover(isPresented: $isShowing, arrowEdge: .top) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
+                    .font(.headline)
+                Text(message)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(16)
+            .frame(width: 300, alignment: .leading)
+        }
+    }
+}
+
 struct PanelCard<Content: View>: View {
     let title: String
     let systemImage: String
+    var info: InfoContent? = nil
     @ViewBuilder var content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label(title, systemImage: systemImage)
-                .font(.headline)
-                .foregroundStyle(.primary)
+            HStack(spacing: 6) {
+                Label(title, systemImage: systemImage)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                if let info {
+                    InfoButton(title: info.title, message: info.message)
+                }
+                Spacer(minLength: 0)
+            }
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -114,8 +171,15 @@ struct StatusHeader: View {
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("IRSVerb")
-                    .font(.headline)
+                HStack(spacing: 4) {
+                    Text("IRSVerb")
+                        .font(.headline)
+                    InfoButton(
+                        title: "Start / Stop",
+                        message: "Running means system audio is being convolved. Stop restores "
+                            + "normal audio without quitting; Start resumes processing."
+                    )
+                }
                 if !compact {
                     Text("System-wide impulse response convolver")
                         .font(.caption)
@@ -158,12 +222,23 @@ struct ImpulseResponseSection: View {
     var compact: Bool
     var showsHeading: Bool = true
 
+    private let info = InfoContent(
+        title: "Impulse response",
+        message: "The response applied to all system audio. Add File uses a single "
+            + ".irs, WAV, AIFF, CAF, FLAC, or M4A file from anywhere. Change Folder "
+            + "switches the whole library to another folder. Open Folder shows the "
+            + "current library folder in Finder."
+    )
+
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 6 : 8) {
             if showsHeading {
-                Text("Impulse response")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    Text("Impulse response")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    InfoButton(title: info.title, message: info.message)
+                }
             }
 
             if model.isPreparingLibrary {
@@ -188,8 +263,7 @@ struct ImpulseResponseSection: View {
                 .labelsHidden()
                 .controlSize(compact ? .regular : .large)
                 .frame(maxWidth: .infinity)
-                .help("Choose the impulse response applied to all system audio. "
-                    + "Use Folder… to point IRSVerb at your own collection.")
+                .help("Choose the impulse response applied to all system audio.")
                 .accessibilityLabel("Impulse response")
                 .accessibilityValue(model.selectedURL?.deletingPathExtension().lastPathComponent ?? "None")
             }
@@ -200,13 +274,20 @@ struct ImpulseResponseSection: View {
                 }
                 .controlSize(.small)
             } else {
-                ControlGroup {
+                HStack(spacing: 8) {
                     actionButtons
+                    Spacer(minLength: 0)
                 }
                 .controlSize(.regular)
             }
 
             if !compact {
+                Text("Add File uses one file; Change Folder switches the whole library; "
+                    + "Open Folder shows the current folder.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Image(systemName: "folder")
                         .font(.caption2)
@@ -224,15 +305,33 @@ struct ImpulseResponseSection: View {
     }
 
     @ViewBuilder private var actionButtons: some View {
-        Button("Choose .irs…") { model.chooseImpulseResponseFile() }
-            .help("Add a single .irs, WAV, AIFF, CAF, FLAC, or M4A file from anywhere on disk.")
-            .accessibilityHint("Choose a single impulse response file from anywhere on disk")
-        Button("Folder…") { model.chooseFolder() }
-            .help("Use a folder on this Mac as the impulse response library.")
-            .accessibilityHint("Use a different folder as the impulse response library")
-        Button("Show in Finder") { model.revealFolder() }
-            .help("Show the current impulse response folder in Finder.")
-            .accessibilityHint("Show the current impulse response folder in Finder")
+        Button {
+            model.chooseImpulseResponseFile()
+        } label: {
+            Label("Add File…", systemImage: "plus")
+        }
+        .buttonStyle(.bordered)
+        .help("Use a single impulse response file from anywhere. It is added to the "
+            + "picker without changing the library folder.")
+        .accessibilityHint("Choose one impulse response file from anywhere on disk")
+
+        Button {
+            model.chooseFolder()
+        } label: {
+            Label("Change Folder…", systemImage: "folder")
+        }
+        .buttonStyle(.bordered)
+        .help("Switch the whole impulse response library to another folder on this Mac.")
+        .accessibilityHint("Use a different folder as the impulse response library")
+
+        Button {
+            model.revealFolder()
+        } label: {
+            Label("Open Folder", systemImage: "arrow.up.forward.app")
+        }
+        .buttonStyle(.bordered)
+        .help("Show the current impulse response folder in Finder.")
+        .accessibilityHint("Show the current impulse response folder in Finder")
     }
 }
 
@@ -248,7 +347,12 @@ struct MixControls: View {
         VStack(alignment: .leading, spacing: compact ? 10 : 16) {
             controlRow(
                 title: "Mix",
-                value: "\(Int((model.wet * 100).rounded()))% wet"
+                value: "\(Int((model.wet * 100).rounded()))% wet",
+                info: InfoContent(
+                    title: "Mix",
+                    message: "Blends the processed signal with the original audio. 100% wet is "
+                        + "fully convolved; lower values let more of the unprocessed signal through."
+                )
             ) {
                 Slider(value: $model.wet, in: 0...1)
                     .help("Wet/dry blend. 100% is fully convolved; lower values mix the "
@@ -259,7 +363,12 @@ struct MixControls: View {
 
             controlRow(
                 title: "Output gain",
-                value: String(format: "%+.1f dB", model.gainDB)
+                value: String(format: "%+.1f dB", model.gainDB),
+                info: InfoContent(
+                    title: "Output gain",
+                    message: "Make-up volume applied after convolution, from -24 dB to +24 dB. "
+                        + "Use it to compensate for a quiet or loud impulse response."
+                )
             ) {
                 Slider(value: $model.gainDB, in: -24...24)
                     .help("Make-up gain applied after convolution, from -24 dB to +24 dB.")
@@ -269,32 +378,60 @@ struct MixControls: View {
 
             if compact {
                 VStack(alignment: .leading, spacing: 8) {
-                    Toggle("Bypass", isOn: $model.bypassed)
-                        .toggleStyle(.switch)
-                        .controlSize(.small)
-                        .font(.caption)
-                        .help("Pass audio through without convolution, with no added latency. "
-                            + "Use it for an instant A/B comparison.")
-                        .accessibilityHint("Passes audio through without convolution and without added latency")
-                    Toggle("Normalize impulse response", isOn: $model.normalize)
-                        .toggleStyle(.switch)
-                        .controlSize(.small)
-                        .font(.caption)
-                        .help("Match the loudness of responses with different lengths when you switch.")
-                        .accessibilityHint("Matches the loudness of responses with different lengths")
+                    HStack(spacing: 6) {
+                        Toggle("Bypass", isOn: $model.bypassed)
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                            .font(.caption)
+                            .help("Pass audio through without convolution, with no added latency. "
+                                + "Use it for an instant A/B comparison.")
+                            .accessibilityHint("Passes audio through without convolution and without added latency")
+                        InfoButton(
+                            title: "Bypass",
+                            message: "Pass audio through without convolution, with no added latency. "
+                                + "Use it for an instant A/B comparison."
+                        )
+                    }
+                    HStack(spacing: 6) {
+                        Toggle("Normalize impulse response", isOn: $model.normalize)
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                            .font(.caption)
+                            .help("Match the loudness of responses with different lengths when you switch.")
+                            .accessibilityHint("Matches the loudness of responses with different lengths")
+                        InfoButton(
+                            title: "Normalize impulse response",
+                            message: "Scales each response so responses of different lengths play at a "
+                                + "similar loudness when you switch between them."
+                        )
+                    }
                 }
             } else {
                 Divider()
                 HStack(spacing: 24) {
-                    Toggle("Bypass", isOn: $model.bypassed)
-                        .toggleStyle(.switch)
-                        .help("Pass audio through without convolution, with no added latency. "
-                            + "Use it for an instant A/B comparison.")
-                        .accessibilityHint("Passes audio through without convolution and without added latency")
-                    Toggle("Normalize impulse response", isOn: $model.normalize)
-                        .toggleStyle(.switch)
-                        .help("Match the loudness of responses with different lengths when you switch.")
-                        .accessibilityHint("Matches the loudness of responses with different lengths")
+                    HStack(spacing: 6) {
+                        Toggle("Bypass", isOn: $model.bypassed)
+                            .toggleStyle(.switch)
+                            .help("Pass audio through without convolution, with no added latency. "
+                                + "Use it for an instant A/B comparison.")
+                            .accessibilityHint("Passes audio through without convolution and without added latency")
+                        InfoButton(
+                            title: "Bypass",
+                            message: "Pass audio through without convolution, with no added latency. "
+                                + "Use it for an instant A/B comparison."
+                        )
+                    }
+                    HStack(spacing: 6) {
+                        Toggle("Normalize impulse response", isOn: $model.normalize)
+                            .toggleStyle(.switch)
+                            .help("Match the loudness of responses with different lengths when you switch.")
+                            .accessibilityHint("Matches the loudness of responses with different lengths")
+                        InfoButton(
+                            title: "Normalize impulse response",
+                            message: "Scales each response so responses of different lengths play at a "
+                                + "similar loudness when you switch between them."
+                        )
+                    }
                     Spacer()
                 }
             }
@@ -304,12 +441,14 @@ struct MixControls: View {
     private func controlRow<Content: View>(
         title: String,
         value: String,
+        info: InfoContent,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack {
+            HStack(spacing: 6) {
                 Text(title)
                     .font(labelFont)
+                InfoButton(title: info.title, message: info.message)
                 Spacer()
                 Text(value)
                     .font(compact ? .caption.monospacedDigit() : .subheadline.monospacedDigit())
@@ -323,9 +462,25 @@ struct MixControls: View {
 
 struct MetersSection: View {
     @ObservedObject var meters: MeterStore
+    var showsHeading = false
+
+    private let info = InfoContent(
+        title: "Levels",
+        message: "Input is the audio captured from other apps. Output is the convolved "
+            + "signal sent to your speakers. “Silent” means no audio is being captured "
+            + "right now."
+    )
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            if showsHeading {
+                HStack(spacing: 6) {
+                    Text("Levels")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    InfoButton(title: info.title, message: info.message)
+                }
+            }
             LevelMeter(label: "Input", level: meters.input)
             LevelMeter(label: "Output", level: meters.output)
         }
@@ -424,9 +579,19 @@ struct ConvolverControls: View {
             Divider()
             MixControls(model: model, compact: true)
             Divider()
-            MetersSection(meters: meters)
+            MetersSection(meters: meters, showsHeading: true)
             StatusMessages(model: model, compact: true)
             Divider()
+            HStack(spacing: 6) {
+                Text("Status")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                InfoButton(
+                    title: "Status",
+                    message: "Sample rate and output device, loaded impulse response, added "
+                        + "latency, dropouts, and drift trims."
+                )
+            }
             InfoFooter(model: model, compact: true)
         }
     }
@@ -436,7 +601,17 @@ struct ConvolverControls: View {
             StatusHeader(model: model, status: status, compact: false)
                 .cardSurface(padding: 16)
 
-            PanelCard(title: "Impulse response", systemImage: "waveform") {
+            PanelCard(
+                title: "Impulse response",
+                systemImage: "waveform",
+                info: InfoContent(
+                    title: "Impulse response",
+                    message: "The response applied to all system audio. Add File uses a single "
+                        + ".irs, WAV, AIFF, CAF, FLAC, or M4A file from anywhere. Change Folder "
+                        + "switches the whole library to another folder. Open Folder shows the "
+                        + "current library folder in Finder."
+                )
+            ) {
                 ImpulseResponseSection(model: model, compact: false, showsHeading: false)
             }
 
@@ -444,13 +619,30 @@ struct ConvolverControls: View {
                 MixControls(model: model, compact: false)
             }
 
-            PanelCard(title: "Levels", systemImage: "waveform.path.ecg") {
+            PanelCard(
+                title: "Levels",
+                systemImage: "waveform.path.ecg",
+                info: InfoContent(
+                    title: "Levels",
+                    message: "Input is the audio captured from other apps. Output is the "
+                        + "convolved signal sent to your speakers. “Silent” means no audio is "
+                        + "being captured right now."
+                )
+            ) {
                 MetersSection(meters: meters)
             }
 
             StatusMessages(model: model, compact: false)
 
-            PanelCard(title: "Status", systemImage: "info.circle") {
+            PanelCard(
+                title: "Status",
+                systemImage: "info.circle",
+                info: InfoContent(
+                    title: "Status",
+                    message: "Sample rate and output device, loaded impulse response, added "
+                        + "latency, dropouts, and drift trims."
+                )
+            ) {
                 InfoFooter(model: model, compact: false)
             }
         }
