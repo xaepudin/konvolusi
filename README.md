@@ -1,317 +1,288 @@
 # IRSVerb
 
-A Viper4Android-style **impulse response convolver for macOS** — the "Convolver"
-effect from V4A, and nothing else.
+**Put a room, a tape machine, a telephone, or a cathedral in the path of everything your Mac plays.**
 
-Load a `.irs` file and everything your Mac plays comes out as if it were
-recorded in a cathedral, a small room, an old radio speaker, or whatever
-response you feed it. It is system-wide: not a player, not a plugin host.
+IRSVerb is a small menu bar app for macOS that applies a Viper4Android-style
+`.irs` impulse response to system audio. It is a convolver and nothing else: no
+player, no plugin host, no account, no subscription.
 
 ```
-system audio ──▶ Core Audio process tap ──▶ ring buffer ──▶ FFT convolver ──▶ output unit
-                     (other apps)                            (your .irs)
+ every app's audio ──▶ IRSVerb ──▶ your speakers or headphones
+                        (your .irs)
 ```
 
-The tap mutes the original audio at the hardware for exactly as long as IRSVerb
-is reading it, so you hear the convolved signal once — not the dry signal plus
-an effect.
+Load a response and music, videos, calls, and games all come out as if they were
+recorded in that space — or through that radio speaker, tape deck, or phone line.
 
-## Quick start
+## What you get
 
-```sh
-./build.sh                 # builds dist/IRSVerb.app and dist/irsconv
-open dist/IRSVerb.app      # menu bar icon appears; audio processing starts
+- **System-wide processing.** Works with any app that plays audio. There is no
+  per-app setup and no virtual audio driver to install.
+- **15 built-in impulse responses**, generated on first launch: rooms, halls, a
+  cathedral, a plate, a stairwell, a car cabin, a cassette tape, an old radio, a
+  telephone, and more.
+- **Your own `.irs` files.** Viper4Android `Kernel` folders work as-is. WAV, AIFF,
+  CAF, FLAC, and M4A files work too.
+- **Wet/dry mix, output gain, bypass, and normalization**, plus live input and
+  output meters.
+- **Low overhead.** Idle cost is around 0.1% of a CPU core; convolution is a few
+  percent on Apple silicon.
+- **Local only.** No network access, no telemetry, no accounts. Audio is processed
+  on your Mac and never leaves it.
+
+## Requirements
+
+- macOS 15 Sequoia or later
+- Apple silicon or Intel Mac
+- Permission for **System Audio Recording** (macOS asks on first launch)
+
+## Install
+
+1. Download `IRSVerb-<version>-macos.zip` from the
+   [latest release](https://github.com/xaepudin/IRSVerb/releases/latest).
+2. Unzip it and drag **IRSVerb.app** into `/Applications`.
+3. The app is ad-hoc signed and not notarized by Apple, so the first launch needs
+   one extra step:
+   - In Finder, **Control-click** (or right-click) **IRSVerb.app** and choose
+     **Open**, then confirm **Open**; or
+   - if macOS still blocks it, run:
+
+     ```sh
+     xattr -dr com.apple.quarantine /Applications/IRSVerb.app
+     ```
+
+4. Start the app. A waveform icon appears in the menu bar.
+5. When macOS asks for **System Audio Recording**, allow it. If you miss the
+   prompt, enable IRSVerb under **System Settings › Privacy & Security › Screen &
+   System Audio Recording**, then click **Start** in IRSVerb.
+6. Play something and click the waveform icon. Pick **Large Hall** to hear the
+   effect immediately.
+
+> **Why the warning?** Apple notarization requires a paid Developer ID
+> certificate. This build is signed ad-hoc so it can run, but Gatekeeper cannot
+> verify its origin. If you prefer, build it yourself — see
+> [docs/building.md](docs/building.md).
+
+## First run
+
+On first launch IRSVerb creates:
+
+```
+~/Library/Application Support/IRSVerb/Impulse Responses/
 ```
 
-On first launch the app creates
-`~/Library/Application Support/IRSVerb/Impulse Responses/` and fills it with five
-generated impulse responses (Cathedral, Large Hall, Small Room, Old Radio
-Speaker, Telephone), so there is something to listen to before you dig out your
-own V4A files.
+and fills it with 15 generated responses. Nothing is downloaded. The first
+selection is **Large Hall**; try **Small Room** at 30% for something subtle, or
+**Telephone** at 100% for the obvious effect.
 
-macOS will ask for **System Audio Recording** permission the first time. If you
-miss the prompt, grant it in *System Settings › Privacy & Security › Screen &
-System Audio Recording*, then restart the app.
+## Using IRSVerb
 
-To quit, use **Quit IRSVerb** at the bottom of the menu bar panel. Quitting
-destroys the tap and immediately restores normal audio.
-
-## The menu bar app
+Click the waveform icon in the menu bar to open the panel.
 
 | Control | What it does |
 | --- | --- |
-| Impulse response picker | Every `.irs`/`.wav`/`.aif` file in the selected folder |
-| Choose .irs… | Add a single file from anywhere (V4A's `ViPER4Android/Kernel` folder works) |
-| Folder… | Point the library at your own impulse response folder |
-| Reveal | Open that folder in Finder |
-| Mix | Wet/dry. 100% is pure convolution; lower values blend the dry signal back in, time-aligned |
-| Output gain | ±24 dB of make-up gain after the convolver |
-| Bypass | Instant A/B, with no added latency |
-| Normalize impulse response | Energy-normalize on load so switching responses does not jump in loudness |
-| In / Out meters | Live levels, useful for confirming the tap is actually capturing |
+| **Impulse response** | Pick any supported response in the current folder |
+| **Choose .irs…** | Add one file from anywhere on disk |
+| **Folder…** | Point the library at your own folder of responses |
+| **Reveal** | Open the current folder in Finder |
+| **Mix** | Wet/dry blend. 100% is fully convolved; lower values mix the dry signal back in, time-aligned |
+| **Output gain** | Make-up gain after the effect, from −24 dB to +24 dB |
+| **Bypass** | Instant A/B without unloading the response |
+| **Normalize impulse response** | Match perceived level between responses so switching does not jump in loudness |
+| **In / Out meters** | Confirm that audio is being captured and played back |
+| **Start / Stop** | Enable or disable processing without quitting |
+| **Quit IRSVerb** | Stop processing and restore normal audio immediately |
 
-The footer shows the running sample rate and output device, the loaded response,
-the added latency, and ring-buffer diagnostics.
+The footer shows the sample rate, output device, loaded response, added latency,
+and buffer diagnostics. Dropouts and drift trims should stay at zero.
 
-## Command line: `irsconv`
+### Mixing tips
 
-Also useful for checking the DSP without listening:
+- **Rooms, halls, and cathedrals:** 20–50% wet. More sounds impressive for a
+  minute and tiring after ten.
+- **Character effects** (telephone, radio, tape, tin can): often best at 100%.
+- **Headphones:** a little **Warm Desk** at 20–30% takes the sealed-in feeling
+  away without sounding like an effect.
+- **Laptop speakers:** **Speech Lift** or **Night Mode** at 100% can make quiet
+  listening and dialogue clearer.
 
-```sh
-dist/irsconv selftest
-#   PASS  unit impulse is a pure delay
-#   PASS  FFT convolution matches direct convolution
-#   PASS  ring buffer round trip
-#   PASS  demo impulse responses write and reload (16-bit .irs)
+### The built-in library
 
-dist/irsconv render song.wav --irs "Impulse Responses/Cathedral.irs" --out out/
-dist/irsconv render song.wav --irs hall.irs --wet 0.5 --gain-db -3 --bits 24
-dist/irsconv info "Impulse Responses"/*.irs
-dist/irsconv make-ir --out "Impulse Responses"
-```
-
-`render` resamples the impulse response to the input file's sample rate (or to
-`--rate`), streams the audio through the *same* convolver the live app uses, and
-reports the level change:
-
-```
-song.wav: 71638 frames @ 48000 Hz
-  in  peak +0.36  rms -29.55 dBFS
-  out peak +0.23  rms -34.06 dBFS  (delta -4.51 dB)
-  -> out/song - Large Hall.wav
-     196437 frames, 488 partitions, block 256 (5.3 ms) latency
-```
-
-## Live diagnostics
-
-```sh
-dist/IRSVerb.app/Contents/MacOS/IRSVerb --diagnose 6
-# or, so macOS attributes the permission to the app rather than your terminal:
-open dist/IRSVerb.app --args --diagnose 6
-```
-
-It creates a real tap, plays a system sound, measures the captured and played
-levels, and writes a report to `~/Library/Logs/IRSVerb/diagnostic.log`.
-
-```
-RESULT: PASS — system audio was captured and convolved.
-  tap format       : 48000 Hz, 2ch, 32-bit float, interleaved
-  peak input level : 0.121902
-  peak output level: 0.097533
-  ring fill range  : 0…549 frames
-  dropouts         : 0 under, 0 over
-  drift trims      : 0
-  buffers          : tap 256 frames, output 558 frames
-  added latency    : 22 ms
-```
-
-The running app also keeps a small log at `~/Library/Logs/IRSVerb/app.log`.
-
-## How the convolution works
-
-`PartitionedConvolver` is a uniform-partitioned overlap-save FFT convolver
-(the standard real-time scheme): the impulse response is split into 256-sample
-partitions, each transformed once with `vDSP_fft_zrip`, and each incoming hop is
-transformed once and accumulated against every partition spectrum held in a
-frequency-domain delay line.
-
-* Cost is independent of impulse response *length* per hop, so a 4.4 s cathedral
-  response stays cheap.
-* Input always leads output within a call, so `output[i]` is the convolution of
-  `input[i]` delayed by exactly 256 samples no matter how the caller chops up its
-  buffers. That determinism is what keeps the dry/wet mix phase-aligned and the
-  offline renderer sample-accurate.
-* The vDSP conventions used here were measured rather than assumed: the real-FFT
-  round trip scales by `2 × fftSize`, `vDSP_zvma` does not conjugate, and the
-  packed bin 0 holds (DC, Nyquist) so it is multiplied component-wise. The test
-  suite checks all of this against a naive direct convolution.
-
-Loading a response is done on a background queue and published to the audio
-thread with an atomic pointer swap; the previous response is kept alive for a
-few seconds so an in-flight render callback can finish with it.
-
-## Energy
-
-The first version sat at ~12% of a CPU core doing nothing at all, and ~35% while
-convolving, which Activity Monitor reported as an energy impact of ~196. Profiling
-(`sample`) showed **zero** samples in the audio code while idle — all threads
-blocked — but plenty in `CUICatalog _resolvedRenditionKeyFromThemeRef`,
-`NSISEngine` and `NSPerformVisuallyAtomicChange`. The cost was SwiftUI: the 20 Hz
-meter timer published into `AppModel`, which the `MenuBarExtra` scene observes, so
-every meter tick re-laid-out and re-rendered the whole panel **twenty times a
-second even while it was closed**.
-
-Three fixes, all in `optimize-energy`:
-
-1. **Meter levels moved out of `AppModel`** into a separate `MeterStore` that only
-   the meter views observe, so the menu bar scene is no longer invalidated by them
-   (`Sources/IRSVerb/Stores.swift`).
-2. **The 20 Hz meter timer only runs while the panel is on screen**; a 1 Hz health
-   timer keeps the safety watchdog alive the rest of the time.
-3. **DSP work scaled to what the impulse response justifies** — see below.
-
-Measured with `top` (4-sample averages), engine running, panel closed:
-
-| | CPU | POWER | idle wakeups |
+| Response | Length | Character | Try at |
 | --- | --- | --- | --- |
-| Idle, before | 11.7% | 11.7 | 6/s |
-| Idle, after | **1.4%** | **1.5** | 8/s |
-| Playing (Large Hall), before | — | 26.7 | 228/s |
-| Playing (Large Hall), after | **2.7%** | **2.7** | 9/s |
-
-With the panel never opened at all, the same build sits at **0.1%**: the remainder
-while playing is the Core Audio IO wakeups, not the convolver (which the benchmark
-puts at 0.4% of a core).
-
-One residual caveat: the 20 Hz meter timer starts in `onAppear` and stops in
-`onDisappear`. If SwiftUI ever keeps the panel in the hierarchy while hidden,
-`onDisappear` may not fire, and the meters keep publishing. That is bounded and
-cheap — `MeterStore` is observed only by the two level meters, not by the menu bar
-scene that caused the original 11.7% — but it has not been measured with the panel
-having been opened and closed.
-
-### Adaptive partitioning
-
-Cost per sample in a uniform-partitioned convolver scales as
-`impulseResponseLength / blockSize`: doubling the partition size halves the
-frequency-domain multiply-accumulates. The block size is therefore chosen from the
-response's length, since a long diffuse reverb already imposes far more perceptual
-delay than the block itself:
-
-| Response length | Block | Added latency |
-| --- | --- | --- |
-| ≤ 0.55 s | 256 | 5.3 ms |
-| ≤ 1.7 s | 512 | 10.7 ms |
-| longer | 1024 | 21.3 ms |
-
-`irsconv benchmark` measures this without needing audio hardware or permissions:
-
-```
-$ dist/irsconv benchmark --irs "Impulse Responses/Large Hall.irs" --seconds 12
-
-  configuration         partitions  latency   noise         silence
-  fixed B=256 (before)  488         5.3 ms    59.5x   1.7%  3347x   0.0%
-  adaptive (now)        122         21.3 ms   225.4x   0.4% 3138x   0.0%
-```
-
-`xRT` is seconds of audio processed per second of CPU, so **4.2x less CPU** for
-this response (2.8% -> 0.7% for the 4.4 s Cathedral), and short responses keep
-their snappy 5.3 ms block. If you would rather have the old behaviour, use
-`IRSProcessor(maxBlockSize: 256)` in `AudioEngine.swift`.
-
-### Silence fast path
-
-Digitally silent input lets the convolver skip its FFTs entirely. The test is
-applied to the transform window rather than the incoming hop: the window spans two
-hops, so a silent hop whose predecessor is still ringing out must **not** be
-skipped. Once every partition in the delay line has been cleared the output is
-provably zero, and `testSilenceFastPathIsExact` checks the result against a naive
-direct convolution sample for sample.
-
-## The built-in library, and what a useful collection looks like
-
-`irsconv make-ir` writes all fifteen; the app generates them on first run. They
-are synthesised (`Sources/IRSKit/IRSynthesis.swift`), which costs no download and
-makes room for things nobody records: perception curves and physical models.
-
-The useful realisation is that you do not need five hundred files. You need about
-a dozen covering six jobs:
-
-| File | Length | Job | Try at |
-| --- | --- | --- | --- |
-| Identity (control) | 1 tap | Prove the engine is transparent; A/B reference | 100% |
-| Speech Lift | 0.16 s | Rumble out, consonant band up: calls and podcasts on laptop speakers | 100% |
+| Identity (control) | 1 tap | Transparent; useful for A/B tests | 100% |
+| Speech Lift | 0.16 s | Cuts rumble, lifts the consonant band | 100% |
 | Night Mode | 0.16 s | Equal-loudness bass/treble lift for quiet listening | 100% |
-| Warm Desk | 0.24 s | Barely-there space so headphones stop feeling sealed | 20–30% |
-| Studio Room | 0.42 s | General-purpose small space for music | 25–40% |
-| Plate | 1.35 s | Dense, bright, no discrete early reflections: classic mix glue | 30–60% |
-| Small Room | 0.70 s | Everyday room: obvious but unobtrusive | 20–40% |
-| Car Cabin | 0.22 s | Glass comb plus low-end boom; instantly recognisable | 40–70% |
-| Stairwell | 1.70 s | Flutter echo off parallel hard surfaces | 25–50% |
-| Cassette Tape | 0.12 s | Head bump and a dull top: warm and forgiving | 60–100% |
-| Old Radio Speaker | 0.18 s | 1930s box: 60 Hz sits 46 dB below 2.6 kHz | 100% |
-| Telephone | 0.12 s | 300 Hz–3.4 kHz band: the "on the phone" effect | 100% |
+| Warm Desk | 0.24 s | Barely-there space for headphones | 20–30% |
+| Studio Room | 0.42 s | General-purpose small room | 25–40% |
+| Plate | 1.35 s | Dense, bright mix glue | 30–60% |
+| Small Room | 0.70 s | Everyday room | 20–40% |
+| Car Cabin | 0.22 s | Glass comb and low-end boom | 40–70% |
+| Stairwell | 1.70 s | Flutter echo off hard parallel walls | 25–50% |
+| Cassette Tape | 0.12 s | Warm, dull top, gentle head bump | 60–100% |
+| Old Radio Speaker | 0.18 s | 1930s box, very band-limited | 100% |
+| Telephone | 0.12 s | 300 Hz–3.4 kHz phone line | 100% |
 | Large Hall | 2.60 s | The canonical big reverb | 40–80% |
-| Cathedral | 4.40 s | Enormous and slow; impressive, then tiring | 20–40% |
-| Tin Can | 0.30 s | Physical model of a thin metal shell: inharmonic modes | 100% |
+| Cathedral | 4.40 s | Enormous and slow | 20–40% |
+| Tin Can | 0.30 s | Struck metal shell, inharmonic modes | 100% |
 
-The six jobs, and why each earns its place:
+These are **synthesised**, not recordings of real places. The spaces are
+plausible rather than measured; the perceptual curves and the physical model are
+where synthesis works best. See
+[docs/impulse-responses.md](docs/impulse-responses.md) for how they are made and
+how to use your own files.
 
-1. **A control.** `Identity` convolving to nothing is how you prove the effect is
-   off, and it separates "the engine is wrong" from "this impulse response is
-   wrong" when debugging.
-2. **Perception rather than place.** `Night Mode` and `Speech Lift` cannot be
-   downloaded, because nobody records an equal-loudness curve. They are ordinary
-   filter curves expressed as impulse responses: a way to get EQ out of a
-   convolver that has none.
-3. **Everyday spaces.** Short and direct-heavy, so they colour without smearing
-   timing or destroying speech. These are the ones you leave switched on.
-4. **Character.** Radio, telephone, tape, cabin: the Viper4Android-style joy, and
-   the reason to own a convolver at all.
-5. **Big spaces.** Hall and cathedral. Use them deliberately and at low mix.
-6. **One physical model.** `Tin Can` is a bank of damped inharmonic resonances
-   rather than a space, and sounds like nothing else here. Its magnitude response
-   is three times as ragged as any of the reverberant ones, which is exactly what
-   makes it sound like a struck object.
+## Using your own impulse responses
 
-Honest caveat: synthesised *spaces* are plausible rather than measured. A
-synthesised short room has a more ragged magnitude response than a real one, so if
-one sounds honky, drop the mix or reach for a measured library. The perceptual
-curves and the physical model are where synthesis actually wins.
+1. Click **Folder…** and choose a folder, or **Choose .irs…** for a single file.
+2. Select the response in the picker.
 
-`LibraryTests` asserts this character rather than trusting it: that Speech Lift
-really does push 3 kHz up while pulling 60 Hz down, that Night Mode lifts both
-extremes, that radio and telephone are band limited, that tape has its head bump,
-that the flutter train measurably changes a response, and that Tin Can is modal
-rather than diffuse.
-
-## Layout
+For Viper4Android collections, copy the `Kernel` folder to your Mac first, then
+point IRSVerb at it:
 
 ```
-Sources/IRSKit/          platform-independent DSP (also usable elsewhere)
-  PartitionedConvolver   the FFT convolver
-  IRSProcessor           stereo pair + dry/wet + gain + bypass
-  IRFile                 .irs / WAV loading, resampling, writing
-  ImpulseResponse        buffer type, biquads, deterministic noise
-  IRSynthesis            generates the demo impulse responses
-  RingBuffer             lock-free SPSC ring, atomic level meters
-Sources/irsconv/         the CLI
-Sources/IRSVerb/         the menu bar app
-  SystemAudioTap         process tap + private tap-only aggregate device
-  TapCapture             IO thread → ring buffer
-  OutputUnit             AUHAL default output unit
-  AudioEngine            glue, drift control, device-change handling, watchdog
-  AppModel / PanelView   SwiftUI menu bar UI
-  Diagnostics            --diagnose
-Tests/IRSKitTests/       19 tests
+/storage/emulated/0/ViPER4Android/Kernel/                              (Android 9 and earlier)
+/storage/emulated/0/Android/data/com.pittvandewitt.viperfx/files/Kernel/  (Android 10+)
 ```
 
-## Notes and limits
+Supported formats are `.irs`, `.wav`, `.wave`, `.aif`, `.aiff`, `.caf`, `.flac`,
+and `.m4a`. Mono and stereo are both fine, any sample rate is resampled on load,
+and responses longer than 10 seconds are rejected.
 
-* **Only the convolver.** No other Viper4Android effects (no EQ, bass boost,
-  spectrum extend, cure, field surround, …). That was the requirement.
-* **Added latency** is 16 ms for short responses and 32–38 ms for long ones
-  (adaptive block engine plus the ring buffer; measured for the 4.4 s Cathedral).
-  Long responses are the ones that need the bigger partition to stay cheap — see
-  *Energy* below. Use `IRSProcessor(maxBlockSize: 256)` if you would rather have
-  5.3 ms and pay 4x the CPU.
-* **`.irs` files are plain WAV files** with an unusual extension; mono or stereo,
-  any sample rate (resampled on load), 16/24/32-bit or float. Responses longer
-  than 10 s are rejected.
-* **Ad-hoc signing.** The bundle is signed with `-` (ad-hoc), which is enough for
-  Core Audio taps, but the signature changes on every rebuild, so macOS may ask
-  for the system audio permission again after you rebuild. Signing with a stable
-  certificate instead removes that annoyance.
-* **The permission prompt blocks Core Audio, not the UI.** `AudioHALCreateIOProc`
-  (and therefore tap setup) can sit inside a synchronous IPC to `coreaudiod`
-  while the permission dialog is unanswered, so setup runs on its own queue and
-  the menu bar stays responsive. If you deny the prompt, the panel says so and
-  nothing is muted.
-* **One instance at a time.** Two IRSVerb instances would both tap and mute the
-  same audio and fight over it. The diagnostic warns if one is already running.
-* **Drift control.** The tap and the output unit normally share one hardware
-  clock. If they ever drift apart, the ring is trimmed one frame at a time rather
-  than letting latency creep; the menu panel shows the trim count.
-* **Watchdog.** Because reading a tap mutes the system, a stalled output path
-  would mean silence. The app watches the render callbacks and restarts the
-  engine (releasing the mute) if they stop.
+Only use impulse responses you have the right to use. The repository ships only
+responses generated by IRSVerb itself; third-party packs are not included because
+their licences are often unclear. See
+[docs/impulse-responses.md](docs/impulse-responses.md#licensing-and-provenance).
+
+## Troubleshooting
+
+### The app does not open
+
+Gatekeeper is blocking the ad-hoc build. Control-click the app and choose
+**Open**, or remove the quarantine flag:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/IRSVerb.app
+```
+
+### There is no menu bar icon
+
+IRSVerb is a menu bar app with no Dock icon. Look for the waveform icon in the
+menu bar; on a Mac with a notch it may be hidden behind other items. You can also
+open the app again — macOS brings the existing process forward instead of
+starting a second one.
+
+### No audio is processed
+
+- Open the panel. If it says **Waiting for System Audio Recording permission**,
+  enable IRSVerb in **System Settings › Privacy & Security › Screen & System Audio
+  Recording** and click **Start**.
+- If the panel says **Engine stopped**, click **Start**.
+- Make sure only one copy of IRSVerb is running. Two copies fight over the same
+  audio and will mute it.
+- Play something for a few seconds. Core Audio may not deliver tap buffers until
+  audio actually starts.
+
+### System audio became silent
+
+IRSVerb mutes the original audio while it reads the system tap, so a failure in
+the output path would otherwise mean silence. A watchdog restarts the engine if
+audio keeps arriving but output callbacks stop. If you still hear silence, click
+**Stop** and then **Start**, or quit IRSVerb with **Quit IRSVerb** — quitting
+always releases the mute.
+
+### Crackles, dropouts, or drift trims
+
+Open the panel and look at the footer. A few trims at startup are normal; a
+steadily climbing count is not. Try:
+
+- a shorter impulse response (the **Added latency** line shows the trade-off);
+- closing other audio-heavy apps;
+- switching the output device once to rebuild the audio graph.
+
+For a detailed report, see [docs/diagnostics.md](docs/diagnostics.md).
+
+### macOS asks for permission again after an update
+
+The ad-hoc signature changes whenever the app is rebuilt, so macOS may treat it as
+a new app. Enable it again in System Settings, or build with a stable signing
+identity. See [docs/building.md](docs/building.md#signing-and-notarization).
+
+### Latency feels high
+
+Added latency depends on the response length and is chosen automatically:
+
+| Response length | Added latency |
+| --- | --- |
+| 0.55 s or shorter | about 5 ms |
+| 0.55–1.7 s | about 11 ms |
+| longer than 1.7 s | about 21 ms |
+
+plus output buffering (roughly 11–17 ms in practice). Use a shorter response if
+you need tighter timing. The technical details are in
+[docs/dsp.md](docs/dsp.md#latency-and-partitioning).
+
+## Privacy
+
+IRSVerb captures the audio your Mac is playing so it can convolve it and play the
+result back. That is the whole data flow:
+
+- no network code, no analytics, no crash reporting, no accounts;
+- audio is processed in memory and is not written to disk;
+- the app writes only local logs under `~/Library/Logs/IRSVerb/`, and the
+  built-in responses under `~/Library/Application Support/IRSVerb/`.
+
+The System Audio Recording permission is powerful — treat it like screen
+recording. You can revoke it at any time in **System Settings › Privacy &
+Security › Screen & System Audio Recording**.
+
+## Uninstall
+
+1. Open the panel and choose **Quit IRSVerb** (this releases the audio mute).
+2. Drag **IRSVerb.app** to the Trash.
+3. Optionally remove your settings, logs, and generated responses:
+
+   ```sh
+   rm -rf ~/Library/Application\ Support/IRSVerb
+   rm -rf ~/Library/Logs/IRSVerb
+   ```
+
+## Build from source
+
+```sh
+git clone https://github.com/xaepudin/IRSVerb.git
+cd IRSVerb
+./build.sh
+open dist/IRSVerb.app
+```
+
+Full instructions, CLI usage, testing, and release packaging are in
+[docs/building.md](docs/building.md).
+
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| [docs/README.md](docs/README.md) | Documentation index |
+| [docs/building.md](docs/building.md) | Build, test, CLI, packaging, signing |
+| [docs/architecture.md](docs/architecture.md) | Audio pipeline, threading, lifecycle |
+| [docs/dsp.md](docs/dsp.md) | Convolution, latency, normalization, performance |
+| [docs/impulse-responses.md](docs/impulse-responses.md) | `.irs` format, built-in library, licensing |
+| [docs/diagnostics.md](docs/diagnostics.md) | Permissions, logs, `--diagnose`, benchmarks |
+| [docs/release.md](docs/release.md) | Release checklist and publication |
+
+## Contributing
+
+Issues and pull requests are welcome. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) first, especially the rule about not
+committing impulse responses without a clear redistribution licence.
+
+## Licence
+
+- **Source code:** [MIT](LICENSE).
+- **Generated impulse responses** in `Impulse Responses/`: [CC0 1.0](LICENSE-IRS)
+  (public domain dedication). Use them in music, videos, and anything else
+  without attribution.
+
+IRSVerb is not affiliated with Viper4Android or its authors. “Viper4Android” is
+used only to describe the `.irs` file format and workflow.

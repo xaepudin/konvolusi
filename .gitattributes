@@ -1,0 +1,12 @@
+* text=auto eol=lf
+
+# Audio data and compiled icons are binary.
+*.irs binary
+*.wav binary
+*.aif binary
+*.aiff binary
+*.caf binary
+*.flac binary
+*.m4a binary
+*.icns binary
+*.png binary

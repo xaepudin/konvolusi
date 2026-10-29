@@ -24,6 +24,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/IRSVerb" "$APP/Contents/MacOS/IRSVerb"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 cp "$BIN_DIR/irsconv" "$APP/Contents/MacOS/irsconv"
 
 echo "==> Signing (ad-hoc)"

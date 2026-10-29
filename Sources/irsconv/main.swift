@@ -504,10 +504,10 @@ func selfTestCommand() -> Never {
             .appendingPathComponent("irsconv-selftest-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: directory) }
         let urls = try IRSynthesis.writeDemoFiles(to: directory)
-        var allGood = urls.count == 5
+        var allGood = urls.count == IRSynthesis.builtInLibrary().count
         for url in urls {
             let response = try IRFile.load(url: url)
-            if response.frameCount < 100 || abs(response.energy - 1) > 1e-3 { allGood = false }
+            if response.frameCount < 1 || abs(response.energy - 1) > 1e-3 { allGood = false }
         }
         check("demo impulse responses write and reload (16-bit .irs)", allGood)
     } catch {

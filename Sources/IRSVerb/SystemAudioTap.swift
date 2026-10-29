@@ -68,7 +68,7 @@ final class SystemAudioTap {
         tapUID = uid
 
         let dictionary: [String: Any] = [
-            kAudioAggregateDeviceUIDKey: "com.asep.irsverb.capture.\(UUID().uuidString)",
+            kAudioAggregateDeviceUIDKey: "io.github.xaepudin.IRSVerb.capture.\(UUID().uuidString)",
             kAudioAggregateDeviceNameKey: "\(displayName) Capture",
             kAudioAggregateDeviceIsPrivateKey: true,
             kAudioAggregateDeviceIsStackedKey: false,

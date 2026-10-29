@@ -52,7 +52,7 @@ enum Diagnostics {
         log("  log file         : \(logURL.path)")
 
         // Two taps reading the same audio fight over the hardware mute.
-        let running = NSRunningApplication.runningApplications(withBundleIdentifier: "com.asep.irsverb")
+        let running = NSRunningApplication.runningApplications(withBundleIdentifier: "io.github.xaepudin.IRSVerb")
             .filter { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier }
         if !running.isEmpty {
             log("")

@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>IRSVerb</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.asep.irsverb</string>
+	<string>io.github.xaepudin.IRSVerb</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -17,11 +17,17 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.music</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>15.0</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 xaepudin. MIT licensed.</string>
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSHighResolutionCapable</key>
