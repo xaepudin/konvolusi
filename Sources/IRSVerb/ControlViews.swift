@@ -52,7 +52,7 @@ struct InfoButton: View {
         .help("About \(title)")
         .accessibilityLabel("About \(title)")
         .accessibilityHint(message)
-        .popover(isPresented: $isShowing, arrowEdge: .top) {
+        .popover(isPresented: $isShowing, arrowEdge: .leading) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(title)
                     .font(.headline)
