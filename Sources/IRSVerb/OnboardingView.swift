@@ -71,7 +71,7 @@ struct OnboardingView: View {
                 Spacer()
 
                 Button("Not now") {
-                    dismiss()
+                    closeAndFocusMainWindow()
                 }
                 .buttonStyle(.bordered)
                 .accessibilityHint("Closes this sheet. It will appear again next time IRSVerb opens the main window.")
@@ -79,7 +79,7 @@ struct OnboardingView: View {
                 Button("Open IRSVerb") {
                     hasCompletedOnboarding = true
                     model.startIfNeeded()
-                    dismiss()
+                    closeAndFocusMainWindow()
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
@@ -89,6 +89,14 @@ struct OnboardingView: View {
         .padding(32)
         .frame(width: 600)
         .onAppear { NSApp.activate(ignoringOtherApps: true) }
+    }
+
+    private func closeAndFocusMainWindow() {
+        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            NSApp.activate(ignoringOtherApps: true)
+            NSApp.windows.first { $0.title == "IRSVerb" }?.makeKeyAndOrderFront(nil)
+        }
     }
 
     private var header: some View {

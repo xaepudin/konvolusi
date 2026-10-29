@@ -49,7 +49,7 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 | Menu bar panel | `MenuBarExtra` (`.window` style) | Waveform icon |
 | Main window | `Window("IRSVerb", id: "main")` | First launch, **Open IRSVerb…** in the panel, Dock/Spotlight reopen, or `--show-main` |
 | Welcome sheet | `.sheet` on `MainWindowView` | First launch, or **Show the welcome screen again** in Settings |
-| Settings | `Settings` scene | **Settings…** in the panel or the standard app menu |
+| Settings | `Settings` scene | **Settings…** in the panel, the gear at the bottom of the main sidebar, or the standard app menu |
 
 The main window is `.defaultLaunchBehavior(opensMainAtLaunch || !hasCompletedOnboarding ? .presented : .suppressed)`:
 first launch opens a real window, while later launches stay menu-bar-only. The

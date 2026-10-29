@@ -30,6 +30,11 @@ All notable user-visible changes are recorded here. The format follows
   now opens the main window instead of doing nothing.
 - The first launch opens the main window, so a crowded or hidden menu bar icon is
   never the only way to reach the UI.
+- The Library page uses a fixed sidebar and detail layout. A restored
+  `NavigationSplitView` frame could clip the list and hide the sidebar rows.
+- Settings is reachable from a gear button at the bottom of the main sidebar.
+- The main window regains focus after the welcome sheet closes instead of leaving
+  the previous app in front.
 
 ### Changed
 

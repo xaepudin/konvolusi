@@ -11,12 +11,46 @@ struct MainWindowView: View {
     @ObservedObject var status: StatusStore
     var suppressWelcome = false
 
+    @Environment(\.openSettings) private var openSettings
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @State private var tab: MainTab = .control
     @State private var showWelcome = false
 
     var body: some View {
-        NavigationSplitView {
+        HStack(spacing: 0) {
+            sidebar
+                .frame(width: 190)
+            Divider()
+            detail
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .background(Color(nsColor: .windowBackgroundColor))
+        .frame(minWidth: 980, minHeight: 640)
+        .onAppear {
+            model.uiAppeared()
+            NSApp.activate(ignoringOtherApps: true)
+            if !suppressWelcome && !hasCompletedOnboarding {
+                showWelcome = true
+            }
+        }
+        .onChange(of: hasCompletedOnboarding) { _, completed in
+            if completed {
+                focusMainWindow()
+            } else if !suppressWelcome {
+                showWelcome = true
+            }
+        }
+        .onChange(of: showWelcome) { _, showing in
+            if !showing { focusMainWindow() }
+        }
+        .onDisappear { model.uiDisappeared() }
+        .sheet(isPresented: $showWelcome) {
+            OnboardingView(model: model)
+        }
+    }
+
+    private var sidebar: some View {
+        VStack(spacing: 0) {
             List(selection: $tab) {
                 Section("IRSVerb") {
                     Label("Control", systemImage: "slider.horizontal.3")
@@ -30,28 +64,30 @@ struct MainWindowView: View {
                 }
             }
             .listStyle(.sidebar)
-            .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 220)
-        } detail: {
-            detail
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(nsColor: .windowBackgroundColor))
+            .frame(maxHeight: .infinity)
+
+            Divider()
+
+            Button {
+                openSettings()
+                NSApp.activate(ignoringOtherApps: true)
+            } label: {
+                Label("Settings…", systemImage: "gearshape")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+            .accessibilityHint("Open IRSVerb settings")
         }
-        .frame(minWidth: 980, minHeight: 640)
-        .onAppear {
-            model.uiAppeared()
+        .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    private func focusMainWindow() {
+        DispatchQueue.main.async {
             NSApp.activate(ignoringOtherApps: true)
-            if !suppressWelcome && !hasCompletedOnboarding {
-                showWelcome = true
-            }
-        }
-        .onChange(of: hasCompletedOnboarding) { _, completed in
-            if !completed && !suppressWelcome {
-                showWelcome = true
-            }
-        }
-        .onDisappear { model.uiDisappeared() }
-        .sheet(isPresented: $showWelcome) {
-            OnboardingView(model: model)
+            NSApp.windows.first { $0.title == "IRSVerb" }?.makeKeyAndOrderFront(nil)
         }
     }
 
@@ -113,13 +149,13 @@ struct LibraryView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if model.isPreparingLibrary {
-                ProgressView("Generating demo impulse responses…")
+                ProgressView("Generating built-in responses…")
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else if model.items.isEmpty {
                 ContentUnavailableView(
                     "No impulse responses",
                     systemImage: "waveform.slash",
-                    description: Text("Choose a folder or add a .irs file to get started.")
+                    description: Text("Use Add IR… to copy a .irs, WAV, AIFF, CAF, FLAC, or M4A file into the library.")
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -142,6 +178,8 @@ struct LibraryView: View {
                     }
                 }
                 .listStyle(.inset)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .layoutPriority(1)
                 .accessibilityLabel("Impulse response library")
             }
 
@@ -157,7 +195,7 @@ struct LibraryView: View {
             }
         }
         .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 

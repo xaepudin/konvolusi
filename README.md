@@ -129,7 +129,8 @@ The **Library** section lists the built-in responses plus the IRs you added, wit
 buttons to add, remove, normalize, and refresh. The **Diagnostics** section shows
 the same status as the footer, with buttons to open the privacy pane, open the log,
 show the logs in Finder, and copy a support report. The **About** section has the
-version and licence links.
+version and licence links. **Settings…** is also available from the gear at the
+bottom of the sidebar, so you do not need the menu bar panel to reach it.
 
 ### Keyboard and VoiceOver
 
