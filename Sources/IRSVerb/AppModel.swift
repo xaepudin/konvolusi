@@ -410,7 +410,7 @@ final class AppModel: ObservableObject {
         // deliver tap buffers at all, and the output unit has not started. Only
         // warn once output is flowing but the tap still carries silence, which
         // is the case that usually means a permission or routing problem.
-        if isRunning && engine.outputStarted && input < 1e-7 {
+        if isRunning && engine.outputStarted && engine.capturedFrames.load() > 0 && input < 1e-7 {
             silentCallbacks += 1
             if silentCallbacks > 5 {
                 silenceHintActive = true

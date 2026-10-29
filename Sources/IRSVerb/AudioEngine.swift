@@ -206,6 +206,10 @@ final class AudioEngine: @unchecked Sendable {
         processor.reset()
         inputLevel.store(0)
         outputLevel.store(0)
+        capturedFrames.store(0)
+        renderCallbacks.store(0)
+        maxTapFrames.store(0)
+        maxRenderFrames.store(0)
         ringFill = 0
         if state != .stopped {
             state = .stopped
@@ -222,23 +226,22 @@ final class AudioEngine: @unchecked Sendable {
         if state == .running { stop() } else { start() }
     }
 
-    /// Waits for the tap to come alive and fill the ring, then starts playback.
+    /// Waits briefly for the tap to fill the ring, then starts playback.
     ///
-    /// Core Audio can take a second or two to deliver the first tap buffers, so
-    /// this waits on evidence (captured frames) rather than a fixed delay, and
-    /// gives up rather than leaving the system silent forever.
+    /// Core Audio only delivers tap buffers once something is playing. Waiting
+    /// for audio forever would leave the output unit stopped while the tap could
+    /// already be muting system audio, so after two seconds we start the output
+    /// unit with silence. When the user starts a song, capture starts filling the
+    /// ring and the already-running output unit plays it.
     private func startOutputWhenReady(token: Int, began: Date, ticks: Int = 0) {
         guard generation == token, let ring, let output else { return }
         let captured = capturedFrames.load()
         let target = bufferTargetFrames
         let ready = captured > 0 && ring.fill >= target
-        // Silence is normal: Core Audio only delivers tap buffers once something
-        // is playing, so this waits for first audio rather than giving up. The
-        // cap is only a safety valve for a machine that never plays anything.
-        let gaveUp = ticks >= 6000       // ~60 s
+        let startWithSilence = ticks >= 200       // ~2 s
         let tapDelay = Date().timeIntervalSince(began)
 
-        guard ready || gaveUp else {
+        guard ready || startWithSilence else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
                 self?.startOutputWhenReady(token: token, began: began, ticks: ticks + 1)
             }
@@ -258,7 +261,7 @@ final class AudioEngine: @unchecked Sendable {
             AppLog.write(String(format: "output started after %.2fs (captured %.0f frames, tap buffer %.0f, "
                                 + "trimmed %d frames, fill %d%@)",
                                 tapDelay, captured, maxTapFrames.load(), max(0, excess), ring.fill,
-                                ready ? "" : ", gave up waiting"))
+                                ready ? "" : ", started with silence while waiting for audio"))
         } catch {
             // Never leave the system muted with nothing playing: stop the whole
             // engine so the tap is destroyed and audio is restored.

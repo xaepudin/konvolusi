@@ -115,10 +115,12 @@ Rules enforced by the code:
    responsive and quittable.
 5. Setup creates the tap, the private aggregate device, the ring, the capture
    IOProc, and the output unit.
-6. `startOutputWhenReady` waits for evidence that the tap is delivering audio
-   (`capturedFrames > 0` and enough ring fill) rather than a fixed delay. It gives
-   up after about 60 seconds, trims the startup backlog so it does not become
-   permanent latency, and starts the output unit.
+6. `startOutputWhenReady` waits up to about two seconds for the tap to deliver
+   audio and fill the ring. If nothing is playing yet, it starts the output unit
+   with silence so the tap cannot leave system audio muted while there is no
+   output. When playback starts, the already-running output unit plays the
+   captured signal. Any startup backlog is trimmed so it does not become
+   permanent latency.
 7. State becomes `.running` on the main queue. If anything throws, the engine
    moves to `.failed`, destroys the tap, and reports the error.
 

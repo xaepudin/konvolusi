@@ -35,6 +35,11 @@ All notable user-visible changes are recorded here. The format follows
 - Settings is reachable from a gear button at the bottom of the main sidebar.
 - The main window regains focus after the welcome sheet closes instead of leaving
   the previous app in front.
+- The output unit starts after about two seconds even when nothing is playing yet,
+  instead of waiting up to a minute while the tap could mute system audio. Capture
+  counters are reset on stop so a restart cannot reuse stale readiness data.
+- The “no audio captured” hint is suppressed while the tap has not delivered any
+  frames, so a silent Mac is not reported as a routing failure.
 
 ### Changed
 
