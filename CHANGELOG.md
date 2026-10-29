@@ -12,6 +12,7 @@ First public release.
 
 - System-wide impulse response convolution for macOS 15+, using a Core Audio
   process tap and a private aggregate device.
+- Universal release bundle for Apple silicon and Intel Macs.
 - Menu bar panel with impulse response picker, folder selection, wet/dry mix,
   output gain, bypass, normalization, and live input/output meters.
 - 15 synthesized impulse responses, generated on first launch: Identity, Speech

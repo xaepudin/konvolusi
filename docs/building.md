@@ -22,15 +22,30 @@ open dist/IRSVerb.app
 
 `./build.sh` does a release build of both products, assembles
 `dist/IRSVerb.app`, ad-hoc signs it, regenerates the 15 demo responses into
-`Impulse Responses/`, and copies `irsconv` to `dist/irsconv`. Pass `debug` for a
-debug build:
+`Impulse Responses/`, and copies `irsconv` to `dist/irsconv`. It builds for the
+host architecture by default, so pass `debug` for a debug build:
 
 ```sh
 ./build.sh debug
 ```
 
-The bundle is assembled by copying `Resources/Info.plist` and the two
-executables; there is no Xcode project. `Package.swift` is the source of truth:
+For a release that runs on both Apple silicon and Intel Macs, build universal
+binaries:
+
+```sh
+./build.sh universal
+lipo -info dist/IRSVerb.app/Contents/MacOS/IRSVerb
+# Architectures in the fat file: ... are: x86_64 arm64
+```
+
+This cross-builds both `arm64-apple-macosx15.0` and
+`x86_64-apple-macosx15.0` with SwiftPM, combines each product with `lipo`, and
+then assembles and signs the bundle. It doubles the build time; day-to-day
+development can use the native build.
+
+The bundle is assembled by copying `Resources/Info.plist`, `Resources/AppIcon.icns`,
+and the two executables; there is no Xcode project. `Package.swift` is the source
+of truth:
 
 | Product | Target | Kind |
 | --- | --- | --- |
@@ -129,8 +144,8 @@ input where the FFT fast path applies. It needs no audio device.
 scripts/package-release.sh
 ```
 
-The script builds a release app, adds the icon and metadata, and writes to
-`dist/`:
+The script builds a universal release app, adds the icon and metadata, and writes
+to `dist/`:
 
 - `IRSVerb-<version>-macos.zip` — app bundle, zipped with `ditto`;
 - `IRSVerb-<version>.dmg` — drag-to-Applications disk image;

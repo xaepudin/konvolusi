@@ -26,8 +26,8 @@ if [[ ! -f Resources/AppIcon.icns ]]; then
     exit 1
 fi
 
-echo "==> Building IRSVerb $VERSION"
-./build.sh release
+echo "==> Building IRSVerb $VERSION (universal)"
+./build.sh universal
 
 echo "==> Verifying signature"
 codesign --verify --deep --strict --verbose=2 "$APP"
