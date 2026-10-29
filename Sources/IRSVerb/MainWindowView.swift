@@ -36,7 +36,7 @@ struct MainWindowView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(nsColor: .windowBackgroundColor))
         }
-        .frame(minWidth: 900, minHeight: 620)
+        .frame(minWidth: 980, minHeight: 640)
         .onAppear {
             model.uiAppeared()
             NSApp.activate(ignoringOtherApps: true)
@@ -60,7 +60,7 @@ struct MainWindowView: View {
         case .control:
             ScrollView {
                 ConvolverControls(model: model, meters: meters, status: status, compact: false)
-                    .frame(maxWidth: 720, alignment: .leading)
+                    .frame(maxWidth: 960, alignment: .leading)
                     .padding(24)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
@@ -238,7 +238,7 @@ struct DiagnosticsView: View {
                     .foregroundStyle(.secondary)
             }
             .padding(24)
-            .frame(maxWidth: 720, alignment: .leading)
+            .frame(maxWidth: 880, alignment: .leading)
             .frame(maxWidth: .infinity, alignment: .center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

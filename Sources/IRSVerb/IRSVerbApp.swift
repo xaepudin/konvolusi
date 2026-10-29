@@ -69,7 +69,7 @@ struct IRSVerbApp: App {
                            status: model.status,
                            suppressWelcome: opensMainAtLaunch)
         }
-        .defaultSize(width: 980, height: 680)
+        .defaultSize(width: 1120, height: 720)
         .windowResizability(.contentMinSize)
         .defaultLaunchBehavior(opensMainAtLaunch || !hasCompletedOnboarding ? .presented : .suppressed)
 
