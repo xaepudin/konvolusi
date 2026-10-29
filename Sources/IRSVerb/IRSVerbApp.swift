@@ -1,8 +1,32 @@
 import AppKit
+import Combine
 import SwiftUI
+
+extension Notification.Name {
+    /// Posted when the app is reopened (Dock click, Spotlight, Finder) with no
+    /// visible windows. The menu bar label listens and opens the main window.
+    static let irsVerbOpenMainWindow = Notification.Name("IRSVerbOpenMainWindow")
+}
+
+/// The app is a menu bar agent with a Dock icon by default. AppKit's default
+/// "terminate after the last window closes" policy would kill it as soon as the
+/// welcome sheet is dismissed, taking the menu bar item with it, so opt out.
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        false
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            NotificationCenter.default.post(name: .irsVerbOpenMainWindow, object: nil)
+        }
+        return true
+    }
+}
 
 @main
 struct IRSVerbApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model: AppModel
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     private let opensMainAtLaunch = CommandLine.arguments.contains("--show-main")
@@ -40,34 +64,36 @@ struct IRSVerbApp: App {
         .menuBarExtraStyle(.window)
 
         Window("IRSVerb", id: "main") {
-            MainWindowView(model: model, meters: model.meters, status: model.status)
+            MainWindowView(model: model,
+                           meters: model.meters,
+                           status: model.status,
+                           suppressWelcome: opensMainAtLaunch)
         }
         .defaultSize(width: 760, height: 620)
         .windowResizability(.contentMinSize)
-        .defaultLaunchBehavior(opensMainAtLaunch ? .presented : .suppressed)
+        .defaultLaunchBehavior(opensMainAtLaunch || !hasCompletedOnboarding ? .presented : .suppressed)
 
         Settings {
             SettingsView(model: model)
         }
         .defaultLaunchBehavior(.suppressed)
-
-        Window("Welcome to IRSVerb", id: "onboarding") {
-            OnboardingView(model: model)
-        }
-        .windowResizability(.contentSize)
-        .defaultLaunchBehavior(hasCompletedOnboarding || opensMainAtLaunch ? .suppressed : .presented)
     }
 }
 
 /// Isolated so that meter updates cannot invalidate the `MenuBarExtra` scene.
 private struct MenuBarLabel: View {
     @ObservedObject var status: StatusStore
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Image(systemName: status.isRunning ? "waveform.circle.fill" : "waveform.circle")
             .accessibilityLabel("IRSVerb")
             .accessibilityValue(status.isRunning ? "Running" : "Stopped")
             .accessibilityHint("Opens the IRSVerb controls")
+            .onReceive(NotificationCenter.default.publisher(for: .irsVerbOpenMainWindow)) { _ in
+                openWindow(id: "main")
+                NSApp.activate(ignoringOtherApps: true)
+            }
     }
 }
 

@@ -10,16 +10,25 @@ All notable user-visible changes are recorded here. The format follows
 
 - A conventional main window with **Control**, **Library**, **Diagnostics**, and
   **About** tabs, reachable from **Open IRSVerb…** in the menu bar panel.
-- A first-run welcome window that explains the menu bar icon and the System Audio
-  Recording permission. The engine is not started until the user continues, so the
-  permission dialog no longer covers the explanation.
-- Settings for **Show IRSVerb in the Dock**, a shortcut to the privacy pane, and
-  resetting the welcome screen.
+- A first-run welcome sheet over the main window explaining the menu bar icon and
+  the System Audio Recording permission. The engine is not started until the user
+  continues, so the permission dialog no longer covers the explanation.
+- Settings for **Show IRSVerb in the Dock** (on by default), a shortcut to the
+  privacy pane, and resetting the welcome screen.
 - `--show-main` launch option for opening the main window directly, useful when
   the menu bar icon is hidden.
 - Accessibility labels and values for the menu bar icon, impulse response picker,
   mix and gain sliders, and input/output meters. The panel and main window share
   one control implementation.
+
+### Fixed
+
+- The app no longer terminates when its last window closes. That bug killed the
+  process (and the menu bar item) just after the welcome screen was dismissed.
+- Reopening the app from the Dock, Spotlight, or Finder while it is already running
+  now opens the main window instead of doing nothing.
+- The first launch opens the main window, so a crowded or hidden menu bar icon is
+  never the only way to reach the UI.
 
 ### Changed
 

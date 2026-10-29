@@ -7,8 +7,7 @@ struct OnboardingView: View {
     @ObservedObject var model: AppModel
 
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
-    @Environment(\.openWindow) private var openWindow
-    @Environment(\.dismissWindow) private var dismissWindow
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -26,7 +25,8 @@ struct OnboardingView: View {
             }
 
             Text("IRSVerb lives in the menu bar. Click the waveform icon to pick a "
-                + "response, set the mix, and see your input and output levels.")
+                + "response, set the mix, and see your input and output levels. It also "
+                + "appears in the Dock by default; you can turn that off in Settings.")
                 .fixedSize(horizontal: false, vertical: true)
 
             GroupBox("Before you start") {
@@ -58,16 +58,16 @@ struct OnboardingView: View {
                     .accessibilityHint("Opens the System Audio Recording privacy pane")
                 Spacer()
                 Button("Not now") {
-                    dismissWindow(id: "onboarding")
+                    dismiss()
                 }
-                .accessibilityHint("Closes this window. It will appear again next time IRSVerb starts.")
+                .accessibilityHint("Closes this sheet. It will appear again next time IRSVerb opens the main window.")
                 Button("Open IRSVerb") {
-                    dismissWindow(id: "onboarding")
                     hasCompletedOnboarding = true
-                    openWindow(id: "main")
                     model.startIfNeeded()
-                    NSApp.activate(ignoringOtherApps: true)
+                    dismiss()
                 }
+                .keyboardShortcut(.defaultAction)
+                .accessibilityHint("Closes the welcome sheet and starts IRSVerb")
                 .keyboardShortcut(.defaultAction)
                 .accessibilityHint("Closes the welcome screen and opens the main IRSVerb window")
             }

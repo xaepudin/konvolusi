@@ -26,8 +26,9 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
 - **Wet/dry mix, output gain, bypass, and normalization**, plus live input and
   output meters.
 - **Two ways in.** A menu bar panel for quick changes and a conventional window
-  with Control, Library, Diagnostics, and About tabs. You can optionally show
-  IRSVerb in the Dock.
+  with Control, Library, Diagnostics, and About tabs. IRSVerb appears in the Dock
+  by default so it stays findable when the menu bar is crowded; you can turn that
+  off in Settings for a menu-bar-only utility.
 - **Low overhead.** Idle cost is around 0.1% of a CPU core; convolution is a few
   percent on Apple silicon.
 - **Local only.** No network access, no telemetry, no accounts. Audio is processed
@@ -54,12 +55,12 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
      xattr -dr com.apple.quarantine /Applications/IRSVerb.app
      ```
 
-4. Start the app. A welcome window explains the menu bar icon and the audio
-   permission; the waveform icon appears in the menu bar.
-5. Choose **Open IRSVerb** in the welcome window to open the main window, then
-   allow **System Audio Recording** when macOS asks. If you miss the prompt,
-   enable IRSVerb under **System Settings › Privacy & Security › Screen & System
-   Audio Recording**, then click **Start** in IRSVerb.
+4. Start the app. The main window opens with a welcome sheet explaining the menu
+   bar icon and the audio permission.
+5. Choose **Open IRSVerb** in the welcome sheet, then allow **System Audio
+   Recording** when macOS asks. If you miss the prompt, enable IRSVerb under
+   **System Settings › Privacy & Security › Screen & System Audio Recording**,
+   then click **Start** in IRSVerb.
 6. Play something and pick **Large Hall** to hear the effect immediately.
 
 > **Why the warning?** Apple notarization requires a paid Developer ID
@@ -79,19 +80,23 @@ and fills it with 15 generated responses. Nothing is downloaded. The first
 selection is **Large Hall**; try **Small Room** at 30% for something subtle, or
 **Telephone** at 100% for the obvious effect.
 
-A welcome window explains the menu bar icon and the permission the first time.
-If you close it, it appears again on the next launch. You can also reopen it from
+A welcome sheet explains the menu bar icon and the permission the first time the
+main window opens. If you dismiss it with **Not now**, both the window and the
+welcome sheet return on the next launch. You can also reopen it from
 **Settings… → Setup → Show the welcome screen again**.
 
 ## Using IRSVerb
 
-There are two surfaces, both optional:
+There are two surfaces:
 
+- **Main window.** Opened on first launch, or from **Open IRSVerb…** in the menu
+  bar panel. It has four tabs: Control, Library, Diagnostics, and About.
 - **Menu bar panel.** Click the waveform icon for quick access to the response
   picker, mix, gain, bypass, normalization, and meters.
-- **Main window.** Choose **Open IRSVerb…** in the panel, or enable **Show IRSVerb
-  in the Dock** in Settings and open it from the Dock or Spotlight. The window has
-  four tabs: Control, Library, Diagnostics, and About.
+
+IRSVerb is in the Dock by default, so you can reopen the main window by clicking
+its Dock icon (or by launching it again from Spotlight/Finder). If you prefer a
+menu-bar-only app, turn off **Show IRSVerb in the Dock** in Settings.
 
 The menu bar panel and the main window share the same controls, so a change in one
 is reflected in the other.
@@ -129,8 +134,8 @@ to open the privacy pane, open or reveal the log, and copy a support report. The
 - The menu bar icon announces “IRSVerb, Running” or “IRSVerb, Stopped”.
 - The main window uses standard tabs, buttons, lists, and text fields, so the
   usual VoiceOver navigation works.
-- The welcome window and main window are separate from the menu bar panel; closing
-  the window does not quit the app or stop audio processing.
+- The main window is independent of the menu bar panel; closing it does not quit
+  the app or stop audio processing. The app stays in the Dock and menu bar.
 
 ### Mixing tips
 
@@ -204,20 +209,20 @@ xattr -dr com.apple.quarantine /Applications/IRSVerb.app
 
 ### There is no menu bar icon
 
-IRSVerb is a menu bar app and does not show a Dock icon by default. Look for the
-waveform icon in the menu bar; on a Mac with a notch it may be hidden behind other
-items.
+The menu bar can hide items when it is crowded or when a notch is present.
+IRSVerb is in the Dock by default: click its Dock icon, or open IRSVerb again from
+Spotlight/Finder, and the main window appears.
 
-If you cannot find it at all, open the main window directly:
+If you turned off **Show IRSVerb in the Dock** and cannot find the menu bar icon,
+open the main window directly:
 
 ```sh
 open -a IRSVerb --args --show-main
 ```
 
 If IRSVerb is already running, quit it first (the panel's **Quit IRSVerb**, or
-Activity Monitor) so the launch option is applied. Then go to **Settings… →
-General → Show IRSVerb in the Dock** so the app is also reachable from the Dock
-and Spotlight next time.
+Activity Monitor) so the launch option is applied. Then re-enable **Show IRSVerb
+in the Dock** in Settings so the app is easy to reach next time.
 
 ### No audio is processed
 

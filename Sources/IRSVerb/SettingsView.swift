@@ -6,13 +6,15 @@ enum PreferenceKey {
     static let showInDock = "ShowInDock"
 }
 
-/// Optional Dock presence. The app is an agent by default (`LSUIElement`), which
-/// is right for a background audio utility; users who prefer the Dock can opt in.
+/// Dock presence. The app starts as a regular app so it is findable in the Dock
+/// and Spotlight even when the menu bar is full; users who want a menu-bar-only
+/// utility can turn this off.
 enum DockVisibility {
     static let key = PreferenceKey.showInDock
 
     static func apply() {
-        set(UserDefaults.standard.bool(forKey: key), activate: false)
+        let visible = UserDefaults.standard.object(forKey: key) as? Bool ?? true
+        set(visible, activate: false)
     }
 
     static func set(_ visible: Bool, activate: Bool = true) {
@@ -26,7 +28,7 @@ enum DockVisibility {
 struct SettingsView: View {
     @ObservedObject var model: AppModel
 
-    @AppStorage(DockVisibility.key) private var showInDock = false
+    @AppStorage(DockVisibility.key) private var showInDock = true
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @Environment(\.openWindow) private var openWindow
 
@@ -37,8 +39,9 @@ struct SettingsView: View {
                     .onChange(of: showInDock) { _, newValue in
                         DockVisibility.set(newValue)
                     }
-                Text("When off, IRSVerb stays in the menu bar only. Turning this on adds "
-                    + "the app to the Dock and to ⌘-Tab, which makes it easier to find.")
+                Text("When on, IRSVerb is in the Dock and in ⌘-Tab, which makes it easy to find "
+                    + "even when the menu bar is crowded or the icon is hidden. Turn it off for a "
+                    + "menu-bar-only utility.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -50,11 +53,11 @@ struct SettingsView: View {
                 }
                 Button("Show the welcome screen again") {
                     hasCompletedOnboarding = false
-                    openWindow(id: "onboarding")
+                    openWindow(id: "main")
                     NSApp.activate(ignoringOtherApps: true)
                 }
                 Text("The welcome screen explains the menu bar icon and the audio permission. "
-                    + "It opens now and will also appear the next time IRSVerb starts.")
+                    + "It appears over the main window now and again the next time IRSVerb opens it.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

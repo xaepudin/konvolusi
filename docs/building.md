@@ -236,15 +236,16 @@ own; the bundle is the authority.
 
 ## UI development
 
-The app has three UI surfaces: the menu bar panel, the main window, and Settings.
-The main window is suppressed at launch so the app remains a menu bar utility.
-Open it directly while developing:
+The app has four UI surfaces: the menu bar panel, the main window, the welcome
+sheet, and Settings. The main window opens on first launch and is suppressed on
+later launches so the app stays a menu bar utility. Open it directly while
+developing:
 
 ```sh
 open dist/IRSVerb.app --args --show-main
 ```
 
-`--show-main` also suppresses the welcome window, which makes it useful for
+`--show-main` also suppresses the welcome sheet, which makes it useful for
 screenshotting the Control, Library, Diagnostics, and About tabs without resetting
 preferences. Quit any running instance first; `open --args` does not re-apply the
 option to an existing process. To see the welcome flow again:
@@ -254,11 +255,13 @@ defaults delete io.github.xaepudin.IRSVerb HasCompletedOnboarding
 open dist/IRSVerb.app
 ```
 
-The welcome screen intentionally does not start the audio engine; it starts when
-the user chooses **Open IRSVerb** or presses **Start**. This keeps the System Audio
-Recording dialog from covering the explanation. Test VoiceOver and Full Keyboard
-Access on both the panel and the main window; the shared `ControlViews` carry the
-slider, meter, and picker labels, so a change there affects both surfaces.
+The welcome sheet intentionally does not start the audio engine; it starts when the
+user chooses **Open IRSVerb** or presses **Start**. This keeps the System Audio
+Recording dialog from covering the explanation. IRSVerb defaults to a Dock icon
+(`ShowInDock`), so closing every window does not hide the app; turn that off in
+Settings to test the menu-bar-only path. Test VoiceOver and Full Keyboard Access
+on both the panel and the main window; the shared `ControlViews` carry the slider,
+meter, and picker labels, so a change there affects both surfaces.
 
 ## Project layout
 

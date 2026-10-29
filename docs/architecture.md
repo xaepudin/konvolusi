@@ -46,30 +46,38 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 | Surface | Scene | Entry point |
 | --- | --- | --- |
 | Menu bar panel | `MenuBarExtra` (`.window` style) | Waveform icon |
-| Main window | `Window("IRSVerb", id: "main")` | **Open IRSVerb…** in the panel, or `--show-main` at launch |
-| Welcome window | `Window(..., id: "onboarding")` | Presented on first launch; reopen from Settings |
-| Settings | `Settings` scene | **Settings…** in the panel or the standard app menu when the Dock icon is enabled |
+| Main window | `Window("IRSVerb", id: "main")` | First launch, **Open IRSVerb…** in the panel, Dock/Spotlight reopen, or `--show-main` |
+| Welcome sheet | `.sheet` on `MainWindowView` | First launch, or **Show the welcome screen again** in Settings |
+| Settings | `Settings` scene | **Settings…** in the panel or the standard app menu |
 
-The main window and Settings scene use `.defaultLaunchBehavior(.suppressed)` so
-starting the app stays a menu bar-only affair. The welcome window uses
-`.defaultLaunchBehavior(hasCompletedOnboarding ? .suppressed : .presented)`.
+The main window is `.defaultLaunchBehavior(opensMainAtLaunch || !hasCompletedOnboarding ? .presented : .suppressed)`:
+first launch opens a real window, while later launches stay menu-bar-only. The
+Settings scene is suppressed at launch. The welcome flow is a sheet over the main
+window rather than a separate window, so dismissing it cannot leave the app with
+no window or trigger AppKit's last-window termination.
 
-The app remains an agent (`LSUIElement` in `Info.plist`) unless the user turns on
-**Show IRSVerb in the Dock**. `DockVisibility` switches
-`NSApp.setActivationPolicy` between `.accessory` and `.regular` at launch and when
-the preference changes. Enabling the Dock icon also gives the app a standard app
-menu with Settings and About.
+`AppDelegate.applicationShouldTerminateAfterLastWindowClosed` returns `false`. This
+is essential for a menu bar agent: without it, closing the welcome sheet could
+terminate the whole app and remove the menu bar item. Reopening the app from the
+Dock or Spotlight posts `.irsVerbOpenMainWindow`; the menu bar label observes it
+and calls `openWindow(id: "main")`, so a hidden or crowded menu bar icon is never
+the only way to reach the UI.
+
+The app is declared as an agent (`LSUIElement` in `Info.plist`) but `DockVisibility`
+defaults to `.regular` so it is findable in the Dock and ⌘-Tab. Turning off
+**Show IRSVerb in the Dock** switches the activation policy to `.accessory`; the
+preference is applied at launch and when it changes.
 
 On a first launch the engine is **not** started automatically: doing so would put
 the System Audio Recording dialog on top of the welcome explanation before it can
 be read. `AppModel.startIfReady` starts audio only after
-`HasCompletedOnboarding` is true. The welcome window's **Open IRSVerb** button
-sets that flag and calls `startIfNeeded`; the menu bar **Start** button and the
+`HasCompletedOnboarding` is true. The welcome sheet's **Open IRSVerb** button sets
+that flag and calls `startIfNeeded`; the menu bar **Start** button and the
 **Choose/Folder** actions remain explicit user starts at any time.
 
 `--show-main` opens the main window at launch. It is a recovery path for a hidden
 menu bar icon and a way to drive the UI in development; it suppresses the welcome
-window so the requested window is not buried.
+sheet so the requested window is not buried.
 
 ## Threads
 

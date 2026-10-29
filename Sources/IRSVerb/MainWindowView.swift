@@ -9,8 +9,11 @@ struct MainWindowView: View {
     @ObservedObject var model: AppModel
     @ObservedObject var meters: MeterStore
     @ObservedObject var status: StatusStore
+    var suppressWelcome = false
 
+    @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @State private var tab: MainTab = .control
+    @State private var showWelcome = false
 
     var body: some View {
         TabView(selection: $tab) {
@@ -39,8 +42,19 @@ struct MainWindowView: View {
         .onAppear {
             model.uiAppeared()
             NSApp.activate(ignoringOtherApps: true)
+            if !suppressWelcome && !hasCompletedOnboarding {
+                showWelcome = true
+            }
+        }
+        .onChange(of: hasCompletedOnboarding) { _, completed in
+            if !completed && !suppressWelcome {
+                showWelcome = true
+            }
         }
         .onDisappear { model.uiDisappeared() }
+        .sheet(isPresented: $showWelcome) {
+            OnboardingView(model: model)
+        }
     }
 }
 
