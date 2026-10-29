@@ -213,8 +213,8 @@ public enum IRSynthesis {
     /// A deliberately small, purpose-chosen set rather than a pile of downloads.
     ///
     /// Grouped by what they are for: a control, two perceptual compensations that
-    /// do not exist as recordings, three everyday spaces, the Viper4Android style
-    /// character pieces, big spaces, and one physical model for fun.
+    /// do not exist as recordings, three everyday spaces, character pieces, big
+    /// spaces, and one physical model for fun.
     public static func builtInLibrary(sampleRate: Double = 44100) -> [ImpulseResponse] {
         var library: [ImpulseResponse] = []
 
@@ -402,7 +402,7 @@ public enum IRSynthesis {
     }
 
     /// Generates the built-in library on disk (16-bit PCM WAV files with an
-    /// `.irs` extension, matching what Viper4Android ships).
+    /// `.irs` extension).
     @discardableResult
     public static func writeDemoFiles(to directory: URL, sampleRate: Double = 44100) throws -> [URL] {
         var urls: [URL] = []

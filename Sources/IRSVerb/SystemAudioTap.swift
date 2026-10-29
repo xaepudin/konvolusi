@@ -28,8 +28,8 @@ enum AudioTapError: LocalizedError {
 /// A Core Audio process tap, plus the private aggregate device that makes it
 /// readable.
 ///
-/// This is the macOS 14.2+ kext-free equivalent of what Viper4Android hooks into
-/// on Android: every *other* process' audio is captured, and with
+/// This is the macOS 14.2+ kext-free way to capture every *other* process'
+/// audio, and with
 /// `muteBehavior = .mutedWhenTapped` it is muted at the hardware for exactly as
 /// long as this process is reading the tap. IRSVerb then plays the convolved
 /// result back out, so the system hears only the processed signal.

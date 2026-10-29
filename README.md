@@ -2,9 +2,9 @@
 
 **Put a room, a tape machine, a telephone, or a cathedral in the path of everything your Mac plays.**
 
-IRSVerb is a small menu bar app for macOS that applies a Viper4Android-style
-`.irs` impulse response to system audio. It is a convolver and nothing else: no
-player, no plugin host, no account, no subscription.
+IRSVerb is a small menu bar app for macOS that applies an `.irs` impulse response
+to system audio. It is a convolver and nothing else: no player, no plugin host, no
+account, no subscription.
 
 ```
  every app's audio ──▶ IRSVerb ──▶ your speakers or headphones
@@ -21,8 +21,8 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
 - **15 built-in impulse responses**, generated on first launch: rooms, halls, a
   cathedral, a plate, a stairwell, a car cabin, a cassette tape, an old radio, a
   telephone, and more.
-- **Your own `.irs` files.** Viper4Android `Kernel` folders work as-is. WAV, AIFF,
-  CAF, FLAC, and M4A files work too.
+- **Your own `.irs` files.** Add `.irs`, WAV, AIFF, CAF, FLAC, or M4A files; they
+  are copied into IRSVerb's library and can be removed again.
 - **Wet/dry mix, output gain, bypass, and normalization**, plus live input and
   output meters.
 - **Two ways in.** A menu bar panel for quick changes and a conventional window
@@ -103,11 +103,10 @@ is reflected in the other.
 
 | Control | What it does |
 | --- | --- |
-| **Impulse response** | Pick any supported response in the current folder |
-| **Add File…** | Use one file from anywhere on disk without changing the folder |
-| **Change Folder…** | Point the whole library at your own folder of responses |
-| **Open Folder** | Show the current folder in Finder |
-| **ⓘ buttons** | Click any info button for an explanation of that control |
+| **Impulse response** | Pick a built-in response or one you added |
+| **Add IR…** | Choose one or more files; they are copied into the library |
+| **Remove** | Delete the selected added IR; built-ins cannot be removed |
+| **ⓘ buttons** | Click for explanations of Mix, Output gain, Bypass, Normalize, and Levels |
 | **Mix** | Wet/dry blend. 100% is fully convolved; lower values mix the dry signal back in, time-aligned |
 | **Output gain** | Make-up gain after the effect, from −24 dB to +24 dB |
 | **Bypass** | Instant A/B without unloading the response |
@@ -119,19 +118,18 @@ is reflected in the other.
 | **Quit IRSVerb** | Stop processing and restore normal audio immediately |
 
 The footer shows the sample rate, output device, loaded response, added latency,
-and buffer diagnostics. Dropouts and drift trims should stay at zero. The level
-meters show **Silent** when no audio is being captured.
+and buffer diagnostics. Dropouts and drift trims should stay at zero. A level
+meter is blank while no audio is being captured.
 
-Hover any control for a one-line explanation, or click the **ⓘ** button next to a
-control for a short description. The impulse response picker, Add File, Change
-Folder, Open Folder, Mix, Output gain, Bypass, Normalize, Levels, Start/Stop, and
-the diagnostic actions all have info.
+Click the **ⓘ** button next to Mix, Output gain, Bypass, Normalize, or Levels for a
+short explanation. The impulse response, status, and diagnostics areas intentionally
+stay free of extra info.
 
-The **Library** section lists every supported response in the current folder, with
-buttons to add a file, change the folder, show it in Finder, normalize, and
-refresh. The **Diagnostics** section shows the same status as the footer, with buttons
-to open the privacy pane, open the log, show the logs in Finder, and copy a support
-report. The **About** section has the version and licence links.
+The **Library** section lists the built-in responses plus the IRs you added, with
+buttons to add, remove, normalize, and refresh. The **Diagnostics** section shows
+the same status as the footer, with buttons to open the privacy pane, open the log,
+show the logs in Finder, and copy a support report. The **About** section has the
+version and licence links.
 
 ### Keyboard and VoiceOver
 
@@ -182,20 +180,14 @@ how to use your own files.
 
 ## Using your own impulse responses
 
-1. Click **Change Folder…** and choose a folder, or **Add File…** for a single file.
-2. Select the response in the picker.
-
-For Viper4Android collections, copy the `Kernel` folder to your Mac first, then
-point IRSVerb at it:
-
-```
-/storage/emulated/0/ViPER4Android/Kernel/                              (Android 9 and earlier)
-/storage/emulated/0/Android/data/com.pittvandewitt.viperfx/files/Kernel/  (Android 10+)
-```
+1. Click **Add IR…** and choose one or more files.
+2. IRSVerb copies them into its library and selects the first one.
+3. Use **Remove** to delete an added IR. The built-in responses stay available.
 
 Supported formats are `.irs`, `.wav`, `.wave`, `.aif`, `.aiff`, `.caf`, `.flac`,
 and `.m4a`. Mono and stereo are both fine, any sample rate is resampled on load,
-and responses longer than 10 seconds are rejected.
+and responses longer than 10 seconds are rejected. Adding a file does not change
+the built-in library or move your original file.
 
 Only use impulse responses you have the right to use. **A file being free to
 download does not mean it is free to redistribute.** The repository ships only
@@ -342,6 +334,3 @@ committing impulse responses without a clear redistribution licence.
 - **Generated impulse responses** in `Impulse Responses/`: [CC0 1.0](LICENSE-IRS)
   (public domain dedication). Use them in music, videos, and anything else
   without attribution.
-
-IRSVerb is not affiliated with Viper4Android or its authors. “Viper4Android” is
-used only to describe the `.irs` file format and workflow.

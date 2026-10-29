@@ -157,8 +157,8 @@ describe an ad-hoc build as “signed and notarized”.
 ## Repository settings
 
 - Description: “System-wide impulse response convolver for macOS.”
-- Topics: `macos`, `audio`, `convolution`, `impulse-response`, `viper4android`,
-  `swift`, `core-audio`, `menu-bar`.
+- Topics: `macos`, `audio`, `convolution`, `impulse-response`, `swift`,
+  `core-audio`, `menu-bar`.
 - Enable Issues; Discussions optional.
 - Releases: attach the zip, DMG, and checksums.
 - CI: `.github/workflows/ci.yml` on pushes and pull requests; release workflow on

@@ -37,13 +37,15 @@ All notable user-visible changes are recorded here. The format follows
   wider impulse response picker, and consistent spacing.
 - The welcome sheet uses aligned icon rows, readable body text, and a card for the
   permission explanation.
-- Added visible **ⓘ** buttons with click-to-open explanations, plus hover tooltips,
-  for the impulse response picker, library actions, Mix, Output gain, Bypass,
-  Normalize, Levels, Start/Stop, and diagnostic actions.
-- Renamed the confusing library actions to **Add File…**, **Change Folder…**, and
-  **Open Folder**. **Reveal Logs** is now **Show Logs in Finder**.
-- The level meters show **Silent** instead of an unexplained dash when there is no
-  signal.
+- Added visible **ⓘ** buttons with click-to-open explanations for Mix, Output gain,
+  Bypass, Normalize, and Levels. The impulse response, status, and diagnostics
+  areas intentionally have no extra info buttons.
+- Replaced folder selection with a fixed library: **Add IR…** copies files into
+  IRSVerb's library, and **Remove** deletes added IRs. The built-in responses are
+  always available. **Reveal Logs** is now **Show Logs in Finder**.
+- The level meters are blank while there is no signal.
+- Removed third-party branding references. The app is described only as a `.irs`
+  impulse response convolver.
 - The silent-input hint now appears only after output has started, so a quiet Mac
   that has not played anything is not described as a permission failure.
 
@@ -80,8 +82,7 @@ First public release.
 - The release is ad-hoc signed and not notarized. Gatekeeper requires
   Control-click → Open or removing the quarantine attribute.
 - The app is not sandboxed.
-- Only the convolver is implemented; other Viper4Android effects are out of
-  scope.
+- Only the convolver is implemented; other audio effects are out of scope.
 - Third-party impulse response packs are not bundled because their
   redistribution terms are usually unclear.
 

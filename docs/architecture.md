@@ -167,7 +167,8 @@ the panel.
 | Item | Location |
 | --- | --- |
 | Built-in responses and default library | `~/Library/Application Support/IRSVerb/Impulse Responses/` |
-| Selected folder, selected response, mix, gain, bypass, normalize | `UserDefaults` (`IRSFolder`, `SelectedIR`, `Wet`, `GainDB`, `Bypassed`, `Normalize`, `SeededDemoLibrary`) |
+| Selected response, mix, gain, bypass, normalize | `UserDefaults` (`SelectedIR`, `Wet`, `GainDB`, `Bypassed`, `Normalize`, `SeededDemoLibrary`) |
+| Added IRs | `~/Library/Application Support/IRSVerb/Impulse Responses/` (copied in by **Add IR…**) |
 | Dock visibility | `UserDefaults` (`ShowInDock`, default on) |
 | Welcome screen completed | `UserDefaults` (`HasCompletedOnboarding`) |
 | App log | `~/Library/Logs/IRSVerb/app.log` |

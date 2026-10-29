@@ -47,7 +47,11 @@ final class AppModel: ObservableObject {
     var isRunning: Bool { status.isRunning }
 
     let engine = AudioEngine()
-    @Published private(set) var folderURL: URL
+    /// The built-in library and every IR the user has added. Adding an IR copies
+    /// it here, so the library is self-contained and there is no folder setting.
+    let folderURL: URL
+
+    private static let builtInNames: Set<String> = Set(IRSynthesis.builtInLibrary().map(\.name))
 
     private var healthTimer: Timer?
     private var meterTimer: Timer?
@@ -63,7 +67,6 @@ final class AppModel: ObservableObject {
     private static var instanceCount = 0
 
     private enum Keys {
-        static let folder = "IRSFolder"
         static let selected = "SelectedIR"
         static let wet = "Wet"
         static let gain = "GainDB"
@@ -77,13 +80,9 @@ final class AppModel: ObservableObject {
         AppLog.write("AppModel #\(Self.instanceCount) init (bundle \(Bundle.main.bundleIdentifier ?? "-"))")
 
         let defaults = UserDefaults.standard
-        if let saved = defaults.string(forKey: Keys.folder) {
-            folderURL = URL(fileURLWithPath: saved)
-        } else {
-            let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-                ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
-            folderURL = base.appendingPathComponent("IRSVerb/Impulse Responses")
-        }
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
+        folderURL = base.appendingPathComponent("IRSVerb/Impulse Responses")
 
         wet = defaults.object(forKey: Keys.wet) as? Double ?? 1
         gainDB = defaults.object(forKey: Keys.gain) as? Double ?? 0
@@ -181,57 +180,87 @@ final class AppModel: ObservableObject {
     }
 
     private func selectFallbackIfNeeded() {
-        if let selected = selectedURL {
-            // A file picked from outside the folder should survive a relaunch.
-            if !items.contains(where: { $0.url == selected }),
-               FileManager.default.fileExists(atPath: selected.path) {
-                items.append(ImpulseResponseItem(url: selected))
-                items.sort { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-            }
-            if items.contains(where: { $0.url == selected }) {
-                engine.impulseResponseURL = selected
-                return
-            }
+        if let selected = selectedURL,
+           items.contains(where: { $0.url == selected }) {
+            engine.impulseResponseURL = selected
+            return
         }
         let preferred = items.first { $0.name == "Large Hall" } ?? items.first
         selectedURL = preferred?.url
         engine.impulseResponseURL = preferred?.url
     }
 
-    func chooseImpulseResponseFile() {
+    /// True when the selected response was added by the user. Built-ins are
+    /// always present and cannot be removed.
+    var canRemoveSelected: Bool {
+        guard let selectedURL,
+              selectedURL.deletingLastPathComponent().standardizedFileURL == folderURL.standardizedFileURL,
+              items.contains(where: { $0.url == selectedURL }) else { return false }
+        return !Self.builtInNames.contains(selectedURL.deletingPathExtension().lastPathComponent)
+    }
+
+    /// Adds one or more files to the library. Files chosen from outside the
+    /// library are copied in, so the library stays self-contained; a file that
+    /// is already in the library is simply selected.
+    func addImpulseResponseFiles() {
         let panel = NSOpenPanel()
-        panel.title = "Choose an impulse response"
-        panel.prompt = "Use"
-        panel.allowsMultipleSelection = false
+        panel.title = "Add impulse responses"
+        panel.prompt = "Add"
+        panel.allowsMultipleSelection = true
         panel.canChooseDirectories = false
         panel.allowsOtherFileTypes = true
-        panel.message = "Viper4Android .irs files (and any WAV/AIFF) can be used."
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        if !items.contains(where: { $0.url == url }) {
-            items.append(ImpulseResponseItem(url: url))
-            items.sort { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        panel.message = "Choose .irs, WAV, AIFF, CAF, FLAC, or M4A files. "
+            + "They will be copied into IRSVerb's library."
+        guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
+
+        do {
+            try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
+            var added: [URL] = []
+            for source in panel.urls {
+                if source.deletingLastPathComponent().standardizedFileURL == folderURL.standardizedFileURL {
+                    added.append(source)
+                } else {
+                    let destination = uniqueDestination(for: source)
+                    try FileManager.default.copyItem(at: source, to: destination)
+                    added.append(destination)
+                }
+            }
+            errorMessage = nil
+            refreshLibrary()
+            if let first = added.first {
+                selectedURL = first
+                startIfNeeded()
+            }
+        } catch {
+            errorMessage = "Could not add the impulse response: \(error.localizedDescription)"
         }
-        selectedURL = url
+    }
+
+    func removeSelectedImpulseResponse() {
+        guard canRemoveSelected, let selectedURL else { return }
+        do {
+            try FileManager.default.removeItem(at: selectedURL)
+        } catch {
+            errorMessage = "Could not remove the impulse response: \(error.localizedDescription)"
+            return
+        }
+        self.selectedURL = nil
+        errorMessage = nil
+        refreshLibrary()
+        selectFallbackIfNeeded()
         startIfNeeded()
     }
 
-    func chooseFolder() {
-        let panel = NSOpenPanel()
-        panel.title = "Choose an impulse response folder"
-        panel.prompt = "Use Folder"
-        panel.canChooseDirectories = true
-        panel.canChooseFiles = false
-        panel.allowsMultipleSelection = false
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        folderURL = url
-        UserDefaults.standard.set(url.path, forKey: Keys.folder)
-        refreshList()
-        selectFallbackIfNeeded()
-    }
-
-    func revealFolder() {
-        try? FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
-        NSWorkspace.shared.open(folderURL)
+    private func uniqueDestination(for source: URL) -> URL {
+        let base = source.deletingPathExtension().lastPathComponent
+        let ext = source.pathExtension.isEmpty ? "irs" : source.pathExtension
+        var destination = folderURL.appendingPathComponent("\(base).\(ext)")
+        var index = 1
+        while FileManager.default.fileExists(atPath: destination.path) {
+            index += 1
+            destination = folderURL.appendingPathComponent("\(base) \(index).\(ext)")
+        }
+        return destination
     }
 
     func openPrivacySettings() {
@@ -266,7 +295,7 @@ final class AppModel: ObservableObject {
             "IRSVerb \(appVersion) (\(appBuild))",
             "macOS \(ProcessInfo.processInfo.operatingSystemVersionString)",
             "Engine running: \(isRunning ? "yes" : "no")",
-            "Folder: \(folderURL.path)",
+            "Library: \(folderURL.path)",
         ]
         if let selectedURL {
             lines.append("Selected impulse response: \(selectedURL.lastPathComponent)")

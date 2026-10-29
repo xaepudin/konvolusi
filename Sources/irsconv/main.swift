@@ -50,7 +50,7 @@ func fail(_ message: String) -> Never {
 
 func printUsage() {
     print("""
-    irsconv - apply Viper4Android .irs impulse responses offline
+    irsconv - apply .irs impulse responses offline
 
     USAGE
       irsconv render <input...> --irs <file.irs> [options]

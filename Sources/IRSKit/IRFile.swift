@@ -24,7 +24,7 @@ public enum IRFileError: LocalizedError {
     }
 }
 
-/// Reads and writes Viper4Android style `.irs` impulse responses.
+/// Reads and writes `.irs` impulse responses.
 ///
 /// An `.irs` file is a plain WAV file; only the extension is unusual. Reading is
 /// content based so the extension does not matter, but `AVAudioFile` infers the

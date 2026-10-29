@@ -114,7 +114,7 @@ struct LevelMeter: View {
     }
 
     private var valueText: String {
-        guard level > 0 else { return "Silent" }
+        guard level > 0 else { return "" }
         return String(format: "%.0f dB", max(-120, 20 * log10(level)))
     }
 
@@ -149,7 +149,7 @@ struct LevelMeter: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(label) level")
         .accessibilityValue(valueDescription)
-        .help("\(label) level. “Silent” means no audio is being captured right now.")
+        .help("\(label) level. A blank value means no audio is being captured right now.")
     }
 }
 
@@ -171,15 +171,8 @@ struct StatusHeader: View {
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    Text("IRSVerb")
-                        .font(.headline)
-                    InfoButton(
-                        title: "Start / Stop",
-                        message: "Running means system audio is being convolved. Stop restores "
-                            + "normal audio without quitting; Start resumes processing."
-                    )
-                }
+                Text("IRSVerb")
+                    .font(.headline)
                 if !compact {
                     Text("System-wide impulse response convolver")
                         .font(.caption)
@@ -207,9 +200,6 @@ struct StatusHeader: View {
             .controlSize(.regular)
             .buttonStyle(.bordered)
             .tint(status.isRunning ? .red : .accentColor)
-            .help(status.isRunning
-                ? "Stop processing and restore normal system audio"
-                : "Start processing system audio")
             .accessibilityHint(status.isRunning
                 ? "Stops processing and restores normal system audio"
                 : "Starts processing system audio")
@@ -222,36 +212,25 @@ struct ImpulseResponseSection: View {
     var compact: Bool
     var showsHeading: Bool = true
 
-    private let info = InfoContent(
-        title: "Impulse response",
-        message: "The response applied to all system audio. Add File uses a single "
-            + ".irs, WAV, AIFF, CAF, FLAC, or M4A file from anywhere. Change Folder "
-            + "switches the whole library to another folder. Open Folder shows the "
-            + "current library folder in Finder."
-    )
-
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 6 : 8) {
             if showsHeading {
-                HStack(spacing: 6) {
-                    Text("Impulse response")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    InfoButton(title: info.title, message: info.message)
-                }
+                Text("Impulse response")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             if model.isPreparingLibrary {
                 HStack(spacing: 8) {
                     ProgressView()
                         .controlSize(.small)
-                    Text("Generating demo impulse responses…")
+                    Text("Generating built-in responses…")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .accessibilityElement(children: .combine)
             } else if model.items.isEmpty {
-                Text("No .irs files in this folder")
+                Text("No impulse responses available")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -263,7 +242,6 @@ struct ImpulseResponseSection: View {
                 .labelsHidden()
                 .controlSize(compact ? .regular : .large)
                 .frame(maxWidth: .infinity)
-                .help("Choose the impulse response applied to all system audio.")
                 .accessibilityLabel("Impulse response")
                 .accessibilityValue(model.selectedURL?.deletingPathExtension().lastPathComponent ?? "None")
             }
@@ -282,56 +260,32 @@ struct ImpulseResponseSection: View {
             }
 
             if !compact {
-                Text("Add File uses one file; Change Folder switches the whole library; "
-                    + "Open Folder shows the current folder.")
+                Text("Built-in responses are always available. Added IRs are copied into "
+                    + "IRSVerb's library.")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                     .fixedSize(horizontal: false, vertical: true)
-
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Image(systemName: "folder")
-                        .font(.caption2)
-                        .accessibilityHidden(true)
-                    Text(model.folderURL.path)
-                        .font(.caption)
-                        .lineLimit(2)
-                        .truncationMode(.middle)
-                        .textSelection(.enabled)
-                        .help(model.folderURL.path)
-                }
-                .foregroundStyle(.secondary)
             }
         }
     }
 
     @ViewBuilder private var actionButtons: some View {
         Button {
-            model.chooseImpulseResponseFile()
+            model.addImpulseResponseFiles()
         } label: {
-            Label("Add File…", systemImage: "plus")
+            Label("Add IR…", systemImage: "plus")
         }
         .buttonStyle(.bordered)
-        .help("Use a single impulse response file from anywhere. It is added to the "
-            + "picker without changing the library folder.")
-        .accessibilityHint("Choose one impulse response file from anywhere on disk")
+        .accessibilityHint("Choose one or more impulse response files. They are copied into IRSVerb's library.")
 
         Button {
-            model.chooseFolder()
+            model.removeSelectedImpulseResponse()
         } label: {
-            Label("Change Folder…", systemImage: "folder")
+            Label("Remove", systemImage: "minus")
         }
         .buttonStyle(.bordered)
-        .help("Switch the whole impulse response library to another folder on this Mac.")
-        .accessibilityHint("Use a different folder as the impulse response library")
-
-        Button {
-            model.revealFolder()
-        } label: {
-            Label("Open Folder", systemImage: "arrow.up.forward.app")
-        }
-        .buttonStyle(.bordered)
-        .help("Show the current impulse response folder in Finder.")
-        .accessibilityHint("Show the current impulse response folder in Finder")
+        .disabled(!model.canRemoveSelected)
+        .accessibilityHint("Remove the selected added impulse response. Built-in responses cannot be removed.")
     }
 }
 
@@ -467,8 +421,8 @@ struct MetersSection: View {
     private let info = InfoContent(
         title: "Levels",
         message: "Input is the audio captured from other apps. Output is the convolved "
-            + "signal sent to your speakers. “Silent” means no audio is being captured "
-            + "right now."
+            + "signal sent to your speakers. A blank value means no audio is being "
+            + "captured right now."
     )
 
     var body: some View {
@@ -582,16 +536,9 @@ struct ConvolverControls: View {
             MetersSection(meters: meters, showsHeading: true)
             StatusMessages(model: model, compact: true)
             Divider()
-            HStack(spacing: 6) {
-                Text("Status")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                InfoButton(
-                    title: "Status",
-                    message: "Sample rate and output device, loaded impulse response, added "
-                        + "latency, dropouts, and drift trims."
-                )
-            }
+            Text("Status")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             InfoFooter(model: model, compact: true)
         }
     }
@@ -601,17 +548,7 @@ struct ConvolverControls: View {
             StatusHeader(model: model, status: status, compact: false)
                 .cardSurface(padding: 16)
 
-            PanelCard(
-                title: "Impulse response",
-                systemImage: "waveform",
-                info: InfoContent(
-                    title: "Impulse response",
-                    message: "The response applied to all system audio. Add File uses a single "
-                        + ".irs, WAV, AIFF, CAF, FLAC, or M4A file from anywhere. Change Folder "
-                        + "switches the whole library to another folder. Open Folder shows the "
-                        + "current library folder in Finder."
-                )
-            ) {
+            PanelCard(title: "Impulse response", systemImage: "waveform") {
                 ImpulseResponseSection(model: model, compact: false, showsHeading: false)
             }
 
@@ -625,8 +562,8 @@ struct ConvolverControls: View {
                 info: InfoContent(
                     title: "Levels",
                     message: "Input is the audio captured from other apps. Output is the "
-                        + "convolved signal sent to your speakers. “Silent” means no audio is "
-                        + "being captured right now."
+                        + "convolved signal sent to your speakers. A blank value means no audio "
+                        + "is being captured right now."
                 )
             ) {
                 MetersSection(meters: meters)
@@ -634,15 +571,7 @@ struct ConvolverControls: View {
 
             StatusMessages(model: model, compact: false)
 
-            PanelCard(
-                title: "Status",
-                systemImage: "info.circle",
-                info: InfoContent(
-                    title: "Status",
-                    message: "Sample rate and output device, loaded impulse response, added "
-                        + "latency, dropouts, and drift trims."
-                )
-            ) {
+            PanelCard(title: "Status", systemImage: "info.circle") {
                 InfoFooter(model: model, compact: false)
             }
         }

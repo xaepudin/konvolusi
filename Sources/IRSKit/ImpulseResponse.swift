@@ -2,8 +2,8 @@ import Foundation
 
 /// A loaded impulse response.
 ///
-/// Viper4Android `.irs` files are ordinary WAV files holding either a single
-/// (mono) response that is applied to both channels, or a two channel response.
+/// `.irs` files are ordinary WAV files holding either a single (mono) response
+/// that is applied to both channels, or a two channel response.
 public struct ImpulseResponse: Sendable {
     public var name: String
     public var sampleRate: Double

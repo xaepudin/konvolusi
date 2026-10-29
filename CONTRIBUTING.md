@@ -1,8 +1,8 @@
 # Contributing
 
 Thanks for taking a look at IRSVerb. This is a small, focused project: a
-system-wide impulse response convolver for macOS, with no other Viper4Android
-effects and no network features.
+system-wide impulse response convolver for macOS, with no other audio effects and
+no network features.
 
 ## Before you start
 
@@ -34,7 +34,7 @@ redistributed.**
 
 That means a licence file or written permission, with the source recorded next to
 the file. “It is all over the internet”, “the pack was free”, and “the author's
-README says they do not own it” are not licences. Many popular Viper4Android packs
+README says they do not own it” are not licences. Many popular third-party packs
 fall into that category, and some contain measurements of commercial hardware.
 
 Acceptable contributions:

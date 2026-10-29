@@ -90,42 +90,27 @@ struct LibraryView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("Impulse responses")
                     .font(.title2.bold())
-                InfoButton(
-                    title: "Library",
-                    message: "Every supported response in the current folder. Add File uses a "
-                        + "single .irs, WAV, AIFF, CAF, FLAC, or M4A file from anywhere. Change "
-                        + "Folder switches the whole library. Open Folder shows the current "
-                        + "library folder in Finder."
-                )
                 Spacer()
                 Button {
-                    model.chooseImpulseResponseFile()
+                    model.addImpulseResponseFiles()
                 } label: {
-                    Label("Add File…", systemImage: "plus")
+                    Label("Add IR…", systemImage: "plus")
                 }
                 .buttonStyle(.bordered)
-                .help("Add a single impulse response file from anywhere on disk.")
                 Button {
-                    model.chooseFolder()
+                    model.removeSelectedImpulseResponse()
                 } label: {
-                    Label("Change Folder…", systemImage: "folder")
+                    Label("Remove", systemImage: "minus")
                 }
                 .buttonStyle(.bordered)
-                .help("Use a folder on this Mac as the impulse response library.")
-                Button {
-                    model.revealFolder()
-                } label: {
-                    Label("Open Folder", systemImage: "arrow.up.forward.app")
-                }
-                .buttonStyle(.bordered)
-                .help("Show the current impulse response folder in Finder.")
+                .disabled(!model.canRemoveSelected)
             }
 
-            Text("Folder: \(model.folderURL.path)")
+            Text("Built-in responses are always available. Added IRs are copied into "
+                + "IRSVerb's library and can be removed here.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
 
             if model.isPreparingLibrary {
                 ProgressView("Generating demo impulse responses…")
@@ -182,16 +167,8 @@ struct DiagnosticsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 6) {
-                    Text("Diagnostics")
-                        .font(.title2.bold())
-                    InfoButton(
-                        title: "Diagnostics",
-                        message: "Live sample rate, device, loaded response, latency, dropout, "
-                            + "and drift information. Open Log shows the app log, Show Logs in "
-                            + "Finder reveals it, and Copy Report copies a support summary."
-                    )
-                }
+                Text("Diagnostics")
+                    .font(.title2.bold())
 
                 Text("IRSVerb captures system audio, convolves it, and plays the result. "
                     + "These values update while this window is open.")
@@ -232,11 +209,8 @@ struct DiagnosticsView: View {
                 HStack(spacing: 8) {
                     Button("Open Privacy Settings…") { model.openPrivacySettings() }
                     Button("Open Log") { model.openLog() }
-                        .help("Open the IRSVerb log in the default text editor.")
                     Button("Show Logs in Finder") { model.revealLogs() }
-                        .help("Show the folder that contains the IRSVerb log.")
                     Button("Copy Report") { model.copyDiagnosticReport() }
-                        .help("Copy version, device, latency, and error information. No audio is included.")
                         .accessibilityHint("Copies status, device, and error information without any audio")
                 }
 
@@ -305,8 +279,8 @@ struct AboutView: View {
             }
             .font(.callout)
 
-            Text("IRSVerb is not affiliated with Viper4Android or its authors. "
-                + "“Viper4Android” describes the .irs file format and workflow only.")
+            Text("IRSVerb is an independent app. “.irs” describes the impulse response "
+                + "file format.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
