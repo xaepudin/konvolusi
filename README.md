@@ -26,7 +26,7 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
 - **Wet/dry mix, output gain, bypass, and normalization**, plus live input and
   output meters.
 - **Two ways in.** A menu bar panel for quick changes and a conventional window
-  with Control, Library, Diagnostics, and About tabs. IRSVerb appears in the Dock
+  with Control, Library, Diagnostics, and About sections in a sidebar. IRSVerb appears in the Dock
   by default so it stays findable when the menu bar is crowded; you can turn that
   off in Settings for a menu-bar-only utility.
 - **Low overhead.** Idle cost is around 0.1% of a CPU core; convolution is a few
@@ -90,7 +90,7 @@ welcome sheet return on the next launch. You can also reopen it from
 There are two surfaces:
 
 - **Main window.** Opened on first launch, or from **Open IRSVerb…** in the menu
-  bar panel. It has four tabs: Control, Library, Diagnostics, and About.
+  bar panel. It has four sections in a sidebar: Control, Library, Diagnostics, and About.
 - **Menu bar panel.** Click the waveform icon for quick access to the response
   picker, mix, gain, bypass, normalization, and meters.
 
@@ -106,7 +106,7 @@ is reflected in the other.
 | **Impulse response** | Pick any supported response in the current folder |
 | **Choose .irs…** | Add one file from anywhere on disk |
 | **Folder…** | Point the library at your own folder of responses |
-| **Reveal** | Open the current folder in Finder |
+| **Show in Finder** | Open the current folder in Finder |
 | **Mix** | Wet/dry blend. 100% is fully convolved; lower values mix the dry signal back in, time-aligned |
 | **Output gain** | Make-up gain after the effect, from −24 dB to +24 dB |
 | **Bypass** | Instant A/B without unloading the response |
@@ -118,13 +118,18 @@ is reflected in the other.
 | **Quit IRSVerb** | Stop processing and restore normal audio immediately |
 
 The footer shows the sample rate, output device, loaded response, added latency,
-and buffer diagnostics. Dropouts and drift trims should stay at zero.
+and buffer diagnostics. Dropouts and drift trims should stay at zero. The level
+meters show **Silent** when no audio is being captured.
 
-The **Library** tab lists every supported response in the current folder, with
-buttons to add a file, change the folder, reveal it in Finder, normalize, and
-refresh. The **Diagnostics** tab shows the same status as the footer, with buttons
-to open the privacy pane, open or reveal the log, and copy a support report. The
-**About** tab has the version and licence links.
+Hover any control for a one-line explanation — the impulse response picker, mix,
+output gain, bypass, normalize, Start/Stop, and the diagnostic buttons all have
+tooltips.
+
+The **Library** section lists every supported response in the current folder, with
+buttons to add a file, change the folder, show it in Finder, normalize, and
+refresh. The **Diagnostics** section shows the same status as the footer, with buttons
+to open the privacy pane, open the log, show the logs in Finder, and copy a support
+report. The **About** section has the version and licence links.
 
 ### Keyboard and VoiceOver
 
@@ -132,7 +137,7 @@ to open the privacy pane, open or reveal the log, and copy a support report. The
   enable it in some macOS versions) and has a VoiceOver label; sliders announce
   their current values and the meters announce decibel levels.
 - The menu bar icon announces “IRSVerb, Running” or “IRSVerb, Stopped”.
-- The main window uses standard tabs, buttons, lists, and text fields, so the
+- The main window uses a standard sidebar, buttons, lists, and text fields, so the
   usual VoiceOver navigation works.
 - The main window is independent of the menu bar panel; closing it does not quit
   the app or stop audio processing. The app stays in the Dock and menu bar.

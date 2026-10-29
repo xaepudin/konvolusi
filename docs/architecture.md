@@ -34,7 +34,7 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 | `AppModel` | `Sources/IRSVerb/AppModel.swift` | UI state, library folder, selection, timers, watchdog policy, copied diagnostic report |
 | `PanelView` | `Sources/IRSVerb/PanelView.swift` | Compact `MenuBarExtra` panel plus entry points to the main window and Settings |
 | `ControlViews` | `Sources/IRSVerb/ControlViews.swift` | Shared controls, status header, sliders, and accessible level meters used by both surfaces |
-| `MainWindowView` | `Sources/IRSVerb/MainWindowView.swift` | Conventional window with Control, Library, Diagnostics, and About tabs |
+| `MainWindowView` | `Sources/IRSVerb/MainWindowView.swift` | Conventional window with a sidebar for Control, Library, Diagnostics, and About |
 | `OnboardingView` | `Sources/IRSVerb/OnboardingView.swift` | First-run welcome sheet over the main window |
 | `SettingsView` | `Sources/IRSVerb/SettingsView.swift` | Dock visibility, permission shortcut, welcome-screen reset, version |
 | `DockVisibility` | `Sources/IRSVerb/SettingsView.swift` | Applies `.regular` by default or `.accessory` when the Dock icon is disabled |

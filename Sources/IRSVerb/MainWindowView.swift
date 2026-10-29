@@ -16,29 +16,27 @@ struct MainWindowView: View {
     @State private var showWelcome = false
 
     var body: some View {
-        TabView(selection: $tab) {
-            ScrollView {
-                ConvolverControls(model: model, meters: meters, status: status, compact: false)
-                    .frame(maxWidth: 700, alignment: .leading)
-                    .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .center)
+        NavigationSplitView {
+            List(selection: $tab) {
+                Section("IRSVerb") {
+                    Label("Control", systemImage: "slider.horizontal.3")
+                        .tag(MainTab.control)
+                    Label("Library", systemImage: "waveform")
+                        .tag(MainTab.library)
+                    Label("Diagnostics", systemImage: "stethoscope")
+                        .tag(MainTab.diagnostics)
+                    Label("About", systemImage: "info.circle")
+                        .tag(MainTab.about)
+                }
             }
-            .tabItem { Label("Control", systemImage: "slider.horizontal.3") }
-            .tag(MainTab.control)
-
-            LibraryView(model: model)
-                .tabItem { Label("Library", systemImage: "waveform") }
-                .tag(MainTab.library)
-
-            DiagnosticsView(model: model)
-                .tabItem { Label("Diagnostics", systemImage: "stethoscope") }
-                .tag(MainTab.diagnostics)
-
-            AboutView()
-                .tabItem { Label("About", systemImage: "info.circle") }
-                .tag(MainTab.about)
+            .listStyle(.sidebar)
+            .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 220)
+        } detail: {
+            detail
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(nsColor: .windowBackgroundColor))
         }
-        .frame(minWidth: 680, minHeight: 540)
+        .frame(minWidth: 900, minHeight: 620)
         .onAppear {
             model.uiAppeared()
             NSApp.activate(ignoringOtherApps: true)
@@ -54,6 +52,25 @@ struct MainWindowView: View {
         .onDisappear { model.uiDisappeared() }
         .sheet(isPresented: $showWelcome) {
             OnboardingView(model: model)
+        }
+    }
+
+    @ViewBuilder private var detail: some View {
+        switch tab {
+        case .control:
+            ScrollView {
+                ConvolverControls(model: model, meters: meters, status: status, compact: false)
+                    .frame(maxWidth: 720, alignment: .leading)
+                    .padding(24)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+        case .library:
+            LibraryView(model: model)
+        case .diagnostics:
+            DiagnosticsView(model: model)
+        case .about:
+            AboutView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }
@@ -75,8 +92,11 @@ struct LibraryView: View {
                     .font(.title2.bold())
                 Spacer()
                 Button("Choose .irs…") { model.chooseImpulseResponseFile() }
+                    .help("Add a single impulse response file from anywhere on disk.")
                 Button("Folder…") { model.chooseFolder() }
-                Button("Reveal") { model.revealFolder() }
+                    .help("Use a folder on this Mac as the impulse response library.")
+                Button("Show in Finder") { model.revealFolder() }
+                    .help("Show the current impulse response folder in Finder.")
             }
 
             Text("Folder: \(model.folderURL.path)")
@@ -122,13 +142,15 @@ struct LibraryView: View {
                 Toggle("Normalize impulse response", isOn: $model.normalize)
                     .toggleStyle(.switch)
                     .controlSize(.small)
+                    .help("Match the loudness of responses with different lengths when you switch.")
                 Spacer()
                 Button("Refresh") { model.refreshLibrary() }
+                    .help("Re-read the folder and pick up new .irs files.")
                     .accessibilityHint("Re-reads the folder and picks up new .irs files")
             }
         }
-        .padding(20)
-        .frame(minWidth: 680, minHeight: 500)
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -180,8 +202,11 @@ struct DiagnosticsView: View {
                 HStack(spacing: 8) {
                     Button("Open Privacy Settings…") { model.openPrivacySettings() }
                     Button("Open Log") { model.openLog() }
-                    Button("Reveal Logs") { model.revealLogs() }
+                        .help("Open the IRSVerb log in the default text editor.")
+                    Button("Show Logs in Finder") { model.revealLogs() }
+                        .help("Show the folder that contains the IRSVerb log.")
                     Button("Copy Report") { model.copyDiagnosticReport() }
+                        .help("Copy version, device, latency, and error information. No audio is included.")
                         .accessibilityHint("Copies status, device, and error information without any audio")
                 }
 
@@ -212,11 +237,11 @@ struct DiagnosticsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            .padding(20)
+            .padding(24)
             .frame(maxWidth: 720, alignment: .leading)
             .frame(maxWidth: .infinity, alignment: .center)
         }
-        .frame(minWidth: 680, minHeight: 500)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

@@ -16,7 +16,7 @@ panel and logs rather than guessing.
 4. **Is anything playing?** Core Audio may not deliver tap buffers until audio
    starts. A silent Mac legitimately produces no callbacks.
 
-The main window's **Diagnostics** tab shows the same status lines as the panel
+The main window's **Diagnostics** section shows the same status lines as the panel
 footer and adds buttons to open the privacy pane, open or reveal the log, and copy
 a support report. The report contains version, device, sample rate, latency, and
 error text — never audio.

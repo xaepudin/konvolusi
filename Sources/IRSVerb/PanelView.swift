@@ -22,23 +22,26 @@ struct PanelView: View {
                     openWindow(id: "main")
                     NSApp.activate(ignoringOtherApps: true)
                 }
+                .help("Open the full IRSVerb window.")
                 .accessibilityHint("Opens the full IRSVerb window")
 
                 Button("Settings…") {
                     openSettings()
                     NSApp.activate(ignoringOtherApps: true)
                 }
+                .help("Open IRSVerb settings.")
                 .accessibilityHint("Opens IRSVerb settings")
 
                 Spacer()
 
                 Button("Quit IRSVerb") { model.quit() }
+                    .help("Stop processing, restore normal audio, and quit IRSVerb.")
                     .accessibilityHint("Stops processing, restores normal audio, and quits IRSVerb")
             }
             .controlSize(.small)
         }
         .padding(14)
-        .frame(width: 380)
+        .frame(width: 420)
         // The 20 Hz meter timer only runs while a surface is actually on screen.
         .onAppear { model.panelAppeared() }
         .onDisappear { model.panelDisappeared() }

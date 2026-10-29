@@ -247,7 +247,7 @@ open dist/IRSVerb.app --args --show-main
 ```
 
 `--show-main` also suppresses the welcome sheet, which makes it useful for
-screenshotting the Control, Library, Diagnostics, and About tabs without resetting
+screenshotting the Control, Library, Diagnostics, and About sections without resetting
 preferences. Quit any running instance first; `open --args` does not re-apply the
 option to an existing process. To see the welcome flow again:
 

@@ -8,8 +8,9 @@ All notable user-visible changes are recorded here. The format follows
 
 ### Added
 
-- A conventional main window with **Control**, **Library**, **Diagnostics**, and
-  **About** tabs, reachable from **Open IRSVerb…** in the menu bar panel.
+- A conventional main window with a sidebar for **Control**, **Library**,
+  **Diagnostics**, and **About**, reachable from **Open IRSVerb…** in the menu bar
+  panel.
 - A first-run welcome sheet over the main window explaining the menu bar icon and
   the System Audio Recording permission. The engine is not started until the user
   continues, so the permission dialog no longer covers the explanation.
@@ -32,6 +33,17 @@ All notable user-visible changes are recorded here. The format follows
 
 ### Changed
 
+- The main window uses a modern sidebar and card layout with a clear status header,
+  wider impulse response picker, and consistent spacing.
+- The welcome sheet uses aligned icon rows, readable body text, and a card for the
+  permission explanation.
+- Added tooltips for the impulse response picker, Choose/Folder/Show in Finder
+  buttons, mix, output gain, bypass, normalize, Start/Stop, meters, and diagnostic
+  actions.
+- Renamed **Reveal** to **Show in Finder** and **Reveal Logs** to **Show Logs in
+  Finder**.
+- The level meters show **Silent** instead of an unexplained dash when there is no
+  signal.
 - The silent-input hint now appears only after output has started, so a quiet Mac
   that has not played anything is not described as a permission failure.
 

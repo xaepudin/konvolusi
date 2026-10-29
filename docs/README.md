@@ -45,7 +45,7 @@ Sources/IRSVerb/         menu bar application
   AppModel               UI state, library, timers, diagnostics
   PanelView              compact MenuBarExtra panel
   ControlViews           shared controls and accessible meters
-  MainWindowView         Control, Library, Diagnostics, About tabs
+  MainWindowView         Control, Library, Diagnostics, About sections
   OnboardingView         first-run explanation
   SettingsView           Dock visibility and setup
   Stores                 low-frequency UI state isolated from the scene

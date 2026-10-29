@@ -39,6 +39,7 @@ struct SettingsView: View {
                     .onChange(of: showInDock) { _, newValue in
                         DockVisibility.set(newValue)
                     }
+                    .help("Show IRSVerb in the Dock and ⌘-Tab. Turn off for a menu-bar-only utility.")
                 Text("When on, IRSVerb is in the Dock and in ⌘-Tab, which makes it easy to find "
                     + "even when the menu bar is crowded or the icon is hidden. Turn it off for a "
                     + "menu-bar-only utility.")
@@ -51,11 +52,13 @@ struct SettingsView: View {
                 Button("Open System Audio Recording settings…") {
                     model.openPrivacySettings()
                 }
+                .help("Open the privacy pane where IRSVerb's System Audio Recording permission lives.")
                 Button("Show the welcome screen again") {
                     hasCompletedOnboarding = false
                     openWindow(id: "main")
                     NSApp.activate(ignoringOtherApps: true)
                 }
+                .help("Open the welcome sheet over the main window now.")
                 Text("The welcome screen explains the menu bar icon and the audio permission. "
                     + "It appears over the main window now and again the next time IRSVerb opens it.")
                     .font(.caption)

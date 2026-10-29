@@ -71,7 +71,7 @@ signature but GitHub cannot mark it **Verified**. Register the public key as a
 4. **Tests pass.** `swift test` (33 tests) and `dist/irsconv selftest`.
 5. **Docs links resolve.** Every relative link in `README.md`, `docs/`, and
    `CONTRIBUTING.md` points to an existing file or anchor.
-6. **UI checked.** First-run welcome, main window tabs (Control, Library,
+6. **UI checked.** First-run welcome, main window sections (Control, Library,
    Diagnostics, About), Settings, and the Dock icon (on by default). Run VoiceOver
    and Full Keyboard Access through the panel and main window.
 7. **Version bumped.** `CFBundleShortVersionString`, `CFBundleVersion`, and
