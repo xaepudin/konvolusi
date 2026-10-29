@@ -4,6 +4,28 @@ All notable user-visible changes are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- A conventional main window with **Control**, **Library**, **Diagnostics**, and
+  **About** tabs, reachable from **Open IRSVerb…** in the menu bar panel.
+- A first-run welcome window that explains the menu bar icon and the System Audio
+  Recording permission. The engine is not started until the user continues, so the
+  permission dialog no longer covers the explanation.
+- Settings for **Show IRSVerb in the Dock**, a shortcut to the privacy pane, and
+  resetting the welcome screen.
+- `--show-main` launch option for opening the main window directly, useful when
+  the menu bar icon is hidden.
+- Accessibility labels and values for the menu bar icon, impulse response picker,
+  mix and gain sliders, and input/output meters. The panel and main window share
+  one control implementation.
+
+### Changed
+
+- The silent-input hint now appears only after output has started, so a quiet Mac
+  that has not played anything is not described as a permission failure.
+
 ## [1.0.0] — 2026-10-29
 
 First public release.

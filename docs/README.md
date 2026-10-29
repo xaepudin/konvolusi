@@ -42,7 +42,12 @@ Sources/IRSVerb/         menu bar application
   TapCapture             Core Audio IO thread → ring buffer
   OutputUnit             AUHAL default output unit
   AudioEngine            lifecycle, drift control, watchdog
-  AppModel, PanelView    SwiftUI menu bar UI
+  AppModel               UI state, library, timers, diagnostics
+  PanelView              compact MenuBarExtra panel
+  ControlViews           shared controls and accessible meters
+  MainWindowView         Control, Library, Diagnostics, About tabs
+  OnboardingView         first-run explanation
+  SettingsView           Dock visibility and setup
   Stores                 low-frequency UI state isolated from the scene
   Diagnostics            --diagnose implementation
 Tests/IRSKitTests/       33 XCTest cases

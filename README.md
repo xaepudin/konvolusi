@@ -25,6 +25,9 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
   CAF, FLAC, and M4A files work too.
 - **Wet/dry mix, output gain, bypass, and normalization**, plus live input and
   output meters.
+- **Two ways in.** A menu bar panel for quick changes and a conventional window
+  with Control, Library, Diagnostics, and About tabs. You can optionally show
+  IRSVerb in the Dock.
 - **Low overhead.** Idle cost is around 0.1% of a CPU core; convolution is a few
   percent on Apple silicon.
 - **Local only.** No network access, no telemetry, no accounts. Audio is processed
@@ -51,12 +54,13 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
      xattr -dr com.apple.quarantine /Applications/IRSVerb.app
      ```
 
-4. Start the app. A waveform icon appears in the menu bar.
-5. When macOS asks for **System Audio Recording**, allow it. If you miss the
-   prompt, enable IRSVerb under **System Settings › Privacy & Security › Screen &
-   System Audio Recording**, then click **Start** in IRSVerb.
-6. Play something and click the waveform icon. Pick **Large Hall** to hear the
-   effect immediately.
+4. Start the app. A welcome window explains the menu bar icon and the audio
+   permission; the waveform icon appears in the menu bar.
+5. Choose **Open IRSVerb** in the welcome window to open the main window, then
+   allow **System Audio Recording** when macOS asks. If you miss the prompt,
+   enable IRSVerb under **System Settings › Privacy & Security › Screen & System
+   Audio Recording**, then click **Start** in IRSVerb.
+6. Play something and pick **Large Hall** to hear the effect immediately.
 
 > **Why the warning?** Apple notarization requires a paid Developer ID
 > certificate. This build is signed ad-hoc so it can run, but Gatekeeper cannot
@@ -75,9 +79,22 @@ and fills it with 15 generated responses. Nothing is downloaded. The first
 selection is **Large Hall**; try **Small Room** at 30% for something subtle, or
 **Telephone** at 100% for the obvious effect.
 
+A welcome window explains the menu bar icon and the permission the first time.
+If you close it, it appears again on the next launch. You can also reopen it from
+**Settings… → Setup → Show the welcome screen again**.
+
 ## Using IRSVerb
 
-Click the waveform icon in the menu bar to open the panel.
+There are two surfaces, both optional:
+
+- **Menu bar panel.** Click the waveform icon for quick access to the response
+  picker, mix, gain, bypass, normalization, and meters.
+- **Main window.** Choose **Open IRSVerb…** in the panel, or enable **Show IRSVerb
+  in the Dock** in Settings and open it from the Dock or Spotlight. The window has
+  four tabs: Control, Library, Diagnostics, and About.
+
+The menu bar panel and the main window share the same controls, so a change in one
+is reflected in the other.
 
 | Control | What it does |
 | --- | --- |
@@ -91,10 +108,29 @@ Click the waveform icon in the menu bar to open the panel.
 | **Normalize impulse response** | Match perceived level between responses so switching does not jump in loudness |
 | **In / Out meters** | Confirm that audio is being captured and played back |
 | **Start / Stop** | Enable or disable processing without quitting |
+| **Open IRSVerb…** | Open the main window |
+| **Settings…** | Open Settings: Dock visibility, permission shortcut, welcome screen, version |
 | **Quit IRSVerb** | Stop processing and restore normal audio immediately |
 
 The footer shows the sample rate, output device, loaded response, added latency,
 and buffer diagnostics. Dropouts and drift trims should stay at zero.
+
+The **Library** tab lists every supported response in the current folder, with
+buttons to add a file, change the folder, reveal it in Finder, normalize, and
+refresh. The **Diagnostics** tab shows the same status as the footer, with buttons
+to open the privacy pane, open or reveal the log, and copy a support report. The
+**About** tab has the version and licence links.
+
+### Keyboard and VoiceOver
+
+- Every window control is reachable with **Full Keyboard Access** (Control-F7 to
+  enable it in some macOS versions) and has a VoiceOver label; sliders announce
+  their current values and the meters announce decibel levels.
+- The menu bar icon announces “IRSVerb, Running” or “IRSVerb, Stopped”.
+- The main window uses standard tabs, buttons, lists, and text fields, so the
+  usual VoiceOver navigation works.
+- The welcome window and main window are separate from the menu bar panel; closing
+  the window does not quit the app or stop audio processing.
 
 ### Mixing tips
 
@@ -149,9 +185,10 @@ Supported formats are `.irs`, `.wav`, `.wave`, `.aif`, `.aiff`, `.caf`, `.flac`,
 and `.m4a`. Mono and stereo are both fine, any sample rate is resampled on load,
 and responses longer than 10 seconds are rejected.
 
-Only use impulse responses you have the right to use. The repository ships only
+Only use impulse responses you have the right to use. **A file being free to
+download does not mean it is free to redistribute.** The repository ships only
 responses generated by IRSVerb itself; third-party packs are not included because
-their licences are often unclear. See
+their licences are often unclear or absent. See
 [docs/impulse-responses.md](docs/impulse-responses.md#licensing-and-provenance).
 
 ## Troubleshooting
@@ -167,10 +204,20 @@ xattr -dr com.apple.quarantine /Applications/IRSVerb.app
 
 ### There is no menu bar icon
 
-IRSVerb is a menu bar app with no Dock icon. Look for the waveform icon in the
-menu bar; on a Mac with a notch it may be hidden behind other items. You can also
-open the app again — macOS brings the existing process forward instead of
-starting a second one.
+IRSVerb is a menu bar app and does not show a Dock icon by default. Look for the
+waveform icon in the menu bar; on a Mac with a notch it may be hidden behind other
+items.
+
+If you cannot find it at all, open the main window directly:
+
+```sh
+open -a IRSVerb --args --show-main
+```
+
+If IRSVerb is already running, quit it first (the panel's **Quit IRSVerb**, or
+Activity Monitor) so the launch option is applied. Then go to **Settings… →
+General → Show IRSVerb in the Dock** so the app is also reachable from the Dock
+and Spotlight next time.
 
 ### No audio is processed
 

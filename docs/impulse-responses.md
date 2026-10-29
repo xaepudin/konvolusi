@@ -100,6 +100,19 @@ The rule for contributions is therefore:
 > permission that allows redistribution, and record the source and licence next to
 > the file. If you cannot, keep it out of the repository.
 
+**“Free to download” is not a redistribution licence.** If you received a pack
+from a forum, a mirror, or another repository and it has no `LICENSE`/`README`
+granting redistribution, assume you may use it locally but may not publish it. A
+file named after a commercial amplifier, compressor, or tape machine is also a
+signal to check provenance rather than a sign that it is safe to ship.
+
+The workspace that produced this release contained a 91-file Viper4Android pack
+downloaded from the internet. It had no licence or attribution file, many names
+referred to commercial hardware, and the popular collections that host similar
+files often say the compiler does not own them. Those files are therefore **not**
+tracked by git and are not part of any release. Only the 15 generated responses
+are committed.
+
 The generated library is the safe default. Users can still load any `.irs` file
 locally; IRSVerb does not need the file to be in the repository.
 

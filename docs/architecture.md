@@ -31,10 +31,45 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 | `PartitionedConvolver` | `Sources/IRSKit/PartitionedConvolver.swift` | The real-time FFT convolver; see [dsp.md](dsp.md) |
 | `IRFile` | `Sources/IRSKit/IRFile.swift` | Decodes `.irs`/WAV/AIFF/CAF/FLAC/M4A via AVFoundation, resamples with `AVAudioConverter`, writes 16/24/32-bit WAV |
 | `IRSynthesis` | `Sources/IRSKit/IRSynthesis.swift` | Deterministic generators for the 15 built-in responses |
-| `AppModel` | `Sources/IRSVerb/AppModel.swift` | UI state, library folder, selection, timers, watchdog policy |
-| `PanelView` | `Sources/IRSVerb/PanelView.swift` | SwiftUI panel shown by the `MenuBarExtra` scene |
+| `AppModel` | `Sources/IRSVerb/AppModel.swift` | UI state, library folder, selection, timers, watchdog policy, copied diagnostic report |
+| `PanelView` | `Sources/IRSVerb/PanelView.swift` | Compact `MenuBarExtra` panel plus entry points to the main window and Settings |
+| `ControlViews` | `Sources/IRSVerb/ControlViews.swift` | Shared controls, status header, sliders, and accessible level meters used by both surfaces |
+| `MainWindowView` | `Sources/IRSVerb/MainWindowView.swift` | Conventional window with Control, Library, Diagnostics, and About tabs |
+| `OnboardingView` | `Sources/IRSVerb/OnboardingView.swift` | First-run explanation of the menu bar icon and audio permission |
+| `SettingsView` | `Sources/IRSVerb/SettingsView.swift` | Dock visibility, permission shortcut, welcome-screen reset, version |
+| `DockVisibility` | `Sources/IRSVerb/SettingsView.swift` | Applies the optional `.regular` activation policy; default is `.accessory` |
 | `MeterStore` / `StatusStore` | `Sources/IRSVerb/Stores.swift` | High-rate meter values and rare status changes, kept out of `AppModel` so they do not invalidate the menu bar scene |
 | `Diagnostics` | `Sources/IRSVerb/Diagnostics.swift` | `--diagnose` end-to-end check |
+
+## UI surfaces
+
+| Surface | Scene | Entry point |
+| --- | --- | --- |
+| Menu bar panel | `MenuBarExtra` (`.window` style) | Waveform icon |
+| Main window | `Window("IRSVerb", id: "main")` | **Open IRSVerb…** in the panel, or `--show-main` at launch |
+| Welcome window | `Window(..., id: "onboarding")` | Presented on first launch; reopen from Settings |
+| Settings | `Settings` scene | **Settings…** in the panel or the standard app menu when the Dock icon is enabled |
+
+The main window and Settings scene use `.defaultLaunchBehavior(.suppressed)` so
+starting the app stays a menu bar-only affair. The welcome window uses
+`.defaultLaunchBehavior(hasCompletedOnboarding ? .suppressed : .presented)`.
+
+The app remains an agent (`LSUIElement` in `Info.plist`) unless the user turns on
+**Show IRSVerb in the Dock**. `DockVisibility` switches
+`NSApp.setActivationPolicy` between `.accessory` and `.regular` at launch and when
+the preference changes. Enabling the Dock icon also gives the app a standard app
+menu with Settings and About.
+
+On a first launch the engine is **not** started automatically: doing so would put
+the System Audio Recording dialog on top of the welcome explanation before it can
+be read. `AppModel.startIfReady` starts audio only after
+`HasCompletedOnboarding` is true. The welcome window's **Open IRSVerb** button
+sets that flag and calls `startIfNeeded`; the menu bar **Start** button and the
+**Choose/Folder** actions remain explicit user starts at any time.
+
+`--show-main` opens the main window at launch. It is a recovery path for a hidden
+menu bar icon and a way to drive the UI in development; it suppresses the welcome
+window so the requested window is not buried.
 
 ## Threads
 
@@ -124,6 +159,8 @@ the panel.
 | --- | --- |
 | Built-in responses and default library | `~/Library/Application Support/IRSVerb/Impulse Responses/` |
 | Selected folder, selected response, mix, gain, bypass, normalize | `UserDefaults` (`IRSFolder`, `SelectedIR`, `Wet`, `GainDB`, `Bypassed`, `Normalize`, `SeededDemoLibrary`) |
+| Dock visibility | `UserDefaults` (`ShowInDock`) |
+| Welcome screen completed | `UserDefaults` (`HasCompletedOnboarding`) |
 | App log | `~/Library/Logs/IRSVerb/app.log` |
 | Last diagnostic run | `~/Library/Logs/IRSVerb/diagnostic.log` |
 

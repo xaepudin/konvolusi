@@ -7,7 +7,7 @@ panel and logs rather than guessing.
 ## First checks
 
 1. **Is the engine running?** The menu bar icon gains a filled waveform and the
-   panel's header dot is green when `.running`.
+   panel header says **Running** when `.running`.
 2. **Is the permission granted?** The panel says **Waiting for System Audio
    Recording permission** if setup failed. Enable IRSVerb under **System Settings
    › Privacy & Security › Screen & System Audio Recording**, then click **Start**.
@@ -15,6 +15,11 @@ panel and logs rather than guessing.
    Quit the other copy (Activity Monitor → IRSVerb → Quit).
 4. **Is anything playing?** Core Audio may not deliver tap buffers until audio
    starts. A silent Mac legitimately produces no callbacks.
+
+The main window's **Diagnostics** tab shows the same status lines as the panel
+footer and adds buttons to open the privacy pane, open or reveal the log, and copy
+a support report. The report contains version, device, sample rate, latency, and
+error text — never audio.
 
 ## Logs
 

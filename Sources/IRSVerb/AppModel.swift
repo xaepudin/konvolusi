@@ -47,11 +47,13 @@ final class AppModel: ObservableObject {
     var isRunning: Bool { status.isRunning }
 
     let engine = AudioEngine()
-    private(set) var folderURL: URL
+    @Published private(set) var folderURL: URL
 
     private var healthTimer: Timer?
     private var meterTimer: Timer?
-    private var panelVisible = false
+    /// Number of surfaces (menu bar panel, main window) currently on screen.
+    /// Meter updates only run while at least one of them is visible.
+    private var visibleSurfaces = 0
     private var silenceHintActive = false
     private var silentCallbacks = 0
     private var stalledTicks = 0
@@ -123,7 +125,7 @@ final class AppModel: ObservableObject {
         refreshList()
         if !items.isEmpty {
             selectFallbackIfNeeded()
-            startIfNeeded()
+            startIfReady()
             return
         }
         guard !manager.fileExists(atPath: folderURL.path) || items.isEmpty else { return }
@@ -139,7 +141,7 @@ final class AppModel: ObservableObject {
                     self.isPreparingLibrary = false
                     self.refreshList()
                     self.selectFallbackIfNeeded()
-                    self.startIfNeeded()
+                    self.startIfReady()
                 }
             } catch {
                 DispatchQueue.main.async {
@@ -149,6 +151,14 @@ final class AppModel: ObservableObject {
                 }
             }
         }
+    }
+
+    /// Start automatically only after the user has seen the welcome screen. On a
+    /// first launch, starting the engine here would throw the system-audio
+    /// permission dialog on top of the explanation before it can be read.
+    private func startIfReady() {
+        guard UserDefaults.standard.bool(forKey: PreferenceKey.hasCompletedOnboarding) else { return }
+        startIfNeeded()
     }
 
     func refreshList() {
@@ -161,6 +171,13 @@ final class AppModel: ObservableObject {
             .sorted { $0.lastPathComponent.localizedStandardCompare($1.lastPathComponent) == .orderedAscending }
             .map { ImpulseResponseItem(url: $0) }
         refreshInfo()
+    }
+
+    /// Re-reads the folder and keeps a sensible selection. Used by the library
+    /// window and its Refresh button.
+    func refreshLibrary() {
+        refreshList()
+        selectFallbackIfNeeded()
     }
 
     private func selectFallbackIfNeeded() {
@@ -222,6 +239,54 @@ final class AppModel: ObservableObject {
         NSWorkspace.shared.open(url)
     }
 
+    func revealLogs() {
+        let directory = AppLog.url.deletingLastPathComponent()
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        NSWorkspace.shared.activateFileViewerSelecting([AppLog.url])
+    }
+
+    func openLog() {
+        try? FileManager.default.createDirectory(at: AppLog.url.deletingLastPathComponent(),
+                                                 withIntermediateDirectories: true)
+        NSWorkspace.shared.open(AppLog.url)
+    }
+
+    var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    }
+
+    var appBuild: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
+
+    /// Copies a support-friendly report to the pasteboard. Audio is never
+    /// included; this is lifecycle and device information only.
+    func copyDiagnosticReport() {
+        var lines = [
+            "IRSVerb \(appVersion) (\(appBuild))",
+            "macOS \(ProcessInfo.processInfo.operatingSystemVersionString)",
+            "Engine running: \(isRunning ? "yes" : "no")",
+            "Folder: \(folderURL.path)",
+        ]
+        if let selectedURL {
+            lines.append("Selected impulse response: \(selectedURL.lastPathComponent)")
+        }
+        if !infoLines.isEmpty {
+            lines.append("")
+            lines.append(contentsOf: infoLines)
+        }
+        if let errorMessage {
+            lines.append("")
+            lines.append("Error: \(errorMessage)")
+        }
+        if let hintMessage {
+            lines.append("Hint: \(hintMessage)")
+        }
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(lines.joined(separator: "\n"), forType: .string)
+    }
+
     // MARK: - Engine
 
     func startIfNeeded() {
@@ -260,11 +325,11 @@ final class AppModel: ObservableObject {
 
     // MARK: - Meters and status
 
-    /// The panel tells us when it is on screen so the 20 Hz meter timer only runs
-    /// while someone can actually see the meters.
-    func panelAppeared() {
-        guard !panelVisible else { return }
-        panelVisible = true
+    /// Called by the menu bar panel and the main window. Meter updates run only
+    /// while at least one surface is visible.
+    func uiAppeared() {
+        visibleSurfaces += 1
+        guard visibleSurfaces == 1 else { return }
         // Pick up impulse responses dropped into the folder since launch.
         refreshList()
         selectFallbackIfNeeded()
@@ -278,11 +343,16 @@ final class AppModel: ObservableObject {
         healthTick()
     }
 
-    func panelDisappeared() {
-        panelVisible = false
+    func uiDisappeared() {
+        visibleSurfaces = max(0, visibleSurfaces - 1)
+        guard visibleSurfaces == 0 else { return }
         meterTimer?.invalidate()
         meterTimer = nil
     }
+
+    /// Backwards-compatible names used by the menu bar panel.
+    func panelAppeared() { uiAppeared() }
+    func panelDisappeared() { uiDisappeared() }
 
     /// 1 Hz, always: the safety watchdog has to keep running even with the panel
     /// closed, because a stalled output would leave system audio muted.
@@ -304,10 +374,14 @@ final class AppModel: ObservableObject {
 
     private func healthTick() {
         checkOutputWatchdog()
-        guard panelVisible else { return }
+        guard visibleSurfaces > 0 else { return }
 
         let input = engine.inputLevel.load()
-        if isRunning && input < 1e-7 {
+        // A silent Mac with no audio playing is normal: Core Audio may not
+        // deliver tap buffers at all, and the output unit has not started. Only
+        // warn once output is flowing but the tap still carries silence, which
+        // is the case that usually means a permission or routing problem.
+        if isRunning && engine.outputStarted && input < 1e-7 {
             silentCallbacks += 1
             if silentCallbacks > 5 {
                 silenceHintActive = true
@@ -318,7 +392,7 @@ final class AppModel: ObservableObject {
             }
         } else {
             silentCallbacks = 0
-            if input > 1e-7, silenceHintActive {
+            if silenceHintActive {
                 silenceHintActive = false
                 hintMessage = nil
             }

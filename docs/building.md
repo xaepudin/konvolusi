@@ -234,6 +234,32 @@ own; the bundle is the authority.
 | `codesign` fails with “resource fork, Finder information, or similar detritus” | Remove extended attributes: `xattr -cr dist/IRSVerb.app`, then re-sign |
 | Tests pass but the app cannot capture audio | Permissions are per-bundle; use the app bundle, not the raw executable, and check System Settings |
 
+## UI development
+
+The app has three UI surfaces: the menu bar panel, the main window, and Settings.
+The main window is suppressed at launch so the app remains a menu bar utility.
+Open it directly while developing:
+
+```sh
+open dist/IRSVerb.app --args --show-main
+```
+
+`--show-main` also suppresses the welcome window, which makes it useful for
+screenshotting the Control, Library, Diagnostics, and About tabs without resetting
+preferences. Quit any running instance first; `open --args` does not re-apply the
+option to an existing process. To see the welcome flow again:
+
+```sh
+defaults delete io.github.xaepudin.IRSVerb HasCompletedOnboarding
+open dist/IRSVerb.app
+```
+
+The welcome screen intentionally does not start the audio engine; it starts when
+the user chooses **Open IRSVerb** or presses **Start**. This keeps the System Audio
+Recording dialog from covering the explanation. Test VoiceOver and Full Keyboard
+Access on both the panel and the main window; the shared `ControlViews` carry the
+slider, meter, and picker labels, so a change there affects both surfaces.
+
 ## Project layout
 
 ```
@@ -243,7 +269,7 @@ scripts/package-release.sh zip, DMG and checksums
 scripts/make-icon.swift    regenerates Resources/AppIcon.icns
 Sources/IRSKit/            DSP and file I/O
 Sources/irsconv/           CLI
-Sources/IRSVerb/           menu bar app
+Sources/IRSVerb/           menu bar app, main window, onboarding, settings
 Tests/IRSKitTests/         33 tests
 Resources/Info.plist       bundle metadata
 docs/                      technical documentation
