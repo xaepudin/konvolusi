@@ -102,16 +102,26 @@ the artifacts and verify with `spctl` and `codesign`.
 
 ## Publish on GitHub
 
-Create the repository once, then push `main` and the annotated, signed tag:
+Create the empty repository once, point `origin` at the `xaepudin` identity, then
+push `main` and the annotated, signed tag:
 
 ```sh
 gh repo create xaepudin/IRSVerb --public \
-  --description "System-wide impulse response convolver for macOS" \
-  --source . --remote origin --push
+  --description "System-wide impulse response convolver for macOS"
 
-git tag -s v1.0.0 -m "IRSVerb 1.0.0"
-git push origin main
+# On this machine the default git@github.com key authenticates as another
+# account, so the remote uses the github-xaepudin SSH alias. Elsewhere, use an
+# HTTPS remote with credentials for xaepudin, or add the same alias.
+git remote add origin git@github-xaepudin:xaepudin/IRSVerb.git
+
+git push -u origin main
 git push origin v1.0.0
+```
+
+The tag already exists and is signed. If it needs to be recreated:
+
+```sh
+git tag -f -s v1.0.0 -m "IRSVerb 1.0.0"
 ```
 
 Create the release with the artifacts and generated notes:
