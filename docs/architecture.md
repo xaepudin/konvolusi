@@ -35,9 +35,10 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 | `PanelView` | `Sources/IRSVerb/PanelView.swift` | Compact `MenuBarExtra` panel plus entry points to the main window and Settings |
 | `ControlViews` | `Sources/IRSVerb/ControlViews.swift` | Shared controls, status header, sliders, and accessible level meters used by both surfaces |
 | `MainWindowView` | `Sources/IRSVerb/MainWindowView.swift` | Conventional window with Control, Library, Diagnostics, and About tabs |
-| `OnboardingView` | `Sources/IRSVerb/OnboardingView.swift` | First-run explanation of the menu bar icon and audio permission |
+| `OnboardingView` | `Sources/IRSVerb/OnboardingView.swift` | First-run welcome sheet over the main window |
 | `SettingsView` | `Sources/IRSVerb/SettingsView.swift` | Dock visibility, permission shortcut, welcome-screen reset, version |
-| `DockVisibility` | `Sources/IRSVerb/SettingsView.swift` | Applies the optional `.regular` activation policy; default is `.accessory` |
+| `DockVisibility` | `Sources/IRSVerb/SettingsView.swift` | Applies `.regular` by default or `.accessory` when the Dock icon is disabled |
+| `AppDelegate` | `Sources/IRSVerb/IRSVerbApp.swift` | Refuses last-window termination and reopens the main window on reopen |
 | `MeterStore` / `StatusStore` | `Sources/IRSVerb/Stores.swift` | High-rate meter values and rare status changes, kept out of `AppModel` so they do not invalidate the menu bar scene |
 | `Diagnostics` | `Sources/IRSVerb/Diagnostics.swift` | `--diagnose` end-to-end check |
 
@@ -167,7 +168,7 @@ the panel.
 | --- | --- |
 | Built-in responses and default library | `~/Library/Application Support/IRSVerb/Impulse Responses/` |
 | Selected folder, selected response, mix, gain, bypass, normalize | `UserDefaults` (`IRSFolder`, `SelectedIR`, `Wet`, `GainDB`, `Bypassed`, `Normalize`, `SeededDemoLibrary`) |
-| Dock visibility | `UserDefaults` (`ShowInDock`) |
+| Dock visibility | `UserDefaults` (`ShowInDock`, default on) |
 | Welcome screen completed | `UserDefaults` (`HasCompletedOnboarding`) |
 | App log | `~/Library/Logs/IRSVerb/app.log` |
 | Last diagnostic run | `~/Library/Logs/IRSVerb/diagnostic.log` |

@@ -1,8 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// First-run explanation. The app has no Dock icon by default, so without this
-/// window a new user can launch it and see nothing at all.
+/// First-run explanation, shown as a sheet over the main window. The app is a
+/// menu bar utility, but the main window keeps the welcome content visible while
+/// the user reads it and after it is dismissed.
 struct OnboardingView: View {
     @ObservedObject var model: AppModel
 

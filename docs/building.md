@@ -74,8 +74,9 @@ Tests do not require audio hardware, permissions, or a GUI.
 open dist/IRSVerb.app
 ```
 
-The app has no Dock icon (`LSUIElement` is true); it lives in the menu bar. To see
-its log while developing:
+The app is a menu bar agent (`LSUIElement` is true) but switches to `.regular` at
+launch so it is in the Dock by default; turn off **Show IRSVerb in the Dock** to
+test the menu-bar-only configuration. To see its log while developing:
 
 ```sh
 tail -f ~/Library/Logs/IRSVerb/app.log
