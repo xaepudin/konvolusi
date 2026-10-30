@@ -49,13 +49,14 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 | Menu bar panel | `MenuBarExtra` (`.window` style) | Waveform icon |
 | Main window | `Window("IRSVerb", id: "main")` | First launch, **Open IRSVerb…** in the panel, Dock/Spotlight reopen, or `--show-main` |
 | Welcome sheet | `.sheet` on `MainWindowView` | First launch, or **Show the welcome screen again** in Settings |
-| Settings | `Settings` scene | **Settings…** in the panel, the gear at the bottom of the main sidebar, or the standard app menu |
+| Settings | Sidebar section in `MainWindowView` | The **Settings** row, **Settings…** in the menu bar panel, or the app menu |
 
 The main window is `.defaultLaunchBehavior(opensMainAtLaunch || !hasCompletedOnboarding ? .presented : .suppressed)`:
 first launch opens a real window, while later launches stay menu-bar-only. The
-Settings scene is suppressed at launch. The welcome flow is a sheet over the main
-window rather than a separate window, so dismissing it cannot leave the app with
-no window or trigger AppKit's last-window termination.
+sidebar is a fixed 190-point column rather than a `NavigationSplitView`, so it has
+no collapse control and cannot restore a bad split frame. The welcome flow is a
+sheet over the main window rather than a separate window, so dismissing it cannot
+leave the app with no window or trigger AppKit's last-window termination.
 
 `AppDelegate.applicationShouldTerminateAfterLastWindowClosed` returns `false`. This
 is essential for a menu bar agent: without it, closing the welcome sheet could

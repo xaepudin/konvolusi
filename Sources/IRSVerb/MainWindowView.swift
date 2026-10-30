@@ -12,11 +12,21 @@ struct MainWindowView: View {
     var status: StatusStore
     var suppressWelcome = false
 
-    @Environment(\.openSettings) private var openSettings
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
-    @State private var tab: MainTab = .control
+    @AppStorage("MainTab") private var tabRaw = MainTab.control.rawValue
     @State private var showWelcome = false
     @State private var isSurfaceVisible = false
+
+    private var selectedTab: MainTab {
+        MainTab(rawValue: tabRaw) ?? .control
+    }
+
+    private var tabSelection: Binding<MainTab> {
+        Binding(
+            get: { selectedTab },
+            set: { tabRaw = $0.rawValue }
+        )
+    }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -67,37 +77,21 @@ struct MainWindowView: View {
     }
 
     private var sidebar: some View {
-        VStack(spacing: 0) {
-            List(selection: $tab) {
-                Section("IRSVerb") {
-                    Label("Control", systemImage: "slider.horizontal.3")
-                        .tag(MainTab.control)
-                    Label("Library", systemImage: "waveform")
-                        .tag(MainTab.library)
-                    Label("Diagnostics", systemImage: "stethoscope")
-                        .tag(MainTab.diagnostics)
-                    Label("About", systemImage: "info.circle")
-                        .tag(MainTab.about)
-                }
+        List(selection: tabSelection) {
+            Section("IRSVerb") {
+                Label("Control", systemImage: "slider.horizontal.3")
+                    .tag(MainTab.control)
+                Label("Library", systemImage: "waveform")
+                    .tag(MainTab.library)
+                Label("Diagnostics", systemImage: "stethoscope")
+                    .tag(MainTab.diagnostics)
+                Label("Settings", systemImage: "gearshape")
+                    .tag(MainTab.settings)
+                Label("About", systemImage: "info.circle")
+                    .tag(MainTab.about)
             }
-            .listStyle(.sidebar)
-            .frame(maxHeight: .infinity)
-
-            Divider()
-
-            Button {
-                openSettings()
-                NSApp.activate(ignoringOtherApps: true)
-            } label: {
-                Label("Settings…", systemImage: "gearshape")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())
-            .accessibilityHint("Open IRSVerb settings")
         }
+        .listStyle(.sidebar)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
@@ -109,7 +103,7 @@ struct MainWindowView: View {
     }
 
     @ViewBuilder private var detail: some View {
-        switch tab {
+        switch selectedTab {
         case .control:
             ScrollView {
                 ConvolverControls(model: model, meters: meters, status: status, compact: false)
@@ -121,6 +115,11 @@ struct MainWindowView: View {
             LibraryView(model: model)
         case .diagnostics:
             DiagnosticsView(model: model)
+        case .settings:
+            SettingsView(model: model)
+                .frame(maxWidth: 720, maxHeight: .infinity)
+                .padding(24)
+                .frame(maxWidth: .infinity)
         case .about:
             AboutView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -128,10 +127,11 @@ struct MainWindowView: View {
     }
 }
 
-private enum MainTab: Hashable {
+enum MainTab: String, CaseIterable, Hashable {
     case control
     case library
     case diagnostics
+    case settings
     case about
 }
 

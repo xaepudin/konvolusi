@@ -9,7 +9,6 @@ struct PanelView: View {
     var status: StatusStore
 
     @Environment(\.openWindow) private var openWindow
-    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -26,7 +25,8 @@ struct PanelView: View {
                 .accessibilityHint("Opens the full IRSVerb window")
 
                 Button("Settings…") {
-                    openSettings()
+                    UserDefaults.standard.set(MainTab.settings.rawValue, forKey: "MainTab")
+                    openWindow(id: "main")
                     NSApp.activate(ignoringOtherApps: true)
                 }
                 .help("Open IRSVerb settings.")

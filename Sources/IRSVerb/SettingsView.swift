@@ -41,8 +41,9 @@ struct SettingsView: View {
                     }
                     .help("Show IRSVerb in the Dock and ⌘-Tab. Turn off for a menu-bar-only utility.")
                 Text("When on, IRSVerb is in the Dock and in ⌘-Tab, which makes it easy to find "
-                    + "even when the menu bar is crowded or the icon is hidden. Turn it off for a "
-                    + "menu-bar-only utility.")
+                    + "even when the menu bar is crowded or the icon is hidden. Closing the main "
+                    + "window does not quit IRSVerb: audio keeps running and the menu bar icon "
+                    + "stays. Turn this off for a strict menu-bar-only background app.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -69,14 +70,12 @@ struct SettingsView: View {
             Section("About") {
                 LabeledContent("Version", value: "\(model.appVersion) (\(model.appBuild))")
                 Text("Source code is MIT licensed. The generated impulse responses are dedicated "
-                    + "to CC0. See the About tab for links.")
+                    + "to CC0. See the About section for links.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .formStyle(.grouped)
-        .frame(width: 520, height: 400)
-        .onAppear { NSApp.activate(ignoringOtherApps: true) }
     }
 }

@@ -32,7 +32,7 @@ All notable user-visible changes are recorded here. The format follows
   never the only way to reach the UI.
 - The Library page uses a fixed sidebar and detail layout. A restored
   `NavigationSplitView` frame could clip the list and hide the sidebar rows.
-- Settings is reachable from a gear button at the bottom of the main sidebar.
+- Settings is a normal sidebar section, opened by the menu bar panel or the app menu, instead of a separate Settings window. The main sidebar is fixed and cannot collapse.
 - The main window regains focus after the welcome sheet closes instead of leaving
   the previous app in front.
 - The output unit starts after about two seconds even when nothing is playing yet,

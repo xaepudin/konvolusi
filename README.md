@@ -91,13 +91,20 @@ welcome sheet return on the next launch. You can also reopen it from
 There are two surfaces:
 
 - **Main window.** Opened on first launch, or from **Open IRSVerb…** in the menu
-  bar panel. It has four sections in a sidebar: Control, Library, Diagnostics, and About.
+  bar panel. It has five sections in a fixed sidebar: Control, Library, Diagnostics,
+  Settings, and About. The sidebar cannot collapse.
 - **Menu bar panel.** Click the waveform icon for quick access to the response
   picker, mix, gain, bypass, normalization, and meters.
 
 IRSVerb is in the Dock by default, so you can reopen the main window by clicking
 its Dock icon (or by launching it again from Spotlight/Finder). If you prefer a
 menu-bar-only app, turn off **Show IRSVerb in the Dock** in Settings.
+
+Closing the main window is not quitting. Audio processing keeps running, the menu
+bar icon stays, and the live meters stop so the app drops back to its menu-bar CPU
+profile. If **Show IRSVerb in the Dock** is on, the app also stays in the Dock and
+in ⌘-Tab; turn it off if you want it to disappear from the app switcher when the
+window is closed. **Quit IRSVerb** from the menu bar panel stops audio and exits.
 
 The menu bar panel and the main window share the same controls, so a change in one
 is reflected in the other.
@@ -130,8 +137,9 @@ The **Library** section lists the built-in responses plus the IRs you added, wit
 buttons to add, remove, normalize, and refresh. The **Diagnostics** section shows
 the same status as the footer, with buttons to open the privacy pane, open the log,
 show the logs in Finder, and copy a support report. The **About** section has the
-version and licence links. **Settings…** is also available from the gear at the
-bottom of the sidebar, so you do not need the menu bar panel to reach it.
+version and licence links. **Settings** is a normal sidebar section, so it uses the
+same main window as the rest of the app; the menu bar panel's **Settings…** button
+opens that section directly.
 
 ### Keyboard and VoiceOver
 

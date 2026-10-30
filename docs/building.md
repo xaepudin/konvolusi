@@ -237,8 +237,8 @@ own; the bundle is the authority.
 
 ## UI development
 
-The app has four UI surfaces: the menu bar panel, the main window, the welcome
-sheet, and Settings. The main window opens on first launch and is suppressed on
+The app has three UI surfaces: the menu bar panel, the main window (which includes
+the Settings section), and the welcome sheet. The main window opens on first launch and is suppressed on
 later launches so the app stays a menu bar utility. Open it directly while
 developing:
 

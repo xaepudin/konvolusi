@@ -72,11 +72,15 @@ struct IRSVerbApp: App {
         .defaultSize(width: 1120, height: 720)
         .windowResizability(.contentMinSize)
         .defaultLaunchBehavior(opensMainAtLaunch || !hasCompletedOnboarding ? .presented : .suppressed)
-
-        Settings {
-            SettingsView(model: model)
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") {
+                    UserDefaults.standard.set(MainTab.settings.rawValue, forKey: "MainTab")
+                    NotificationCenter.default.post(name: .irsVerbOpenMainWindow, object: nil)
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
         }
-        .defaultLaunchBehavior(.suppressed)
     }
 }
 
