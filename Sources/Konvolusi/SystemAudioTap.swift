@@ -13,7 +13,7 @@ enum AudioTapError: LocalizedError {
         case .processObjectUnavailable:
             return "Could not find this application's audio process object."
         case .tapCreation(let status):
-            return "Could not tap system audio (OSStatus \(status)). IRSVerb needs permission in "
+            return "Could not tap system audio (OSStatus \(status)). Konvolusi needs permission in "
                 + "System Settings › Privacy & Security › Screen & System Audio Recording."
         case .missingTapUID:
             return "The system audio tap did not report a UID."
@@ -31,7 +31,7 @@ enum AudioTapError: LocalizedError {
 /// This is the macOS 14.2+ kext-free way to capture every *other* process'
 /// audio, and with
 /// `muteBehavior = .mutedWhenTapped` it is muted at the hardware for exactly as
-/// long as this process is reading the tap. IRSVerb then plays the convolved
+/// long as this process is reading the tap. Konvolusi then plays the convolved
 /// result back out, so the system hears only the processed signal.
 final class SystemAudioTap {
     private(set) var tapID: AudioObjectID = kAudioObjectUnknown
@@ -44,7 +44,7 @@ final class SystemAudioTap {
     var sampleRate: Double { streamFormat.mSampleRate }
     var channelCount: Int { Int(streamFormat.mChannelsPerFrame) }
 
-    init(displayName: String = "IRSVerb") throws {
+    init(displayName: String = "Konvolusi") throws {
         self.displayName = displayName
 
         let processObject = try Self.currentProcessObject()
@@ -68,7 +68,7 @@ final class SystemAudioTap {
         tapUID = uid
 
         let dictionary: [String: Any] = [
-            kAudioAggregateDeviceUIDKey: "io.github.xaepudin.IRSVerb.capture.\(UUID().uuidString)",
+            kAudioAggregateDeviceUIDKey: "com.xaepudin.konvolusi.capture.\(UUID().uuidString)",
             kAudioAggregateDeviceNameKey: "\(displayName) Capture",
             kAudioAggregateDeviceIsPrivateKey: true,
             kAudioAggregateDeviceIsStackedKey: false,
@@ -101,7 +101,7 @@ final class SystemAudioTap {
         streamFormat = format
     }
 
-    /// The AudioObjectID representing this process, needed so that IRSVerb's own
+    /// The AudioObjectID representing this process, needed so that Konvolusi's own
     /// output is not captured (which would feed the effect back into itself).
     private static func currentProcessObject() throws -> AudioObjectID {
         var pid = getpid()

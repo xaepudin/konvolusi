@@ -17,26 +17,26 @@ struct PanelView: View {
             Divider()
 
             HStack(spacing: 6) {
-                Button("Open IRSVerb…") {
+                Button("Open Konvolusi…") {
                     openWindow(id: "main")
                     NSApp.activate(ignoringOtherApps: true)
                 }
-                .help("Open the full IRSVerb window.")
-                .accessibilityHint("Opens the full IRSVerb window")
+                .help("Open the full Konvolusi window.")
+                .accessibilityHint("Opens the full Konvolusi window")
 
                 Button("Settings…") {
                     UserDefaults.standard.set(MainTab.settings.rawValue, forKey: "MainTab")
                     openWindow(id: "main")
                     NSApp.activate(ignoringOtherApps: true)
                 }
-                .help("Open IRSVerb settings.")
-                .accessibilityHint("Opens IRSVerb settings")
+                .help("Open Konvolusi settings.")
+                .accessibilityHint("Opens Konvolusi settings")
 
                 Spacer()
 
-                Button("Quit IRSVerb") { model.quit() }
-                    .help("Stop processing, restore normal audio, and quit IRSVerb.")
-                    .accessibilityHint("Stops processing, restores normal audio, and quits IRSVerb")
+                Button("Quit Konvolusi") { model.quit() }
+                    .help("Stop processing, restore normal audio, and quit Konvolusi.")
+                    .accessibilityHint("Stops processing, restores normal audio, and quits Konvolusi")
             }
             .controlSize(.small)
         }

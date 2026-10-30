@@ -6,7 +6,7 @@ enum AppLog {
     static let url: URL = {
         let base = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library")
-        let directory = base.appendingPathComponent("Logs/IRSVerb")
+        let directory = base.appendingPathComponent("Logs/Konvolusi")
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         return directory.appendingPathComponent("app.log")
     }()

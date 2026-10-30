@@ -31,9 +31,9 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           gh release create "$GITHUB_REF_NAME" \
-            "dist/IRSVerb-${VERSION}-macos.zip" \
-            "dist/IRSVerb-${VERSION}-macos.zip.sha256" \
-            "dist/IRSVerb-${VERSION}.dmg" \
-            "dist/IRSVerb-${VERSION}.dmg.sha256" \
-            --title "IRSVerb $VERSION" \
+            "dist/Konvolusi-${VERSION}-macos.zip" \
+            "dist/Konvolusi-${VERSION}-macos.zip.sha256" \
+            "dist/Konvolusi-${VERSION}.dmg" \
+            "dist/Konvolusi-${VERSION}.dmg.sha256" \
+            --title "Konvolusi $VERSION" \
             --generate-notes

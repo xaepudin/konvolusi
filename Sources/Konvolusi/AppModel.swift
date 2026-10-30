@@ -82,7 +82,7 @@ final class AppModel: ObservableObject {
         let defaults = UserDefaults.standard
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
-        folderURL = base.appendingPathComponent("IRSVerb/Impulse Responses")
+        folderURL = base.appendingPathComponent("Konvolusi/Impulse Responses")
 
         wet = defaults.object(forKey: Keys.wet) as? Double ?? 1
         gainDB = defaults.object(forKey: Keys.gain) as? Double ?? 0
@@ -210,7 +210,7 @@ final class AppModel: ObservableObject {
         panel.canChooseDirectories = false
         panel.allowsOtherFileTypes = true
         panel.message = "Choose .irs, WAV, AIFF, CAF, FLAC, or M4A files. "
-            + "They will be copied into IRSVerb's library."
+            + "They will be copied into Konvolusi's library."
         guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
 
         do {
@@ -292,7 +292,7 @@ final class AppModel: ObservableObject {
     /// included; this is lifecycle and device information only.
     func copyDiagnosticReport() {
         var lines = [
-            "IRSVerb \(appVersion) (\(appBuild))",
+            "Konvolusi \(appVersion) (\(appBuild))",
             "macOS \(ProcessInfo.processInfo.operatingSystemVersionString)",
             "Engine running: \(isRunning ? "yes" : "no")",
             "Library: \(folderURL.path)",
@@ -345,7 +345,7 @@ final class AppModel: ObservableObject {
             status.isRunning = false
             errorMessage = message
             if engine.isWaitingForPermission {
-                hintMessage = "Approve IRSVerb under System Settings › Privacy & Security › "
+                hintMessage = "Approve Konvolusi under System Settings › Privacy & Security › "
                     + "Screen & System Audio Recording, then press Start."
             }
         }
@@ -416,7 +416,7 @@ final class AppModel: ObservableObject {
                 silenceHintActive = true
                 if hintMessage == nil {
                     hintMessage = "No audio is being captured. Check System Settings › Privacy & Security › "
-                        + "Screen & System Audio Recording, then restart IRSVerb."
+                        + "Screen & System Audio Recording, then restart Konvolusi."
                 }
             }
         } else {

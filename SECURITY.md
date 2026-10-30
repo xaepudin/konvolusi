@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-IRSVerb is a local macOS application. Security fixes are applied to the latest
+Konvolusi is a local macOS application. Security fixes are applied to the latest
 release on `main`; older releases are not maintained.
 
 | Version | Supported |
@@ -27,7 +27,7 @@ You should receive an acknowledgement within a few days. There is no bug bounty.
 
 ## Scope
 
-IRSVerb requests the **System Audio Recording** permission, so the most important
+Konvolusi requests the **System Audio Recording** permission, so the most important
 security property is that captured audio stays on the machine:
 
 - the app contains no network code and makes no outbound connections;

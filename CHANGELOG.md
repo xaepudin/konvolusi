@@ -9,8 +9,8 @@ All notable user-visible changes are recorded here. The format follows
 ### Added
 
 - A conventional main window with a fixed sidebar for **Control**, **Library**,
-  **Diagnostics**, **Settings**, and **About**, opened when IRSVerb launches and
-  also reachable from **Open IRSVerb…** in the menu bar panel.
+  **Diagnostics**, **Settings**, and **About**, opened when Konvolusi launches and
+  also reachable from **Open Konvolusi…** in the menu bar panel.
 - A first-run welcome sheet over the main window explaining the menu bar icon and
   the System Audio Recording permission. The engine is not started until the user
   continues, so the permission dialog no longer covers the explanation.
@@ -38,10 +38,10 @@ All notable user-visible changes are recorded here. The format follows
   cannot collapse.
 - The main window regains focus after the welcome sheet closes instead of leaving
   the previous app in front.
-- Closing the main window removes IRSVerb from the Dock and ⌘-Tab while audio keeps
+- Closing the main window removes Konvolusi from the Dock and ⌘-Tab while audio keeps
   running in the menu bar. Opening the window restores those entries; there is no
   Dock toggle.
-- Launching IRSVerb always opens the main window, and `LSMultipleInstancesProhibited`
+- Launching Konvolusi always opens the main window, and `LSMultipleInstancesProhibited`
   makes a second launch reuse the running process instead of spawning a duplicate.
 - The output unit starts after about two seconds even when nothing is playing yet,
   instead of waiting up to a minute while the tap could mute system audio. Capture
@@ -51,6 +51,11 @@ All notable user-visible changes are recorded here. The format follows
 
 ### Changed
 
+- Rebranded the app from IRSVerb to **Konvolusi**, with the tagline *Rediscover the
+  songs you love.* The app bundle, executable, bundle identifier, support/log
+  folders, documentation, and release artifacts now use the Konvolusi name. The new
+  support folder is `~/Library/Application Support/Konvolusi`; the old IRSVerb folders
+  are left untouched.
 - Meter updates are observed only by the meter views, and the 20 Hz meter timer
   stops when the main window closes. The menu bar-only profile is typically under
   1% CPU idle and 2–4% while playing a long response; leaving the main window open
@@ -63,7 +68,7 @@ All notable user-visible changes are recorded here. The format follows
   Bypass, Normalize, and Levels. The impulse response, status, and diagnostics
   areas intentionally have no extra info buttons.
 - Replaced folder selection with a fixed library: **Add IR…** copies files into
-  IRSVerb's library, and **Remove** deletes added IRs. The built-in responses are
+  Konvolusi's library, and **Remove** deletes added IRs. The built-in responses are
   always available. **Reveal Logs** is now **Show Logs in Finder**.
 - The level meters are blank while there is no signal.
 - Removed third-party branding references. The app is described only as a `.irs`
@@ -77,8 +82,8 @@ First public release.
 
 ### Added
 
-- System-wide impulse response convolution for macOS 15+, using a Core Audio
-  process tap and a private aggregate device.
+- System-wide convolution for macOS 15+, using a Core Audio process tap and a
+  private aggregate device.
 - Universal release bundle for Apple silicon and Intel Macs.
 - Menu bar panel with impulse response picker, folder selection, wet/dry mix,
   output gain, bypass, normalization, and live input/output meters.
@@ -108,4 +113,4 @@ First public release.
 - Third-party impulse response packs are not bundled because their
   redistribution terms are usually unclear.
 
-[1.0.0]: https://github.com/xaepudin/IRSVerb/releases/tag/v1.0.0
+[1.0.0]: https://github.com/xaepudin/Konvolusi/releases/tag/v1.0.0

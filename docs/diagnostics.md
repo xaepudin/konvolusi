@@ -1,6 +1,6 @@
 # Diagnostics
 
-IRSVerb touches a privileged part of macOS: it taps all system audio and mutes
+Konvolusi touches a privileged part of macOS: it taps all system audio and mutes
 the original while it reads it. When something is wrong, start with the app's own
 panel and logs rather than guessing.
 
@@ -9,10 +9,10 @@ panel and logs rather than guessing.
 1. **Is the engine running?** The menu bar icon gains a filled waveform and the
    panel header says **Running** when `.running`.
 2. **Is the permission granted?** The panel says **Waiting for System Audio
-   Recording permission** if setup failed. Enable IRSVerb under **System Settings
+   Recording permission** if setup failed. Enable Konvolusi under **System Settings
    › Privacy & Security › Screen & System Audio Recording**, then click **Start**.
 3. **Is another copy running?** Two instances both tap and mute the same audio.
-   Quit the other copy (Activity Monitor → IRSVerb → Quit).
+   Quit the other copy (Activity Monitor → Konvolusi → Quit).
 4. **Is anything playing?** Core Audio may not deliver tap buffers until audio
    starts. A silent Mac legitimately produces no callbacks.
 
@@ -25,15 +25,15 @@ error text — never audio.
 
 | File | Contents |
 | --- | --- |
-| `~/Library/Logs/IRSVerb/app.log` | Lifecycle, engine state, loaded responses, latency, watchdog restarts |
-| `~/Library/Logs/IRSVerb/diagnostic.log` | The last `--diagnose` run |
+| `~/Library/Logs/Konvolusi/app.log` | Lifecycle, engine state, loaded responses, latency, watchdog restarts |
+| `~/Library/Logs/Konvolusi/diagnostic.log` | The last `--diagnose` run |
 
 Both are plain text and are appended, not rotated. They contain no audio and no
 personal data beyond local file paths and device names. Delete them at any time;
 the app recreates them.
 
 ```sh
-tail -n 50 ~/Library/Logs/IRSVerb/app.log
+tail -n 50 ~/Library/Logs/Konvolusi/app.log
 ```
 
 ## `--diagnose`
@@ -44,10 +44,10 @@ writes a pass/fail report.
 
 ```sh
 # Ask LaunchServices to run the app, so the permission is attributed to the app:
-open dist/IRSVerb.app --args --diagnose 6
+open dist/Konvolusi.app --args --diagnose 6
 
 # Or run the executable directly (permission may be attributed to Terminal):
-dist/IRSVerb.app/Contents/MacOS/IRSVerb --diagnose 6
+dist/Konvolusi.app/Contents/MacOS/Konvolusi --diagnose 6
 ```
 
 The argument is the measurement window in seconds (1–60, default 5). The app
@@ -78,7 +78,7 @@ Exit codes:
 | 5 | Core Audio setup did not finish within 15 seconds |
 
 The command prints to stdout and to `diagnostic.log`. It also warns if another
-IRSVerb instance is running, because the two would compete for the mute.
+Konvolusi instance is running, because the two would compete for the mute.
 
 ## `irsconv` checks
 
@@ -123,7 +123,7 @@ is not delivering.
 ### Permission prompt never appears
 
 The system may have remembered a denial. Open System Settings → Privacy &
-Security → Screen & System Audio Recording, enable IRSVerb (or remove it with the
+Security → Screen & System Audio Recording, enable Konvolusi (or remove it with the
 minus button and relaunch), then click **Start**.
 
 If you rebuilt the app, the ad-hoc signature changed and macOS may treat it as a

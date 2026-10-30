@@ -3,7 +3,7 @@ import CoreAudio
 import Foundation
 import IRSKit
 
-/// Core Audio render callback for IRSVerb's output unit. Kept as a file-scope
+/// Core Audio render callback for Konvolusi's output unit. Kept as a file-scope
 /// constant so it is a plain C function pointer with no captured context.
 private let irsVerbRenderCallback: AURenderCallback = { refCon, _, _, _, frameCount, ioData in
     guard let ioData else { return noErr }

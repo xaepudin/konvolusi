@@ -12,16 +12,16 @@ runtime; the package targets macOS 15.
 ## Quick build
 
 ```sh
-git clone https://github.com/xaepudin/IRSVerb.git
-cd IRSVerb
+git clone https://github.com/xaepudin/Konvolusi.git
+cd Konvolusi
 swift build -c release
 swift test
 ./build.sh
-open dist/IRSVerb.app
+open dist/Konvolusi.app
 ```
 
 `./build.sh` does a release build of both products, assembles
-`dist/IRSVerb.app`, ad-hoc signs it, regenerates the 15 demo responses into
+`dist/Konvolusi.app`, ad-hoc signs it, regenerates the 15 demo responses into
 `Impulse Responses/`, and copies `irsconv` to `dist/irsconv`. It builds for the
 host architecture by default, so pass `debug` for a debug build:
 
@@ -34,7 +34,7 @@ binaries:
 
 ```sh
 ./build.sh universal
-lipo -info dist/IRSVerb.app/Contents/MacOS/IRSVerb
+lipo -info dist/Konvolusi.app/Contents/MacOS/Konvolusi
 # Architectures in the fat file: ... are: x86_64 arm64
 ```
 
@@ -51,7 +51,7 @@ of truth:
 | --- | --- | --- |
 | `IRSKit` | `Sources/IRSKit` | Library (DSP) |
 | `irsconv` | `Sources/irsconv` | Command-line executable |
-| `IRSVerb` | `Sources/IRSVerb` | Menu bar app executable |
+| `Konvolusi` | `Sources/Konvolusi` | Menu bar app executable |
 
 ## Tests
 
@@ -71,7 +71,7 @@ Tests do not require audio hardware, permissions, or a GUI.
 ## Running
 
 ```sh
-open dist/IRSVerb.app
+open dist/Konvolusi.app
 ```
 
 The app is a menu bar agent (`LSUIElement` is true). While the main window is open
@@ -80,17 +80,17 @@ switches it back to `.accessory` while audio keeps running. To see its log while
 developing:
 
 ```sh
-tail -f ~/Library/Logs/IRSVerb/app.log
+tail -f ~/Library/Logs/Konvolusi/app.log
 ```
 
 To run the executable directly (useful for debugger output):
 
 ```sh
-dist/IRSVerb.app/Contents/MacOS/IRSVerb
+dist/Konvolusi.app/Contents/MacOS/Konvolusi
 ```
 
 A direct launch from Terminal may attribute the System Audio Recording permission
-to Terminal rather than the app, so prefer `open dist/IRSVerb.app` when testing
+to Terminal rather than the app, so prefer `open dist/Konvolusi.app` when testing
 permissions.
 
 ## The `irsconv` CLI
@@ -149,9 +149,9 @@ scripts/package-release.sh
 The script builds a universal release app, adds the icon and metadata, and writes
 to `dist/`:
 
-- `IRSVerb-<version>-macos.zip` — app bundle, zipped with `ditto`;
-- `IRSVerb-<version>.dmg` — drag-to-Applications disk image;
-- `IRSVerb-<version>-macos.zip.sha256` and `.dmg.sha256` — checksums.
+- `Konvolusi-<version>-macos.zip` — app bundle, zipped with `ditto`;
+- `Konvolusi-<version>.dmg` — drag-to-Applications disk image;
+- `Konvolusi-<version>-macos.zip.sha256` and `.dmg.sha256` — checksums.
 
 The version comes from `CFBundleShortVersionString` in `Resources/Info.plist`.
 Run `scripts/package-release.sh` only after `swift test` and
@@ -162,7 +162,7 @@ Run `scripts/package-release.sh` only after `swift test` and
 `build.sh` signs ad-hoc:
 
 ```sh
-codesign --force --sign - --timestamp=none dist/IRSVerb.app
+codesign --force --sign - --timestamp=none dist/Konvolusi.app
 ```
 
 That is enough for local use and for the system-audio permission prompt, but it
@@ -178,20 +178,20 @@ notarize:
 
 ```sh
 codesign --force --deep --options runtime \
-  --sign "Developer ID Application: Your Name (TEAMID)" dist/IRSVerb.app
+  --sign "Developer ID Application: Your Name (TEAMID)" dist/Konvolusi.app
 
-ditto -c -k --keepParent dist/IRSVerb.app dist/IRSVerb.zip
-xcrun notarytool submit dist/IRSVerb.zip \
+ditto -c -k --keepParent dist/Konvolusi.app dist/Konvolusi.zip
+xcrun notarytool submit dist/Konvolusi.zip \
   --apple-id "you@example.com" --team-id TEAMID \
   --password "@keychain:AC_PASSWORD" --wait
-xcrun stapler staple dist/IRSVerb.app
+xcrun stapler staple dist/Konvolusi.app
 ```
 
 Then rebuild the zip/DMG and verify:
 
 ```sh
-spctl --assess --type execute --verbose dist/IRSVerb.app
-codesign --verify --deep --strict --verbose=2 dist/IRSVerb.app
+spctl --assess --type execute --verbose dist/Konvolusi.app
+codesign --verify --deep --strict --verbose=2 dist/Konvolusi.app
 ```
 
 Do not commit a Developer ID private key or an app-specific password. Keep
@@ -232,8 +232,8 @@ own; the bundle is the authority.
 | --- | --- |
 | `error: unable to find utility "swift"` | Install Xcode and select it with `xcode-select`; the Command Line Tools alone may not include the macOS SDK |
 | `AudioHardwareCreateProcessTap` is unavailable | The SDK/target is older than macOS 14.2; check the platform in `Package.swift` |
-| App builds but exits immediately | Run the executable from Terminal to see the error; check `~/Library/Logs/IRSVerb/app.log` |
-| `codesign` fails with “resource fork, Finder information, or similar detritus” | Remove extended attributes: `xattr -cr dist/IRSVerb.app`, then re-sign |
+| App builds but exits immediately | Run the executable from Terminal to see the error; check `~/Library/Logs/Konvolusi/app.log` |
+| `codesign` fails with “resource fork, Finder information, or similar detritus” | Remove extended attributes: `xattr -cr dist/Konvolusi.app`, then re-sign |
 | Tests pass but the app cannot capture audio | Permissions are per-bundle; use the app bundle, not the raw executable, and check System Settings |
 
 ## UI development
@@ -244,7 +244,7 @@ later launches so the app stays a menu bar utility. Open it directly while
 developing:
 
 ```sh
-open dist/IRSVerb.app --args --show-main
+open dist/Konvolusi.app --args --show-main
 ```
 
 The main window opens on every launch. `--show-main` suppresses the welcome sheet,
@@ -254,12 +254,12 @@ and About sections without resetting preferences. Quit any running instance firs
 welcome flow again:
 
 ```sh
-defaults delete io.github.xaepudin.IRSVerb HasCompletedOnboarding
-open dist/IRSVerb.app
+defaults delete com.xaepudin.konvolusi HasCompletedOnboarding
+open dist/Konvolusi.app
 ```
 
 The welcome sheet intentionally does not start the audio engine; it starts when the
-user chooses **Open IRSVerb** or presses **Start**. This keeps the System Audio
+user chooses **Open Konvolusi** or presses **Start**. This keeps the System Audio
 Recording dialog from covering the explanation. Close the main window to test the
 menu-bar-only path; the process and menu bar item stay alive, and launching the app
 again reuses that process. Test VoiceOver and Full Keyboard Access on both the
@@ -275,7 +275,7 @@ scripts/package-release.sh zip, DMG and checksums
 scripts/make-icon.swift    regenerates Resources/AppIcon.icns
 Sources/IRSKit/            DSP and file I/O
 Sources/irsconv/           CLI
-Sources/IRSVerb/           menu bar app, main window, onboarding, settings
+Sources/Konvolusi/           menu bar app, main window, onboarding, settings
 Tests/IRSKitTests/         33 tests
 Resources/Info.plist       bundle metadata
 docs/                      technical documentation

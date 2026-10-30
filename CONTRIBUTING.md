@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for taking a look at IRSVerb. This is a small, focused project: a
+Thanks for taking a look at Konvolusi. This is a small, focused project: a
 system-wide impulse response convolver for macOS, with no other audio effects and
 no network features.
 
@@ -91,9 +91,9 @@ machine you measured on.
 Open an issue with:
 
 - macOS version and Mac model;
-- IRSVerb version and whether it was built from source;
+- Konvolusi version and whether it was built from source;
 - output device and sample rate;
-- the relevant lines from `~/Library/Logs/IRSVerb/app.log`;
+- the relevant lines from `~/Library/Logs/Konvolusi/app.log`;
 - the `--diagnose` report if audio is involved.
 
 Redact local paths and device names if you prefer. Do not attach copyrighted

@@ -171,10 +171,10 @@ struct StatusHeader: View {
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("IRSVerb")
+                Text("Konvolusi")
                     .font(.headline)
                 if !compact {
-                    Text("System-wide impulse response convolver")
+                    Text("Rediscover the songs you love.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -261,7 +261,7 @@ struct ImpulseResponseSection: View {
 
             if !compact {
                 Text("Built-in responses are always available. Added IRs are copied into "
-                    + "IRSVerb's library.")
+                    + "Konvolusi's library.")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -276,7 +276,7 @@ struct ImpulseResponseSection: View {
             Label("Add IR…", systemImage: "plus")
         }
         .buttonStyle(.bordered)
-        .accessibilityHint("Choose one or more impulse response files. They are copied into IRSVerb's library.")
+        .accessibilityHint("Choose one or more impulse response files. They are copied into Konvolusi's library.")
 
         Button {
             model.removeSelectedImpulseResponse()

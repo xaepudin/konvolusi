@@ -1,7 +1,7 @@
-# IRSVerb documentation
+# Konvolusi documentation
 
 This directory is for people who want to understand, modify, build, or publish
-IRSVerb. End-user instructions live in the [main README](../README.md).
+Konvolusi. End-user instructions live in the [main README](../README.md).
 
 ## Contents
 
@@ -37,7 +37,7 @@ Sources/IRSKit/          platform-independent DSP library
   IRSProcessor           stereo convolver pair, dry/wet, gain, bypass
   RingBuffer             lock-free SPSC ring and atomic meters
 Sources/irsconv/         command-line renderer and diagnostics
-Sources/IRSVerb/         menu bar application
+Sources/Konvolusi/         menu bar application
   SystemAudioTap         process tap + private aggregate device
   TapCapture             Core Audio IO thread → ring buffer
   OutputUnit             AUHAL default output unit

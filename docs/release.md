@@ -1,12 +1,12 @@
 # Release and publication
 
-This document records how IRSVerb is published. It is also the checklist to
+This document records how Konvolusi is published. It is also the checklist to
 follow for the next release.
 
 ## Repository identity
 
 - **GitHub account:** [`xaepudin`](https://github.com/xaepudin)
-- **Repository:** `xaepudin/IRSVerb` (public)
+- **Repository:** `xaepudin/Konvolusi` (public)
 - **Default branch:** `main`
 - **Commit author and committer:** `xaepudin`
 - **Commit email:** the GitHub-provided private address
@@ -94,10 +94,10 @@ scripts/package-release.sh
 The script produces:
 
 ```
-dist/IRSVerb-1.0.0-macos.zip
-dist/IRSVerb-1.0.0-macos.zip.sha256
-dist/IRSVerb-1.0.0.dmg
-dist/IRSVerb-1.0.0.dmg.sha256
+dist/Konvolusi-1.0.0-macos.zip
+dist/Konvolusi-1.0.0-macos.zip.sha256
+dist/Konvolusi-1.0.0.dmg
+dist/Konvolusi-1.0.0.dmg.sha256
 ```
 
 The app is ad-hoc signed. If a Developer ID certificate is available, follow
@@ -110,13 +110,13 @@ Create the empty repository once, point `origin` at the `xaepudin` identity, the
 push `main` and the annotated, signed tag:
 
 ```sh
-gh repo create xaepudin/IRSVerb --public \
-  --description "System-wide impulse response convolver for macOS"
+gh repo create xaepudin/Konvolusi --public \
+  --description "Convolution for everything you play, on macOS"
 
 # On this machine the default git@github.com key authenticates as another
 # account, so the remote uses the github-xaepudin SSH alias. Elsewhere, use an
 # HTTPS remote with credentials for xaepudin, or add the same alias.
-git remote add origin git@github-xaepudin:xaepudin/IRSVerb.git
+git remote add origin git@github-xaepudin:xaepudin/Konvolusi.git
 
 git push -u origin main
 git push origin v1.0.0
@@ -125,18 +125,18 @@ git push origin v1.0.0
 The tag already exists and is signed. If it needs to be recreated:
 
 ```sh
-git tag -f -s v1.0.0 -m "IRSVerb 1.0.0"
+git tag -f -s v1.0.0 -m "Konvolusi 1.0.0"
 ```
 
 Create the release with the artifacts and generated notes:
 
 ```sh
 gh release create v1.0.0 \
-  dist/IRSVerb-1.0.0-macos.zip \
-  dist/IRSVerb-1.0.0-macos.zip.sha256 \
-  dist/IRSVerb-1.0.0.dmg \
-  dist/IRSVerb-1.0.0.dmg.sha256 \
-  --title "IRSVerb 1.0.0" \
+  dist/Konvolusi-1.0.0-macos.zip \
+  dist/Konvolusi-1.0.0-macos.zip.sha256 \
+  dist/Konvolusi-1.0.0.dmg \
+  dist/Konvolusi-1.0.0.dmg.sha256 \
+  --title "Konvolusi 1.0.0" \
   --notes-file docs/release-notes/1.0.0.md
 ```
 
@@ -145,9 +145,9 @@ If the release notes are kept in `CHANGELOG.md`, use `--notes-from-tag` or pass
 
 ## What users download
 
-- **`IRSVerb-<version>-macos.zip`** — the app bundle. Preferred; `ditto` preserves
+- **`Konvolusi-<version>-macos.zip`** — the app bundle. Preferred; `ditto` preserves
   the bundle structure.
-- **`IRSVerb-<version>.dmg`** — a disk image with the app and an `/Applications`
+- **`Konvolusi-<version>.dmg`** — a disk image with the app and an `/Applications`
   shortcut.
 - **`.sha256` files** — users can verify with `shasum -a 256 -c <file>.sha256`.
 
@@ -157,7 +157,7 @@ describe an ad-hoc build as “signed and notarized”.
 
 ## Repository settings
 
-- Description: “System-wide impulse response convolver for macOS.”
+- Description: “Rediscover the songs you love.”
 - Topics: `macos`, `audio`, `convolution`, `impulse-response`, `swift`,
   `core-audio`, `menu-bar`.
 - Enable Issues; Discussions optional.

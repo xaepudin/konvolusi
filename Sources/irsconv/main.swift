@@ -2,7 +2,7 @@ import Foundation
 import IRSKit
 
 // =====================================================================================
-// irsconv - offline impulse response tooling for the IRSVerb project.
+// irsconv - offline impulse response tooling for the Konvolusi project.
 //
 //   irsconv render <input...> --irs <file.irs> [--out <dir|file.wav>] [--wet 1.0]
 //                            [--gain-db 0] [--bits 24] [--rate 48000]

@@ -35,10 +35,10 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section("Background") {
-                Text("Closing the main window removes IRSVerb from the Dock and ⌘-Tab, "
+                Text("Closing the main window removes Konvolusi from the Dock and ⌘-Tab, "
                     + "but it keeps running in the menu bar and audio processing continues. "
-                    + "Open the main window from the menu bar, or launch IRSVerb again; the "
-                    + "running app is reused. Use Quit IRSVerb in the menu bar panel to stop "
+                    + "Open the main window from the menu bar, or launch Konvolusi again; the "
+                    + "running app is reused. Use Quit Konvolusi in the menu bar panel to stop "
                     + "processing and exit completely.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -49,7 +49,7 @@ struct SettingsView: View {
                 Button("Open System Audio Recording settings…") {
                     model.openPrivacySettings()
                 }
-                .help("Open the privacy pane where IRSVerb's System Audio Recording permission lives.")
+                .help("Open the privacy pane where Konvolusi's System Audio Recording permission lives.")
                 Button("Show the welcome screen again") {
                     hasCompletedOnboarding = false
                     openWindow(id: "main")
@@ -57,7 +57,7 @@ struct SettingsView: View {
                 }
                 .help("Open the welcome sheet over the main window now.")
                 Text("The welcome screen explains the menu bar icon and the audio permission. "
-                    + "It appears over the main window now and again the next time IRSVerb opens it.")
+                    + "It appears over the main window now and again the next time Konvolusi opens it.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

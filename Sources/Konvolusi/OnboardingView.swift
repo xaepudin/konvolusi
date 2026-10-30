@@ -16,9 +16,9 @@ struct OnboardingView: View {
 
             Divider()
 
-            Text("IRSVerb lives in the menu bar. Click the waveform icon to pick a "
+            Text("Konvolusi lives in the menu bar. Click the waveform icon to pick a "
                 + "response, set the mix, and see your input and output levels. The main "
-                + "window appears in the Dock while it is open; closing it returns IRSVerb "
+                + "window appears in the Dock while it is open; closing it returns Konvolusi "
                 + "to the menu bar and keeps audio running.")
                 .font(.body)
                 .lineSpacing(3)
@@ -31,7 +31,7 @@ struct OnboardingView: View {
                 OnboardingRow(
                     icon: "checkmark.shield.fill",
                     title: "Allow System Audio Recording",
-                    detail: "When macOS asks, allow IRSVerb to capture the audio other apps "
+                    detail: "When macOS asks, allow Konvolusi to capture the audio other apps "
                         + "are playing. If you miss the prompt, you can grant it later in "
                         + "System Settings."
                 )
@@ -41,7 +41,7 @@ struct OnboardingView: View {
                 OnboardingRow(
                     icon: "speaker.wave.2.fill",
                     title: "Hear the effect once",
-                    detail: "IRSVerb mutes the original signal while it reads the tap, so you "
+                    detail: "Konvolusi mutes the original signal while it reads the tap, so you "
                         + "hear the convolved result — not the dry signal plus an effect."
                 )
 
@@ -50,7 +50,7 @@ struct OnboardingView: View {
                 OnboardingRow(
                     icon: "lock.fill",
                     title: "Stay on this Mac",
-                    detail: "Audio is processed in memory. IRSVerb has no network code, no "
+                    detail: "Audio is processed in memory. Konvolusi has no network code, no "
                         + "telemetry, and no account."
                 )
             }
@@ -75,16 +75,16 @@ struct OnboardingView: View {
                     closeAndFocusMainWindow()
                 }
                 .buttonStyle(.bordered)
-                .accessibilityHint("Closes this sheet. It will appear again next time IRSVerb opens the main window.")
+                .accessibilityHint("Closes this sheet. It will appear again next time Konvolusi opens the main window.")
 
-                Button("Open IRSVerb") {
+                Button("Open Konvolusi") {
                     hasCompletedOnboarding = true
                     model.startIfNeeded()
                     closeAndFocusMainWindow()
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
-                .accessibilityHint("Closes the welcome sheet and starts IRSVerb")
+                .accessibilityHint("Closes the welcome sheet and starts Konvolusi")
             }
         }
         .padding(32)
@@ -96,7 +96,7 @@ struct OnboardingView: View {
         dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             NSApp.activate(ignoringOtherApps: true)
-            NSApp.windows.first { $0.title == "IRSVerb" }?.makeKeyAndOrderFront(nil)
+            NSApp.windows.first { $0.title == "Konvolusi" }?.makeKeyAndOrderFront(nil)
         }
     }
 
@@ -108,9 +108,9 @@ struct OnboardingView: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Welcome to IRSVerb")
+                Text("Welcome to Konvolusi")
                     .font(.largeTitle.bold())
-                Text("A system-wide impulse response convolver for macOS")
+                Text("Rediscover the songs you love.")
                     .font(.title3)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

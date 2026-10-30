@@ -2,18 +2,18 @@ import AppKit
 import Foundation
 import IRSKit
 
-/// `IRSVerb --diagnose [seconds]` drives the live routing and reports what it
+/// `Konvolusi --diagnose [seconds]` drives the live routing and reports what it
 /// finds, so the system-wide audio path can be verified without listening.
 ///
 /// It also plays a system sound so the tap has something to capture. Output goes
-/// to stdout *and* to `~/Library/Logs/IRSVerb/diagnostic.log`, because an app
+/// to stdout *and* to `~/Library/Logs/Konvolusi/diagnostic.log`, because an app
 /// launched through LaunchServices (the way macOS wants to attribute the
 /// system-audio permission) has nowhere useful to print.
 enum Diagnostics {
     private static let logURL: URL = {
         let base = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library")
-        let directory = base.appendingPathComponent("Logs/IRSVerb")
+        let directory = base.appendingPathComponent("Logs/Konvolusi")
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         return directory.appendingPathComponent("diagnostic.log")
     }()
@@ -45,18 +45,18 @@ enum Diagnostics {
             seconds = max(1, min(value, 60))
         }
 
-        log("IRSVerb diagnostics — \(Date())")
+        log("Konvolusi diagnostics — \(Date())")
         log("  macOS            : \(ProcessInfo.processInfo.operatingSystemVersionString)")
         log("  bundle           : \(Bundle.main.bundlePath)")
         log("  bundle id        : \(Bundle.main.bundleIdentifier ?? "(none — running unbundled)")")
         log("  log file         : \(logURL.path)")
 
         // Two taps reading the same audio fight over the hardware mute.
-        let running = NSRunningApplication.runningApplications(withBundleIdentifier: "io.github.xaepudin.IRSVerb")
+        let running = NSRunningApplication.runningApplications(withBundleIdentifier: "com.xaepudin.konvolusi")
             .filter { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier }
         if !running.isEmpty {
             log("")
-            log("NOTE: IRSVerb is already running (pid \(running.map { String($0.processIdentifier) }.joined(separator: ", "))).")
+            log("NOTE: Konvolusi is already running (pid \(running.map { String($0.processIdentifier) }.joined(separator: ", "))).")
             log("      Quit it first, otherwise both instances will compete for the audio.")
             log("")
         }
@@ -97,7 +97,7 @@ enum Diagnostics {
             log("  error            : \(message)")
             log("")
             log("RESULT: FAIL — the tap could not be created.")
-            log("        Grant IRSVerb access in System Settings › Privacy & Security ›")
+            log("        Grant Konvolusi access in System Settings › Privacy & Security ›")
             log("        Screen & System Audio Recording, then run this again.")
             finish(2)
         }
@@ -172,7 +172,7 @@ enum Diagnostics {
     private static func locateImpulseResponse() -> URL? {
         let candidates = [
             FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-                .appendingPathComponent("IRSVerb/Impulse Responses"),
+                .appendingPathComponent("Konvolusi/Impulse Responses"),
             URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("Impulse Responses"),
         ].compactMap { $0 }
 

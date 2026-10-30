@@ -1,5 +1,5 @@
 #!/usr/bin/env swift
-// Draws the IRSVerb app icon at 1024×1024 and writes a PNG.
+// Draws the Konvolusi app icon at 1024×1024 and writes a PNG.
 // Run `scripts/make-icon.swift Resources/AppIcon-1024.png` from the repo root.
 import AppKit
 import Foundation

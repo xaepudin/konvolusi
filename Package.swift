@@ -2,17 +2,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "IRSVerb",
+    name: "Konvolusi",
     platforms: [.macOS(.v15)],
     products: [
         .library(name: "IRSKit", targets: ["IRSKit"]),
         .executable(name: "irsconv", targets: ["irsconv"]),
-        .executable(name: "IRSVerb", targets: ["IRSVerb"]),
+        .executable(name: "Konvolusi", targets: ["Konvolusi"]),
     ],
     targets: [
         .target(name: "IRSKit"),
         .executableTarget(name: "irsconv", dependencies: ["IRSKit"]),
-        .executableTarget(name: "IRSVerb", dependencies: ["IRSKit"]),
+        .executableTarget(name: "Konvolusi", dependencies: ["IRSKit"]),
         .testTarget(name: "IRSKitTests", dependencies: ["IRSKit"]),
     ],
     // Real-time audio code is pointer- and callback-heavy; Swift 5 language mode

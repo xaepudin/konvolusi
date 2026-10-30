@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds IRSVerb.app (menu bar app) and the irsconv CLI into dist/.
+# Builds Konvolusi.app (menu bar app) and the irsconv CLI into dist/.
 #
 #   ./build.sh            native release build (default)
 #   ./build.sh universal  arm64 + x86_64 release build
@@ -12,7 +12,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 MODE="${1:-release}"
-APP="dist/IRSVerb.app"
+APP="dist/Konvolusi.app"
 
 if [[ "$MODE" == "universal" ]]; then
     CONFIGURATION=release
@@ -32,9 +32,9 @@ if [[ "$UNIVERSAL" == 1 ]]; then
     INTEL_SCRATCH=".build/universal-x86_64"
 
     echo "==> Building universal ($ARM_TRIPLE + $INTEL_TRIPLE)"
-    swift build -c release --scratch-path "$ARM_SCRATCH" --triple "$ARM_TRIPLE" --product IRSVerb
+    swift build -c release --scratch-path "$ARM_SCRATCH" --triple "$ARM_TRIPLE" --product Konvolusi
     swift build -c release --scratch-path "$ARM_SCRATCH" --triple "$ARM_TRIPLE" --product irsconv
-    swift build -c release --scratch-path "$INTEL_SCRATCH" --triple "$INTEL_TRIPLE" --product IRSVerb
+    swift build -c release --scratch-path "$INTEL_SCRATCH" --triple "$INTEL_TRIPLE" --product Konvolusi
     swift build -c release --scratch-path "$INTEL_SCRATCH" --triple "$INTEL_TRIPLE" --product irsconv
 
     ARM_BIN="$(swift build -c release --scratch-path "$ARM_SCRATCH" --triple "$ARM_TRIPLE" --show-bin-path)"
@@ -43,12 +43,12 @@ if [[ "$UNIVERSAL" == 1 ]]; then
     BIN_DIR="dist/universal"
     rm -rf "$BIN_DIR"
     mkdir -p "$BIN_DIR"
-    lipo -create "$ARM_BIN/IRSVerb" "$INTEL_BIN/IRSVerb" -output "$BIN_DIR/IRSVerb"
+    lipo -create "$ARM_BIN/Konvolusi" "$INTEL_BIN/Konvolusi" -output "$BIN_DIR/Konvolusi"
     lipo -create "$ARM_BIN/irsconv" "$INTEL_BIN/irsconv" -output "$BIN_DIR/irsconv"
-    lipo -info "$BIN_DIR/IRSVerb"
+    lipo -info "$BIN_DIR/Konvolusi"
 else
     echo "==> Building ($CONFIGURATION)"
-    swift build -c "$CONFIGURATION" --product IRSVerb
+    swift build -c "$CONFIGURATION" --product Konvolusi
     swift build -c "$CONFIGURATION" --product irsconv
     BIN_DIR="$(swift build -c "$CONFIGURATION" --show-bin-path)"
 fi
@@ -56,7 +56,7 @@ fi
 echo "==> Assembling $APP"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN_DIR/IRSVerb" "$APP/Contents/MacOS/IRSVerb"
+cp "$BIN_DIR/Konvolusi" "$APP/Contents/MacOS/Konvolusi"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 cp "$BIN_DIR/irsconv" "$APP/Contents/MacOS/irsconv"

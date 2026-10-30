@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>IRSVerb</string>
+	<string>Konvolusi</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.github.xaepudin.IRSVerb</string>
+	<string>com.xaepudin.konvolusi</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>IRSVerb</string>
+	<string>Konvolusi</string>
 	<key>CFBundleDisplayName</key>
-	<string>IRSVerb</string>
+	<string>Konvolusi</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -35,8 +35,8 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSAudioCaptureUsageDescription</key>
-	<string>IRSVerb captures the audio your Mac is playing so it can run it through the impulse response you picked (a hall, a radio speaker, and so on) and play the result back.</string>
+	<string>Konvolusi captures the audio your Mac is playing so it can run it through the impulse response you picked (a hall, a radio speaker, and so on) and play the result back.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>IRSVerb only captures audio that is already being played on this Mac in order to apply an impulse response to it.</string>
+	<string>Konvolusi only captures audio that is already being played on this Mac in order to apply an impulse response to it.</string>
 </dict>
 </plist>

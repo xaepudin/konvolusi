@@ -90,7 +90,7 @@ final class AudioEngine: @unchecked Sendable {
     private(set) var isWaitingForPermission = false
     private var deviceListener: AudioObjectPropertyListenerBlock?
     private var deviceChangeWorkItem: DispatchWorkItem?
-    private let loadQueue = DispatchQueue(label: "io.github.xaepudin.IRSVerb.ir-loader", qos: .userInitiated)
+    private let loadQueue = DispatchQueue(label: "com.xaepudin.konvolusi.ir-loader", qos: .userInitiated)
 
     init() {
         scratchLeft = UnsafeMutablePointer<Float>.allocate(capacity: scratchCapacity)
@@ -130,7 +130,7 @@ final class AudioEngine: @unchecked Sendable {
 
         // A previous attempt may still be stuck inside Core Audio; a fresh queue
         // keeps that from blocking this one.
-        let queue = DispatchQueue(label: "io.github.xaepudin.IRSVerb.engine-setup.\(token)", qos: .userInitiated)
+        let queue = DispatchQueue(label: "com.xaepudin.konvolusi.engine-setup.\(token)", qos: .userInitiated)
         setupQueue = queue
         queue.async { [weak self] in
             self?.performSetup(token: token, began: began)

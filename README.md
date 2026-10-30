@@ -1,13 +1,14 @@
-# IRSVerb
+# Konvolusi
 
-**Put a room, a tape machine, a telephone, or a cathedral in the path of everything your Mac plays.**
+**Rediscover the songs you love.**
 
-IRSVerb is a small menu bar app for macOS that applies an `.irs` impulse response
-to system audio. It is a convolver and nothing else: no player, no plugin host, no
-account, no subscription.
+Put a room, a tape machine, a telephone, or a cathedral in the path of everything
+your Mac plays. Konvolusi is a small menu bar app for macOS that applies an `.irs`
+impulse response to system audio. It is a convolver and nothing else: no player, no
+plugin host, no account, no subscription.
 
 ```
- every app's audio ──▶ IRSVerb ──▶ your speakers or headphones
+ every app's audio ──▶ Konvolusi ──▶ your speakers or headphones
                         (your .irs)
 ```
 
@@ -22,12 +23,12 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
   cathedral, a plate, a stairwell, a car cabin, a cassette tape, an old radio, a
   telephone, and more.
 - **Your own `.irs` files.** Add `.irs`, WAV, AIFF, CAF, FLAC, or M4A files; they
-  are copied into IRSVerb's library and can be removed again.
+  are copied into Konvolusi's library and can be removed again.
 - **Wet/dry mix, output gain, bypass, and normalization**, plus live input and
   output meters.
 - **Two ways in.** A menu bar panel for quick changes and a conventional window
   with Control, Library, Diagnostics, Settings, and About sections in a fixed
-  sidebar. Launching IRSVerb opens the window; closing it returns the app to
+  sidebar. Launching Konvolusi opens the window; closing it returns the app to
   menu-bar-only background operation.
 - **Low overhead.** With only the menu bar item, idle is typically under 1% of a CPU
   core and a long response is about 2–4%. The main window's live meters cost about
@@ -43,25 +44,25 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
 
 ## Install
 
-1. Download `IRSVerb-<version>-macos.zip` from the
-   [latest release](https://github.com/xaepudin/IRSVerb/releases/latest).
-2. Unzip it and drag **IRSVerb.app** into `/Applications`.
+1. Download `Konvolusi-<version>-macos.zip` from the
+   [latest release](https://github.com/xaepudin/Konvolusi/releases/latest).
+2. Unzip it and drag **Konvolusi.app** into `/Applications`.
 3. The app is ad-hoc signed and not notarized by Apple, so the first launch needs
    one extra step:
-   - In Finder, **Control-click** (or right-click) **IRSVerb.app** and choose
+   - In Finder, **Control-click** (or right-click) **Konvolusi.app** and choose
      **Open**, then confirm **Open**; or
    - if macOS still blocks it, run:
 
      ```sh
-     xattr -dr com.apple.quarantine /Applications/IRSVerb.app
+     xattr -dr com.apple.quarantine /Applications/Konvolusi.app
      ```
 
 4. Start the app. The main window opens with a welcome sheet explaining the menu
    bar icon and the audio permission.
-5. Choose **Open IRSVerb** in the welcome sheet, then allow **System Audio
-   Recording** when macOS asks. If you miss the prompt, enable IRSVerb under
+5. Choose **Open Konvolusi** in the welcome sheet, then allow **System Audio
+   Recording** when macOS asks. If you miss the prompt, enable Konvolusi under
    **System Settings › Privacy & Security › Screen & System Audio Recording**,
-   then click **Start** in IRSVerb.
+   then click **Start** in Konvolusi.
 6. Play something and pick **Large Hall** to hear the effect immediately.
 
 > **Why the warning?** Apple notarization requires a paid Developer ID
@@ -71,10 +72,10 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
 
 ## First run
 
-On first launch IRSVerb creates:
+On first launch Konvolusi creates:
 
 ```
-~/Library/Application Support/IRSVerb/Impulse Responses/
+~/Library/Application Support/Konvolusi/Impulse Responses/
 ```
 
 and fills it with 15 generated responses. Nothing is downloaded. The first
@@ -86,11 +87,11 @@ main window opens. If you dismiss it with **Not now**, both the window and the
 welcome sheet return on the next launch. You can also reopen it from
 **Settings… → Setup → Show the welcome screen again**.
 
-## Using IRSVerb
+## Using Konvolusi
 
 There are two surfaces:
 
-- **Main window.** Opened on first launch, or from **Open IRSVerb…** in the menu
+- **Main window.** Opened on first launch, or from **Open Konvolusi…** in the menu
   bar panel. It has five sections in a fixed sidebar: Control, Library, Diagnostics,
   Settings, and About. The sidebar cannot collapse.
 - **Menu bar panel.** Click the waveform icon for quick access to the response
@@ -100,8 +101,8 @@ The app appears in the Dock and ⌘-Tab while the main window is open. Closing t
 window removes it from both, but it is not quitting: audio processing keeps
 running, the menu bar icon stays, and the live meters stop so the app drops back to
 its menu-bar CPU profile. To show the window again, use the menu bar or launch
-IRSVerb again from Spotlight/Finder — the existing process is reused, not
-duplicated. **Quit IRSVerb** from the menu bar panel stops audio and exits.
+Konvolusi again from Spotlight/Finder — the existing process is reused, not
+duplicated. **Quit Konvolusi** from the menu bar panel stops audio and exits.
 
 The menu bar panel and the main window share the same controls, so a change in one
 is reflected in the other.
@@ -118,9 +119,9 @@ is reflected in the other.
 | **Normalize impulse response** | Match perceived level between responses so switching does not jump in loudness |
 | **In / Out meters** | Confirm that audio is being captured and played back |
 | **Start / Stop** | Enable or disable processing without quitting |
-| **Open IRSVerb…** | Open the main window |
+| **Open Konvolusi…** | Open the main window |
 | **Settings…** | Open the Settings section: background behavior, permission shortcut, welcome screen, version |
-| **Quit IRSVerb** | Stop processing and restore normal audio immediately |
+| **Quit Konvolusi** | Stop processing and restore normal audio immediately |
 
 The footer shows the sample rate, output device, loaded response, added latency,
 and buffer diagnostics. Dropouts and drift trims should stay at zero. A level
@@ -143,7 +144,7 @@ opens that section directly.
 - Every window control is reachable with **Full Keyboard Access** (Control-F7 to
   enable it in some macOS versions) and has a VoiceOver label; sliders announce
   their current values and the meters announce decibel levels.
-- The menu bar icon announces “IRSVerb, Running” or “IRSVerb, Stopped”.
+- The menu bar icon announces “Konvolusi, Running” or “Konvolusi, Stopped”.
 - The main window uses a standard sidebar, buttons, lists, and text fields, so the
   usual VoiceOver navigation works.
 - The main window is independent of the menu bar panel; closing it does not quit
@@ -188,7 +189,7 @@ how to use your own files.
 ## Using your own impulse responses
 
 1. Click **Add IR…** and choose one or more files.
-2. IRSVerb copies them into its library and selects the first one.
+2. Konvolusi copies them into its library and selects the first one.
 3. Use **Remove** to delete an added IR. The built-in responses stay available.
 
 Supported formats are `.irs`, `.wav`, `.wave`, `.aif`, `.aiff`, `.caf`, `.flac`,
@@ -198,7 +199,7 @@ the built-in library or move your original file.
 
 Only use impulse responses you have the right to use. **A file being free to
 download does not mean it is free to redistribute.** The repository ships only
-responses generated by IRSVerb itself; third-party packs are not included because
+responses generated by Konvolusi itself; third-party packs are not included because
 their licences are often unclear or absent. See
 [docs/impulse-responses.md](docs/impulse-responses.md#licensing-and-provenance).
 
@@ -210,33 +211,33 @@ Gatekeeper is blocking the ad-hoc build. Control-click the app and choose
 **Open**, or remove the quarantine flag:
 
 ```sh
-xattr -dr com.apple.quarantine /Applications/IRSVerb.app
+xattr -dr com.apple.quarantine /Applications/Konvolusi.app
 ```
 
 ### There is no menu bar icon
 
 The menu bar can hide items when it is crowded or when a notch is present.
-Launch IRSVerb again from Spotlight or Finder: the existing process comes forward
+Launch Konvolusi again from Spotlight or Finder: the existing process comes forward
 and opens the main window, without starting a second instance. Closing that window
 returns the app to the menu bar only.
 
 ### No audio is processed
 
 - Open the panel. If it says **Waiting for System Audio Recording permission**,
-  enable IRSVerb in **System Settings › Privacy & Security › Screen & System Audio
+  enable Konvolusi in **System Settings › Privacy & Security › Screen & System Audio
   Recording** and click **Start**.
 - If the panel says **Engine stopped**, click **Start**.
-- Make sure only one copy of IRSVerb is running. Two copies fight over the same
+- Make sure only one copy of Konvolusi is running. Two copies fight over the same
   audio and will mute it.
 - Play something for a few seconds. Core Audio may not deliver tap buffers until
   audio actually starts.
 
 ### System audio became silent
 
-IRSVerb mutes the original audio while it reads the system tap, so a failure in
+Konvolusi mutes the original audio while it reads the system tap, so a failure in
 the output path would otherwise mean silence. A watchdog restarts the engine if
 audio keeps arriving but output callbacks stop. If you still hear silence, click
-**Stop** and then **Start**, or quit IRSVerb with **Quit IRSVerb** — quitting
+**Stop** and then **Start**, or quit Konvolusi with **Quit Konvolusi** — quitting
 always releases the mute.
 
 ### Crackles, dropouts, or drift trims
@@ -272,13 +273,13 @@ you need tighter timing. The technical details are in
 
 ## Privacy
 
-IRSVerb captures the audio your Mac is playing so it can convolve it and play the
+Konvolusi captures the audio your Mac is playing so it can convolve it and play the
 result back. That is the whole data flow:
 
 - no network code, no analytics, no crash reporting, no accounts;
 - audio is processed in memory and is not written to disk;
-- the app writes only local logs under `~/Library/Logs/IRSVerb/`, and the
-  built-in responses under `~/Library/Application Support/IRSVerb/`.
+- the app writes only local logs under `~/Library/Logs/Konvolusi/`, and the
+  built-in responses under `~/Library/Application Support/Konvolusi/`.
 
 The System Audio Recording permission is powerful — treat it like screen
 recording. You can revoke it at any time in **System Settings › Privacy &
@@ -286,22 +287,22 @@ Security › Screen & System Audio Recording**.
 
 ## Uninstall
 
-1. Open the panel and choose **Quit IRSVerb** (this releases the audio mute).
-2. Drag **IRSVerb.app** to the Trash.
+1. Open the panel and choose **Quit Konvolusi** (this releases the audio mute).
+2. Drag **Konvolusi.app** to the Trash.
 3. Optionally remove your settings, logs, and generated responses:
 
    ```sh
-   rm -rf ~/Library/Application\ Support/IRSVerb
-   rm -rf ~/Library/Logs/IRSVerb
+   rm -rf ~/Library/Application\ Support/Konvolusi
+   rm -rf ~/Library/Logs/Konvolusi
    ```
 
 ## Build from source
 
 ```sh
-git clone https://github.com/xaepudin/IRSVerb.git
-cd IRSVerb
+git clone https://github.com/xaepudin/Konvolusi.git
+cd Konvolusi
 ./build.sh
-open dist/IRSVerb.app
+open dist/Konvolusi.app
 ```
 
 Full instructions, CLI usage, testing, and release packaging are in

@@ -5,7 +5,7 @@ import SwiftUI
 extension Notification.Name {
     /// Posted when the app is reopened (Dock click, Spotlight, Finder) with no
     /// visible windows. The menu bar label listens and opens the main window.
-    static let irsVerbOpenMainWindow = Notification.Name("IRSVerbOpenMainWindow")
+    static let irsVerbOpenMainWindow = Notification.Name("KonvolusiOpenMainWindow")
 }
 
 /// The app is a menu bar agent with a Dock icon by default. AppKit's default
@@ -25,7 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 @main
-struct IRSVerbApp: App {
+struct KonvolusiApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model: AppModel
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
@@ -63,7 +63,7 @@ struct IRSVerbApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        Window("IRSVerb", id: "main") {
+        Window("Konvolusi", id: "main") {
             MainWindowView(model: model,
                            meters: model.meters,
                            status: model.status,
@@ -91,9 +91,9 @@ private struct MenuBarLabel: View {
 
     var body: some View {
         Image(systemName: status.isRunning ? "waveform.circle.fill" : "waveform.circle")
-            .accessibilityLabel("IRSVerb")
+            .accessibilityLabel("Konvolusi")
             .accessibilityValue(status.isRunning ? "Running" : "Stopped")
-            .accessibilityHint("Opens the IRSVerb controls")
+            .accessibilityHint("Opens the Konvolusi controls")
             .onReceive(NotificationCenter.default.publisher(for: .irsVerbOpenMainWindow)) { _ in
                 openWindow(id: "main")
                 NSApp.activate(ignoringOtherApps: true)

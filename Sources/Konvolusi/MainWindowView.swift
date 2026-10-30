@@ -3,7 +3,7 @@ import Combine
 import SwiftUI
 
 /// The conventional window offered alongside the menu bar panel. It exists so
-/// users can find IRSVerb from the Dock/Spotlight (when enabled), browse a
+/// users can find Konvolusi from the Dock/Spotlight (when enabled), browse a
 /// library, read diagnostics, and reach Settings without hunting for a menu bar
 /// icon.
 struct MainWindowView: View {
@@ -69,7 +69,7 @@ struct MainWindowView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { notification in
             guard isSurfaceVisible,
                   let window = notification.object as? NSWindow,
-                  window.title == "IRSVerb" else { return }
+                  window.title == "Konvolusi" else { return }
             isSurfaceVisible = false
             DockVisibility.hideAfterWindow()
             model.uiDisappeared()
@@ -81,7 +81,7 @@ struct MainWindowView: View {
 
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("IRSVerb")
+            Text("Konvolusi")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 16)
@@ -111,7 +111,7 @@ struct MainWindowView: View {
     private func focusMainWindow() {
         DispatchQueue.main.async {
             NSApp.activate(ignoringOtherApps: true)
-            NSApp.windows.first { $0.title == "IRSVerb" }?.makeKeyAndOrderFront(nil)
+            NSApp.windows.first { $0.title == "Konvolusi" }?.makeKeyAndOrderFront(nil)
         }
     }
 
@@ -173,7 +173,7 @@ struct LibraryView: View {
             }
 
             Text("Built-in responses are always available. Added IRs are copied into "
-                + "IRSVerb's library and can be removed here.")
+                + "Konvolusi's library and can be removed here.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -238,7 +238,7 @@ struct DiagnosticsView: View {
                 Text("Diagnostics")
                     .font(.title2.bold())
 
-                Text("IRSVerb captures system audio, convolves it, and plays the result. "
+                Text("Konvolusi captures system audio, convolves it, and plays the result. "
                     + "These values update while this window is open.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -284,15 +284,15 @@ struct DiagnosticsView: View {
 
                 GroupBox("Full end-to-end check") {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Quit IRSVerb, then run this from Terminal. It creates a real tap, "
+                        Text("Quit Konvolusi, then run this from Terminal. It creates a real tap, "
                             + "plays a system sound, and writes a pass/fail report to the log folder.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text("open /Applications/IRSVerb.app --args --diagnose 6")
+                        Text("open /Applications/Konvolusi.app --args --diagnose 6")
                             .font(.system(.caption, design: .monospaced))
                             .textSelection(.enabled)
-                        Text("When running from a source build, use dist/IRSVerb.app instead.")
+                        Text("When running from a source build, use dist/Konvolusi.app instead.")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                         Text("Log: \(AppLog.url.path)")
@@ -332,22 +332,23 @@ struct AboutView: View {
                 .resizable()
                 .frame(width: 96, height: 96)
                 .accessibilityHidden(true)
-            Text("IRSVerb")
+            Text("Konvolusi")
                 .font(.largeTitle.bold())
+            Text("Rediscover the songs you love.")
+                .font(.title3)
+                .foregroundStyle(.secondary)
             Text("Version \(version) (\(build))")
                 .font(.callout)
                 .foregroundStyle(.secondary)
-            Text("A system-wide impulse response convolver for macOS.")
-                .multilineTextAlignment(.center)
 
             HStack(spacing: 16) {
-                Link("Repository", destination: URL(string: "https://github.com/xaepudin/IRSVerb")!)
-                Link("MIT licence", destination: URL(string: "https://github.com/xaepudin/IRSVerb/blob/main/LICENSE")!)
-                Link("CC0 responses", destination: URL(string: "https://github.com/xaepudin/IRSVerb/blob/main/LICENSE-IRS")!)
+                Link("Repository", destination: URL(string: "https://github.com/xaepudin/Konvolusi")!)
+                Link("MIT licence", destination: URL(string: "https://github.com/xaepudin/Konvolusi/blob/main/LICENSE")!)
+                Link("CC0 responses", destination: URL(string: "https://github.com/xaepudin/Konvolusi/blob/main/LICENSE-IRS")!)
             }
             .font(.callout)
 
-            Text("IRSVerb is an independent app. “.irs” describes the impulse response "
+            Text("Konvolusi is an independent app. “.irs” describes the impulse response "
                 + "file format.")
                 .font(.caption)
                 .foregroundStyle(.secondary)

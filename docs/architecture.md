@@ -1,6 +1,6 @@
 # Architecture
 
-IRSVerb is a macOS menu bar app that captures the audio of every other process,
+Konvolusi is a macOS menu bar app that captures the audio of every other process,
 convolves it with an impulse response, and plays the result through the default
 output device.
 
@@ -14,7 +14,7 @@ output device.
                                                        (AUHAL)
 ```
 
-The process tap is created with `muteBehavior = .mutedWhenTapped`. While IRSVerb
+The process tap is created with `muteBehavior = .mutedWhenTapped`. While Konvolusi
 reads the tap, macOS mutes the original audio at the hardware, so the user hears
 the convolved signal exactly once. Destroying the tap restores normal audio.
 
@@ -22,36 +22,36 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 
 | Component | File | Responsibility |
 | --- | --- | --- |
-| `SystemAudioTap` | `Sources/IRSVerb/SystemAudioTap.swift` | Creates a global stereo process tap excluding IRSVerb's own process, then wraps it in a private aggregate device so it can be read with an IOProc |
-| `TapCapture` | `Sources/IRSVerb/TapCapture.swift` | The aggregate device's IOProc. Converts whatever sample layout Core Audio delivers into planar float, writes it to the ring, updates input level and counters |
+| `SystemAudioTap` | `Sources/Konvolusi/SystemAudioTap.swift` | Creates a global stereo process tap excluding Konvolusi's own process, then wraps it in a private aggregate device so it can be read with an IOProc |
+| `TapCapture` | `Sources/Konvolusi/TapCapture.swift` | The aggregate device's IOProc. Converts whatever sample layout Core Audio delivers into planar float, writes it to the ring, updates input level and counters |
 | `AudioRingBuffer` | `Sources/IRSKit/RingBuffer.swift` | Lock-free single-producer/single-consumer ring. Producers never block; underruns and overruns are counted |
-| `OutputUnit` | `Sources/IRSVerb/OutputUnit.swift` | AUHAL default output unit at the tap's sample rate; its render callback pulls from the ring |
-| `AudioEngine` | `Sources/IRSVerb/AudioEngine.swift` | Lifecycle, startup sequencing, sample-rate matching, drift control, device-change handling, watchdog counters |
+| `OutputUnit` | `Sources/Konvolusi/OutputUnit.swift` | AUHAL default output unit at the tap's sample rate; its render callback pulls from the ring |
+| `AudioEngine` | `Sources/Konvolusi/AudioEngine.swift` | Lifecycle, startup sequencing, sample-rate matching, drift control, device-change handling, watchdog counters |
 | `IRSProcessor` | `Sources/IRSKit/IRSProcessor.swift` | Owns two partitioned convolvers (L/R), applies dry/wet, output gain, and bypass; publishes new impulse responses atomically |
 | `PartitionedConvolver` | `Sources/IRSKit/PartitionedConvolver.swift` | The real-time FFT convolver; see [dsp.md](dsp.md) |
 | `IRFile` | `Sources/IRSKit/IRFile.swift` | Decodes `.irs`/WAV/AIFF/CAF/FLAC/M4A via AVFoundation, resamples with `AVAudioConverter`, writes 16/24/32-bit WAV |
 | `IRSynthesis` | `Sources/IRSKit/IRSynthesis.swift` | Deterministic generators for the 15 built-in responses |
-| `AppModel` | `Sources/IRSVerb/AppModel.swift` | UI state, library folder, selection, timers, watchdog policy, copied diagnostic report |
-| `PanelView` | `Sources/IRSVerb/PanelView.swift` | Compact `MenuBarExtra` panel plus entry points to the main window and Settings |
-| `ControlViews` | `Sources/IRSVerb/ControlViews.swift` | Shared controls, status header, sliders, and accessible level meters used by both surfaces |
-| `MainWindowView` | `Sources/IRSVerb/MainWindowView.swift` | Conventional window with a fixed sidebar for Control, Library, Diagnostics, Settings, and About |
-| `OnboardingView` | `Sources/IRSVerb/OnboardingView.swift` | First-run welcome sheet over the main window |
-| `SettingsView` | `Sources/IRSVerb/SettingsView.swift` | Embedded Settings section: background behavior, permission shortcut, welcome-screen reset, version |
-| `DockVisibility` | `Sources/IRSVerb/SettingsView.swift` | `.regular` while the main window is open; `.accessory` when it closes |
-| `AppDelegate` | `Sources/IRSVerb/IRSVerbApp.swift` | Refuses last-window termination and reopens the main window on reopen |
-| `MeterStore` / `StatusStore` | `Sources/IRSVerb/Stores.swift` | High-rate meter values and rare status changes, kept out of `AppModel` so they do not invalidate the menu bar scene |
-| `Diagnostics` | `Sources/IRSVerb/Diagnostics.swift` | `--diagnose` end-to-end check |
+| `AppModel` | `Sources/Konvolusi/AppModel.swift` | UI state, library folder, selection, timers, watchdog policy, copied diagnostic report |
+| `PanelView` | `Sources/Konvolusi/PanelView.swift` | Compact `MenuBarExtra` panel plus entry points to the main window and Settings |
+| `ControlViews` | `Sources/Konvolusi/ControlViews.swift` | Shared controls, status header, sliders, and accessible level meters used by both surfaces |
+| `MainWindowView` | `Sources/Konvolusi/MainWindowView.swift` | Conventional window with a fixed sidebar for Control, Library, Diagnostics, Settings, and About |
+| `OnboardingView` | `Sources/Konvolusi/OnboardingView.swift` | First-run welcome sheet over the main window |
+| `SettingsView` | `Sources/Konvolusi/SettingsView.swift` | Embedded Settings section: background behavior, permission shortcut, welcome-screen reset, version |
+| `DockVisibility` | `Sources/Konvolusi/SettingsView.swift` | `.regular` while the main window is open; `.accessory` when it closes |
+| `AppDelegate` | `Sources/Konvolusi/KonvolusiApp.swift` | Refuses last-window termination and reopens the main window on reopen |
+| `MeterStore` / `StatusStore` | `Sources/Konvolusi/Stores.swift` | High-rate meter values and rare status changes, kept out of `AppModel` so they do not invalidate the menu bar scene |
+| `Diagnostics` | `Sources/Konvolusi/Diagnostics.swift` | `--diagnose` end-to-end check |
 
 ## UI surfaces
 
 | Surface | Scene | Entry point |
 | --- | --- | --- |
 | Menu bar panel | `MenuBarExtra` (`.window` style) | Waveform icon |
-| Main window | `Window("IRSVerb", id: "main")` | Launch, **Open IRSVerb…** in the panel, or reopening the app |
+| Main window | `Window("Konvolusi", id: "main")` | Launch, **Open Konvolusi…** in the panel, or reopening the app |
 | Welcome sheet | `.sheet` on `MainWindowView` | First launch, or **Show the welcome screen again** in Settings |
 | Settings | Sidebar section in `MainWindowView` | The **Settings** row, **Settings…** in the menu bar panel, or the app menu |
 
-The main window is `.defaultLaunchBehavior(.presented)`, so launching IRSVerb
+The main window is `.defaultLaunchBehavior(.presented)`, so launching Konvolusi
 always opens the main window. The sidebar is a fixed 190-point column rather than
 a `NavigationSplitView`, so it has no collapse control and cannot restore a bad
 split frame. The welcome flow is a sheet over the main window rather than a
@@ -74,7 +74,7 @@ user-facing Dock setting; the behavior is part of the window lifecycle.
 On a first launch the engine is **not** started automatically: doing so would put
 the System Audio Recording dialog on top of the welcome explanation before it can
 be read. `AppModel.startIfReady` starts audio only after
-`HasCompletedOnboarding` is true. The welcome sheet's **Open IRSVerb** button sets
+`HasCompletedOnboarding` is true. The welcome sheet's **Open Konvolusi** button sets
 that flag and calls `startIfNeeded`; the menu bar **Start** button and the
 **Choose/Folder** actions remain explicit user starts at any time.
 
@@ -89,8 +89,8 @@ without resetting the onboarding preference.
 | Main actor | SwiftUI, `AppModel`, panel timers, engine state publication | No |
 | Core Audio IO thread (tap) | `TapCapture.receive` | **Yes** |
 | Core Audio render thread (output unit) | `AudioEngine.renderOutput` | **Yes** |
-| `io.github.xaepudin.IRSVerb.engine-setup.*` | Tap/aggregate/output creation, which can block on the permission dialog | No |
-| `io.github.xaepudin.IRSVerb.ir-loader` | Decoding, resampling, FFT precomputation, then atomic publication | No |
+| `com.xaepudin.konvolusi.engine-setup.*` | Tap/aggregate/output creation, which can block on the permission dialog | No |
+| `com.xaepudin.konvolusi.ir-loader` | Decoding, resampling, FFT precomputation, then atomic publication | No |
 
 Rules enforced by the code:
 
@@ -106,7 +106,7 @@ Rules enforced by the code:
 
 ## Startup sequence
 
-1. `IRSVerbApp.init` handles `--diagnose` before any UI exists, then creates
+1. `KonvolusiApp.init` handles `--diagnose` before any UI exists, then creates
    `AppModel` but does not start audio.
 2. On `NSApplication.didFinishLaunchingNotification`, `AppModel.start()` runs once.
 3. `AppModel` creates the library folder if needed and generates the built-in
@@ -170,12 +170,12 @@ the panel.
 
 | Item | Location |
 | --- | --- |
-| Built-in responses and default library | `~/Library/Application Support/IRSVerb/Impulse Responses/` |
+| Built-in responses and default library | `~/Library/Application Support/Konvolusi/Impulse Responses/` |
 | Selected response, mix, gain, bypass, normalize | `UserDefaults` (`SelectedIR`, `Wet`, `GainDB`, `Bypassed`, `Normalize`, `SeededDemoLibrary`) |
-| Added IRs | `~/Library/Application Support/IRSVerb/Impulse Responses/` (copied in by **Add IR…**) |
+| Added IRs | `~/Library/Application Support/Konvolusi/Impulse Responses/` (copied in by **Add IR…**) |
 | Welcome screen completed | `UserDefaults` (`HasCompletedOnboarding`) |
-| App log | `~/Library/Logs/IRSVerb/app.log` |
-| Last diagnostic run | `~/Library/Logs/IRSVerb/diagnostic.log` |
+| App log | `~/Library/Logs/Konvolusi/app.log` |
+| Last diagnostic run | `~/Library/Logs/Konvolusi/diagnostic.log` |
 
 The app does not use the network and does not write audio to disk. See
 [diagnostics.md](diagnostics.md) for how to inspect a running system.
