@@ -6,7 +6,7 @@ follow for the next release.
 ## Repository identity
 
 - **GitHub account:** [`xaepudin`](https://github.com/xaepudin)
-- **Repository:** `xaepudin/Konvolusi` (public)
+- **Repository:** `xaepudin/konvolusi` (public)
 - **Default branch:** `main`
 - **Commit author and committer:** `xaepudin`
 - **Commit email:** the GitHub-provided private address
@@ -106,17 +106,14 @@ the artifacts and verify with `spctl` and `codesign`.
 
 ## Publish on GitHub
 
-Create the empty repository once, point `origin` at the `xaepudin` identity, then
-push `main` and the annotated, signed tag:
+The repository is **https://github.com/xaepudin/konvolusi**. Point `origin` at the
+`xaepudin` identity, then push `main` and the annotated, signed tag:
 
 ```sh
-gh repo create xaepudin/Konvolusi --public \
-  --description "Convolution for everything you play, on macOS"
-
 # On this machine the default git@github.com key authenticates as another
 # account, so the remote uses the github-xaepudin SSH alias. Elsewhere, use an
 # HTTPS remote with credentials for xaepudin, or add the same alias.
-git remote add origin git@github-xaepudin:xaepudin/Konvolusi.git
+git remote add origin git@github-xaepudin:xaepudin/konvolusi.git
 
 git push -u origin main
 git push origin v1.1.0

@@ -30,10 +30,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
+          NOTES_ARGS=(--generate-notes)
+          if [[ -f "docs/release-notes/${VERSION}.md" ]]; then
+            NOTES_ARGS=(--notes-file "docs/release-notes/${VERSION}.md")
+          fi
           gh release create "$GITHUB_REF_NAME" \
             "dist/Konvolusi-${VERSION}-macos.zip" \
             "dist/Konvolusi-${VERSION}-macos.zip.sha256" \
             "dist/Konvolusi-${VERSION}.dmg" \
             "dist/Konvolusi-${VERSION}.dmg.sha256" \
             --title "Konvolusi $VERSION" \
-            --generate-notes
+            "${NOTES_ARGS[@]}"

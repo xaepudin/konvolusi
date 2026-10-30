@@ -12,7 +12,7 @@ runtime; the package targets macOS 15.
 ## Quick build
 
 ```sh
-git clone https://github.com/xaepudin/Konvolusi.git
+git clone https://github.com/xaepudin/konvolusi.git
 cd Konvolusi
 swift build -c release
 swift test

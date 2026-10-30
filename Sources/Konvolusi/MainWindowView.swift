@@ -333,9 +333,9 @@ struct AboutView: View {
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 16) {
-                Link("Repository", destination: URL(string: "https://github.com/xaepudin/Konvolusi")!)
-                Link("GPL-3.0 licence", destination: URL(string: "https://github.com/xaepudin/Konvolusi/blob/main/LICENSE")!)
-                Link("CC0 responses", destination: URL(string: "https://github.com/xaepudin/Konvolusi/blob/main/LICENSE-IRS")!)
+                Link("Repository", destination: URL(string: "https://github.com/xaepudin/konvolusi")!)
+                Link("GPL-3.0 licence", destination: URL(string: "https://github.com/xaepudin/konvolusi/blob/main/LICENSE")!)
+                Link("CC0 responses", destination: URL(string: "https://github.com/xaepudin/konvolusi/blob/main/LICENSE-IRS")!)
             }
             .font(.callout)
 

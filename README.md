@@ -45,7 +45,7 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
 ## Install
 
 1. Download `Konvolusi-<version>-macos.zip` from the
-   [latest release](https://github.com/xaepudin/Konvolusi/releases/latest).
+   [latest release](https://github.com/xaepudin/konvolusi/releases/latest).
 2. Unzip it and drag **Konvolusi.app** into `/Applications`.
 3. The app is ad-hoc signed and not notarized by Apple, so the first launch needs
    one extra step:
@@ -299,7 +299,7 @@ Security › Screen & System Audio Recording**.
 ## Build from source
 
 ```sh
-git clone https://github.com/xaepudin/Konvolusi.git
+git clone https://github.com/xaepudin/konvolusi.git
 cd Konvolusi
 ./build.sh
 open dist/Konvolusi.app

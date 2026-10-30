@@ -119,6 +119,6 @@ First public release.
 - Third-party impulse response packs are not bundled because their
   redistribution terms are usually unclear.
 
-[1.0.0]: https://github.com/xaepudin/Konvolusi/releases/tag/v1.0.0
+[1.0.0]: https://github.com/xaepudin/konvolusi/releases/tag/v1.0.0
 
-[1.1.0]: https://github.com/xaepudin/Konvolusi/releases/tag/v1.1.0
+[1.1.0]: https://github.com/xaepudin/konvolusi/releases/tag/v1.1.0
