@@ -17,8 +17,9 @@ struct OnboardingView: View {
             Divider()
 
             Text("IRSVerb lives in the menu bar. Click the waveform icon to pick a "
-                + "response, set the mix, and see your input and output levels. It also "
-                + "appears in the Dock by default; you can turn that off in Settings.")
+                + "response, set the mix, and see your input and output levels. The main "
+                + "window appears in the Dock while it is open; closing it returns IRSVerb "
+                + "to the menu bar and keeps audio running.")
                 .font(.body)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)

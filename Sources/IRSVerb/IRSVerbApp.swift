@@ -29,7 +29,7 @@ struct IRSVerbApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model: AppModel
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
-    private let opensMainAtLaunch = CommandLine.arguments.contains("--show-main")
+    private let suppressWelcomeAtLaunch = CommandLine.arguments.contains("--show-main")
 
     init() {
         // `--diagnose` exercises the live audio path and exits; it must run
@@ -67,11 +67,11 @@ struct IRSVerbApp: App {
             MainWindowView(model: model,
                            meters: model.meters,
                            status: model.status,
-                           suppressWelcome: opensMainAtLaunch)
+                           suppressWelcome: suppressWelcomeAtLaunch)
         }
         .defaultSize(width: 1120, height: 720)
         .windowResizability(.contentMinSize)
-        .defaultLaunchBehavior(opensMainAtLaunch || !hasCompletedOnboarding ? .presented : .suppressed)
+        .defaultLaunchBehavior(.presented)
         .commands {
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") {

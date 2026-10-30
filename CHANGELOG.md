@@ -8,16 +8,15 @@ All notable user-visible changes are recorded here. The format follows
 
 ### Added
 
-- A conventional main window with a sidebar for **Control**, **Library**,
-  **Diagnostics**, and **About**, reachable from **Open IRSVerb…** in the menu bar
-  panel.
+- A conventional main window with a fixed sidebar for **Control**, **Library**,
+  **Diagnostics**, **Settings**, and **About**, opened when IRSVerb launches and
+  also reachable from **Open IRSVerb…** in the menu bar panel.
 - A first-run welcome sheet over the main window explaining the menu bar icon and
   the System Audio Recording permission. The engine is not started until the user
   continues, so the permission dialog no longer covers the explanation.
-- Settings for **Show IRSVerb in the Dock** (on by default), a shortcut to the
-  privacy pane, and resetting the welcome screen.
-- `--show-main` launch option for opening the main window directly, useful when
-  the menu bar icon is hidden.
+- Settings for background behavior, a shortcut to the privacy pane, and resetting
+  the welcome screen.
+- `--show-main` launch option for suppressing the welcome sheet during UI testing.
 - Accessibility labels and values for the menu bar icon, impulse response picker,
   mix and gain sliders, and input/output meters. The panel and main window share
   one control implementation.
@@ -32,9 +31,16 @@ All notable user-visible changes are recorded here. The format follows
   never the only way to reach the UI.
 - The Library page uses a fixed sidebar and detail layout. A restored
   `NavigationSplitView` frame could clip the list and hide the sidebar rows.
-- Settings is a normal sidebar section, opened by the menu bar panel or the app menu, instead of a separate Settings window. The main sidebar is fixed and cannot collapse.
+- Settings is a normal sidebar section, opened by the menu bar panel or the app
+  menu, instead of a separate Settings window. The main sidebar is fixed and
+  cannot collapse.
 - The main window regains focus after the welcome sheet closes instead of leaving
   the previous app in front.
+- Closing the main window removes IRSVerb from the Dock and ⌘-Tab while audio keeps
+  running in the menu bar. Opening the window restores those entries; there is no
+  Dock toggle.
+- Launching IRSVerb always opens the main window, and `LSMultipleInstancesProhibited`
+  makes a second launch reuse the running process instead of spawning a duplicate.
 - The output unit starts after about two seconds even when nothing is playing yet,
   instead of waiting up to a minute while the tap could mute system audio. Capture
   counters are reset on stop so a restart cannot reuse stale readiness data.

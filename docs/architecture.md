@@ -34,10 +34,10 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 | `AppModel` | `Sources/IRSVerb/AppModel.swift` | UI state, library folder, selection, timers, watchdog policy, copied diagnostic report |
 | `PanelView` | `Sources/IRSVerb/PanelView.swift` | Compact `MenuBarExtra` panel plus entry points to the main window and Settings |
 | `ControlViews` | `Sources/IRSVerb/ControlViews.swift` | Shared controls, status header, sliders, and accessible level meters used by both surfaces |
-| `MainWindowView` | `Sources/IRSVerb/MainWindowView.swift` | Conventional window with a sidebar for Control, Library, Diagnostics, and About |
+| `MainWindowView` | `Sources/IRSVerb/MainWindowView.swift` | Conventional window with a fixed sidebar for Control, Library, Diagnostics, Settings, and About |
 | `OnboardingView` | `Sources/IRSVerb/OnboardingView.swift` | First-run welcome sheet over the main window |
-| `SettingsView` | `Sources/IRSVerb/SettingsView.swift` | Dock visibility, permission shortcut, welcome-screen reset, version |
-| `DockVisibility` | `Sources/IRSVerb/SettingsView.swift` | Applies `.regular` by default or `.accessory` when the Dock icon is disabled |
+| `SettingsView` | `Sources/IRSVerb/SettingsView.swift` | Embedded Settings section: background behavior, permission shortcut, welcome-screen reset, version |
+| `DockVisibility` | `Sources/IRSVerb/SettingsView.swift` | `.regular` while the main window is open; `.accessory` when it closes |
 | `AppDelegate` | `Sources/IRSVerb/IRSVerbApp.swift` | Refuses last-window termination and reopens the main window on reopen |
 | `MeterStore` / `StatusStore` | `Sources/IRSVerb/Stores.swift` | High-rate meter values and rare status changes, kept out of `AppModel` so they do not invalidate the menu bar scene |
 | `Diagnostics` | `Sources/IRSVerb/Diagnostics.swift` | `--diagnose` end-to-end check |
@@ -47,28 +47,29 @@ the convolved signal exactly once. Destroying the tap restores normal audio.
 | Surface | Scene | Entry point |
 | --- | --- | --- |
 | Menu bar panel | `MenuBarExtra` (`.window` style) | Waveform icon |
-| Main window | `Window("IRSVerb", id: "main")` | First launch, **Open IRSVerb…** in the panel, Dock/Spotlight reopen, or `--show-main` |
+| Main window | `Window("IRSVerb", id: "main")` | Launch, **Open IRSVerb…** in the panel, or reopening the app |
 | Welcome sheet | `.sheet` on `MainWindowView` | First launch, or **Show the welcome screen again** in Settings |
 | Settings | Sidebar section in `MainWindowView` | The **Settings** row, **Settings…** in the menu bar panel, or the app menu |
 
-The main window is `.defaultLaunchBehavior(opensMainAtLaunch || !hasCompletedOnboarding ? .presented : .suppressed)`:
-first launch opens a real window, while later launches stay menu-bar-only. The
-sidebar is a fixed 190-point column rather than a `NavigationSplitView`, so it has
-no collapse control and cannot restore a bad split frame. The welcome flow is a
-sheet over the main window rather than a separate window, so dismissing it cannot
-leave the app with no window or trigger AppKit's last-window termination.
+The main window is `.defaultLaunchBehavior(.presented)`, so launching IRSVerb
+always opens the main window. The sidebar is a fixed 190-point column rather than
+a `NavigationSplitView`, so it has no collapse control and cannot restore a bad
+split frame. The welcome flow is a sheet over the main window rather than a
+separate window, so dismissing it cannot leave the app with no window or trigger
+AppKit's last-window termination.
 
 `AppDelegate.applicationShouldTerminateAfterLastWindowClosed` returns `false`. This
 is essential for a menu bar agent: without it, closing the welcome sheet could
-terminate the whole app and remove the menu bar item. Reopening the app from the
-Dock or Spotlight posts `.irsVerbOpenMainWindow`; the menu bar label observes it
-and calls `openWindow(id: "main")`, so a hidden or crowded menu bar icon is never
-the only way to reach the UI.
+terminate the whole app and remove the menu bar item. Reopening the app from
+Finder or Spotlight posts `.irsVerbOpenMainWindow`; the menu bar label observes it
+and calls `openWindow(id: "main")`. `LSMultipleInstancesProhibited` in
+`Info.plist` makes LaunchServices reuse the running process instead of spawning a
+second copy.
 
-The app is declared as an agent (`LSUIElement` in `Info.plist`) but `DockVisibility`
-defaults to `.regular` so it is findable in the Dock and ⌘-Tab. Turning off
-**Show IRSVerb in the Dock** switches the activation policy to `.accessory`; the
-preference is applied at launch and when it changes.
+`DockVisibility` switches the activation policy: `.regular` while the main window
+is open, `.accessory` as soon as it closes. The app remains a menu bar agent with
+audio running in the background, but it leaves the Dock and ⌘-Tab. There is no
+user-facing Dock setting; the behavior is part of the window lifecycle.
 
 On a first launch the engine is **not** started automatically: doing so would put
 the System Audio Recording dialog on top of the welcome explanation before it can
@@ -77,9 +78,9 @@ be read. `AppModel.startIfReady` starts audio only after
 that flag and calls `startIfNeeded`; the menu bar **Start** button and the
 **Choose/Folder** actions remain explicit user starts at any time.
 
-`--show-main` opens the main window at launch. It is a recovery path for a hidden
-menu bar icon and a way to drive the UI in development; it suppresses the welcome
-sheet so the requested window is not buried.
+`--show-main` suppresses the welcome sheet at launch. The main window now opens on
+every launch anyway; the flag remains useful for driving the UI in development
+without resetting the onboarding preference.
 
 ## Threads
 
@@ -172,7 +173,6 @@ the panel.
 | Built-in responses and default library | `~/Library/Application Support/IRSVerb/Impulse Responses/` |
 | Selected response, mix, gain, bypass, normalize | `UserDefaults` (`SelectedIR`, `Wet`, `GainDB`, `Bypassed`, `Normalize`, `SeededDemoLibrary`) |
 | Added IRs | `~/Library/Application Support/IRSVerb/Impulse Responses/` (copied in by **Add IR…**) |
-| Dock visibility | `UserDefaults` (`ShowInDock`, default on) |
 | Welcome screen completed | `UserDefaults` (`HasCompletedOnboarding`) |
 | App log | `~/Library/Logs/IRSVerb/app.log` |
 | Last diagnostic run | `~/Library/Logs/IRSVerb/diagnostic.log` |

@@ -3,48 +3,44 @@ import SwiftUI
 
 enum PreferenceKey {
     static let hasCompletedOnboarding = "HasCompletedOnboarding"
-    static let showInDock = "ShowInDock"
 }
 
-/// Dock presence. The app starts as a regular app so it is findable in the Dock
-/// and Spotlight even when the menu bar is full; users who want a menu-bar-only
-/// utility can turn this off.
+/// Window/Dock lifecycle. The app is a menu bar agent whenever no window is open.
+/// Opening the main window temporarily makes it a regular app so it appears in
+/// the Dock and ⌘-Tab; closing the window returns it to the menu bar only without
+/// stopping audio. Quit remains in the menu bar panel.
 enum DockVisibility {
-    static let key = PreferenceKey.showInDock
-
+    /// Called at launch before the main window appears.
     static func apply() {
-        let visible = UserDefaults.standard.object(forKey: key) as? Bool ?? true
-        set(visible, activate: false)
+        NSApp.setActivationPolicy(.accessory)
     }
 
-    static func set(_ visible: Bool, activate: Bool = true) {
-        NSApp.setActivationPolicy(visible ? .regular : .accessory)
-        if visible && activate {
-            NSApp.activate(ignoringOtherApps: true)
-        }
+    /// The main window is on screen.
+    static func showForWindow() {
+        NSApp.setActivationPolicy(.regular)
+    }
+
+    /// The main window closed: disappear from the Dock and ⌘-Tab, keep running.
+    static func hideAfterWindow() {
+        NSApp.setActivationPolicy(.accessory)
     }
 }
 
 struct SettingsView: View {
     @ObservedObject var model: AppModel
 
-    @AppStorage(DockVisibility.key) private var showInDock = true
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Form {
-            Section("General") {
-                Toggle("Show IRSVerb in the Dock", isOn: $showInDock)
-                    .onChange(of: showInDock) { _, newValue in
-                        DockVisibility.set(newValue)
-                    }
-                    .help("Show IRSVerb in the Dock and ⌘-Tab. Turn off for a menu-bar-only utility.")
-                Text("When on, IRSVerb is in the Dock and in ⌘-Tab, which makes it easy to find "
-                    + "even when the menu bar is crowded or the icon is hidden. Closing the main "
-                    + "window does not quit IRSVerb: audio keeps running and the menu bar icon "
-                    + "stays. Turn this off for a strict menu-bar-only background app.")
-                    .font(.caption)
+            Section("Background") {
+                Text("Closing the main window removes IRSVerb from the Dock and ⌘-Tab, "
+                    + "but it keeps running in the menu bar and audio processing continues. "
+                    + "Open the main window from the menu bar, or launch IRSVerb again; the "
+                    + "running app is reused. Use Quit IRSVerb in the menu bar panel to stop "
+                    + "processing and exit completely.")
+                    .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

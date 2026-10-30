@@ -26,9 +26,9 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
 - **Wet/dry mix, output gain, bypass, and normalization**, plus live input and
   output meters.
 - **Two ways in.** A menu bar panel for quick changes and a conventional window
-  with Control, Library, Diagnostics, and About sections in a sidebar. IRSVerb appears in the Dock
-  by default so it stays findable when the menu bar is crowded; you can turn that
-  off in Settings for a menu-bar-only utility.
+  with Control, Library, Diagnostics, Settings, and About sections in a fixed
+  sidebar. Launching IRSVerb opens the window; closing it returns the app to
+  menu-bar-only background operation.
 - **Low overhead.** With only the menu bar item, idle is typically under 1% of a CPU
   core and a long response is about 2–4%. The main window's live meters cost about
   5–6% while it is open; close it for the lowest battery use.
@@ -96,15 +96,12 @@ There are two surfaces:
 - **Menu bar panel.** Click the waveform icon for quick access to the response
   picker, mix, gain, bypass, normalization, and meters.
 
-IRSVerb is in the Dock by default, so you can reopen the main window by clicking
-its Dock icon (or by launching it again from Spotlight/Finder). If you prefer a
-menu-bar-only app, turn off **Show IRSVerb in the Dock** in Settings.
-
-Closing the main window is not quitting. Audio processing keeps running, the menu
-bar icon stays, and the live meters stop so the app drops back to its menu-bar CPU
-profile. If **Show IRSVerb in the Dock** is on, the app also stays in the Dock and
-in ⌘-Tab; turn it off if you want it to disappear from the app switcher when the
-window is closed. **Quit IRSVerb** from the menu bar panel stops audio and exits.
+The app appears in the Dock and ⌘-Tab while the main window is open. Closing the
+window removes it from both, but it is not quitting: audio processing keeps
+running, the menu bar icon stays, and the live meters stop so the app drops back to
+its menu-bar CPU profile. To show the window again, use the menu bar or launch
+IRSVerb again from Spotlight/Finder — the existing process is reused, not
+duplicated. **Quit IRSVerb** from the menu bar panel stops audio and exits.
 
 The menu bar panel and the main window share the same controls, so a change in one
 is reflected in the other.
@@ -122,7 +119,7 @@ is reflected in the other.
 | **In / Out meters** | Confirm that audio is being captured and played back |
 | **Start / Stop** | Enable or disable processing without quitting |
 | **Open IRSVerb…** | Open the main window |
-| **Settings…** | Open Settings: Dock visibility, permission shortcut, welcome screen, version |
+| **Settings…** | Open the Settings section: background behavior, permission shortcut, welcome screen, version |
 | **Quit IRSVerb** | Stop processing and restore normal audio immediately |
 
 The footer shows the sample rate, output device, loaded response, added latency,
@@ -150,7 +147,7 @@ opens that section directly.
 - The main window uses a standard sidebar, buttons, lists, and text fields, so the
   usual VoiceOver navigation works.
 - The main window is independent of the menu bar panel; closing it does not quit
-  the app or stop audio processing. The app stays in the Dock and menu bar.
+  the app or stop audio processing. The app stays in the menu bar.
 
 ### Mixing tips
 
@@ -219,19 +216,9 @@ xattr -dr com.apple.quarantine /Applications/IRSVerb.app
 ### There is no menu bar icon
 
 The menu bar can hide items when it is crowded or when a notch is present.
-IRSVerb is in the Dock by default: click its Dock icon, or open IRSVerb again from
-Spotlight/Finder, and the main window appears.
-
-If you turned off **Show IRSVerb in the Dock** and cannot find the menu bar icon,
-open the main window directly:
-
-```sh
-open -a IRSVerb --args --show-main
-```
-
-If IRSVerb is already running, quit it first (the panel's **Quit IRSVerb**, or
-Activity Monitor) so the launch option is applied. Then re-enable **Show IRSVerb
-in the Dock** in Settings so the app is easy to reach next time.
+Launch IRSVerb again from Spotlight or Finder: the existing process comes forward
+and opens the main window, without starting a second instance. Closing that window
+returns the app to the menu bar only.
 
 ### No audio is processed
 

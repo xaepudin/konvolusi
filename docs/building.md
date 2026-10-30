@@ -74,9 +74,10 @@ Tests do not require audio hardware, permissions, or a GUI.
 open dist/IRSVerb.app
 ```
 
-The app is a menu bar agent (`LSUIElement` is true) but switches to `.regular` at
-launch so it is in the Dock by default; turn off **Show IRSVerb in the Dock** to
-test the menu-bar-only configuration. To see its log while developing:
+The app is a menu bar agent (`LSUIElement` is true). While the main window is open
+it switches to `.regular` so it appears in the Dock and ⌘-Tab; closing the window
+switches it back to `.accessory` while audio keeps running. To see its log while
+developing:
 
 ```sh
 tail -f ~/Library/Logs/IRSVerb/app.log
@@ -246,10 +247,11 @@ developing:
 open dist/IRSVerb.app --args --show-main
 ```
 
-`--show-main` also suppresses the welcome sheet, which makes it useful for
-screenshotting the Control, Library, Diagnostics, and About sections without resetting
-preferences. Quit any running instance first; `open --args` does not re-apply the
-option to an existing process. To see the welcome flow again:
+The main window opens on every launch. `--show-main` suppresses the welcome sheet,
+which makes it useful for screenshotting the Control, Library, Diagnostics, Settings,
+and About sections without resetting preferences. Quit any running instance first;
+`open --args` does not re-apply the option to an existing process. To see the
+welcome flow again:
 
 ```sh
 defaults delete io.github.xaepudin.IRSVerb HasCompletedOnboarding
@@ -258,11 +260,11 @@ open dist/IRSVerb.app
 
 The welcome sheet intentionally does not start the audio engine; it starts when the
 user chooses **Open IRSVerb** or presses **Start**. This keeps the System Audio
-Recording dialog from covering the explanation. IRSVerb defaults to a Dock icon
-(`ShowInDock`), so closing every window does not hide the app; turn that off in
-Settings to test the menu-bar-only path. Test VoiceOver and Full Keyboard Access
-on both the panel and the main window; the shared `ControlViews` carry the slider,
-meter, and picker labels, so a change there affects both surfaces.
+Recording dialog from covering the explanation. Close the main window to test the
+menu-bar-only path; the process and menu bar item stay alive, and launching the app
+again reuses that process. Test VoiceOver and Full Keyboard Access on both the
+panel and the main window; the shared `ControlViews` carry the slider, meter, and
+picker labels, so a change there affects both surfaces.
 
 ## Project layout
 

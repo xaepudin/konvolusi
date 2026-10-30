@@ -47,7 +47,7 @@ Sources/IRSVerb/         menu bar application
   ControlViews           shared controls and accessible meters
   MainWindowView         Control, Library, Diagnostics, About sections
   OnboardingView         first-run explanation
-  SettingsView           Dock visibility and setup
+  SettingsView           Background behavior and setup
   Stores                 low-frequency UI state isolated from the scene
   Diagnostics            --diagnose implementation
 Tests/IRSKitTests/       33 XCTest cases

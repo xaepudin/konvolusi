@@ -41,6 +41,7 @@ struct MainWindowView: View {
         .onAppear {
             if !isSurfaceVisible {
                 isSurfaceVisible = true
+                DockVisibility.showForWindow()
                 model.uiAppeared()
             }
             NSApp.activate(ignoringOtherApps: true)
@@ -61,6 +62,7 @@ struct MainWindowView: View {
         .onDisappear {
             if isSurfaceVisible {
                 isSurfaceVisible = false
+                DockVisibility.hideAfterWindow()
                 model.uiDisappeared()
             }
         }
@@ -69,6 +71,7 @@ struct MainWindowView: View {
                   let window = notification.object as? NSWindow,
                   window.title == "IRSVerb" else { return }
             isSurfaceVisible = false
+            DockVisibility.hideAfterWindow()
             model.uiDisappeared()
         }
         .sheet(isPresented: $showWelcome) {
