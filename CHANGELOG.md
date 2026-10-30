@@ -43,6 +43,10 @@ All notable user-visible changes are recorded here. The format follows
 
 ### Changed
 
+- Meter updates are observed only by the meter views, and the 20 Hz meter timer
+  stops when the main window closes. The menu bar-only profile is typically under
+  1% CPU idle and 2–4% while playing a long response; leaving the main window open
+  with live meters costs about 5–6%.
 - The main window uses a modern sidebar and card layout with a clear status header,
   wider impulse response picker, and consistent spacing.
 - The welcome sheet uses aligned icon rows, readable body text, and a card for the

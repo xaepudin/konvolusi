@@ -154,8 +154,24 @@ about 3.8 MB of float samples before partitioning.
 
 ## Performance
 
-Measured on Apple silicon with `top` (4-sample averages), engine running, panel
-closed:
+Current profile, measured 2026-10-30 on this MacBook Pro with `top` (1-second
+samples), Large Hall, macOS 27.2:
+
+| State | CPU | Notes |
+| --- | --- | --- |
+| Menu bar only, engine running, nothing playing | 0.0–1.0% | output running with silence; FFT fast path skips work |
+| Menu bar only, Large Hall playing | 0.6–5.9%, typically 2–4% | Core Audio callbacks plus convolution |
+| Main window open, live meters | 5–6% | the 20 Hz meter redraw dominates, not the DSP |
+| Main window closed | returns to menu-bar profile | the meter timer now stops on `NSWindow.willClose` |
+
+The main window is the expensive part: its live input/output meters redraw twenty
+times a second. The menu bar panel is cheap because it is only on screen while
+opened. The `POWER` column in `top` here tracks `%CPU`; it is not a wattage
+reading. On battery, expect a modest background drain when the menu bar item is
+idle, rising while a long response is playing and noticeably more if the main
+window is left open with live meters.
+
+Earlier optimization milestone (same code path, before the current UI):
 
 | State | CPU | Energy impact | Idle wakeups |
 | --- | --- | --- | --- |

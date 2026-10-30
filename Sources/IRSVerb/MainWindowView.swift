@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 /// The conventional window offered alongside the menu bar panel. It exists so
@@ -6,15 +7,16 @@ import SwiftUI
 /// library, read diagnostics, and reach Settings without hunting for a menu bar
 /// icon.
 struct MainWindowView: View {
-    @ObservedObject var model: AppModel
-    @ObservedObject var meters: MeterStore
-    @ObservedObject var status: StatusStore
+    var model: AppModel
+    var meters: MeterStore
+    var status: StatusStore
     var suppressWelcome = false
 
     @Environment(\.openSettings) private var openSettings
     @AppStorage(PreferenceKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @State private var tab: MainTab = .control
     @State private var showWelcome = false
+    @State private var isSurfaceVisible = false
 
     var body: some View {
         HStack(spacing: 0) {
@@ -27,7 +29,10 @@ struct MainWindowView: View {
         .background(Color(nsColor: .windowBackgroundColor))
         .frame(minWidth: 980, minHeight: 640)
         .onAppear {
-            model.uiAppeared()
+            if !isSurfaceVisible {
+                isSurfaceVisible = true
+                model.uiAppeared()
+            }
             NSApp.activate(ignoringOtherApps: true)
             if !suppressWelcome && !hasCompletedOnboarding {
                 showWelcome = true
@@ -43,7 +48,19 @@ struct MainWindowView: View {
         .onChange(of: showWelcome) { _, showing in
             if !showing { focusMainWindow() }
         }
-        .onDisappear { model.uiDisappeared() }
+        .onDisappear {
+            if isSurfaceVisible {
+                isSurfaceVisible = false
+                model.uiDisappeared()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { notification in
+            guard isSurfaceVisible,
+                  let window = notification.object as? NSWindow,
+                  window.title == "IRSVerb" else { return }
+            isSurfaceVisible = false
+            model.uiDisappeared()
+        }
         .sheet(isPresented: $showWelcome) {
             OnboardingView(model: model)
         }

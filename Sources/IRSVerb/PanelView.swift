@@ -4,9 +4,9 @@ import SwiftUI
 /// The menu bar quick panel. It uses the same `ConvolverControls` as the main
 /// window, plus explicit entry points to the conventional window and Settings.
 struct PanelView: View {
-    @ObservedObject var model: AppModel
-    @ObservedObject var meters: MeterStore
-    @ObservedObject var status: StatusStore
+    var model: AppModel
+    var meters: MeterStore
+    var status: StatusStore
 
     @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings

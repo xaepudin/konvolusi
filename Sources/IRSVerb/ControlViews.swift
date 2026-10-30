@@ -510,8 +510,8 @@ struct InfoFooter: View {
 /// apart in behaviour or accessibility.
 struct ConvolverControls: View {
     @ObservedObject var model: AppModel
-    @ObservedObject var meters: MeterStore
-    @ObservedObject var status: StatusStore
+    var meters: MeterStore
+    var status: StatusStore
     var compact: Bool = true
 
     var body: some View {

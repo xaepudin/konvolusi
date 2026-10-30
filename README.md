@@ -29,8 +29,9 @@ recorded in that space — or through that radio speaker, tape deck, or phone li
   with Control, Library, Diagnostics, and About sections in a sidebar. IRSVerb appears in the Dock
   by default so it stays findable when the menu bar is crowded; you can turn that
   off in Settings for a menu-bar-only utility.
-- **Low overhead.** Idle cost is around 0.1% of a CPU core; convolution is a few
-  percent on Apple silicon.
+- **Low overhead.** With only the menu bar item, idle is typically under 1% of a CPU
+  core and a long response is about 2–4%. The main window's live meters cost about
+  5–6% while it is open; close it for the lowest battery use.
 - **Local only.** No network access, no telemetry, no accounts. Audio is processed
   on your Mac and never leaves it.
 
