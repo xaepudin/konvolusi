@@ -80,31 +80,22 @@ struct MainWindowView: View {
     }
 
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Konvolusi")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 16)
-                .padding(.top, 14)
-                .padding(.bottom, 4)
-
-            // Deliberately a plain List without a Section header: macOS renders
-            // sidebar sections with a collapsible disclosure control, which made
-            // the whole navigation disappear if clicked.
-            List(selection: tabSelection) {
-                Label("Control", systemImage: "slider.horizontal.3")
-                    .tag(MainTab.control)
-                Label("Library", systemImage: "waveform")
-                    .tag(MainTab.library)
-                Label("Diagnostics", systemImage: "stethoscope")
-                    .tag(MainTab.diagnostics)
-                Label("Settings", systemImage: "gearshape")
-                    .tag(MainTab.settings)
-                Label("About", systemImage: "info.circle")
-                    .tag(MainTab.about)
-            }
-            .listStyle(.sidebar)
+        // Plain rows, no Section header: macOS renders sidebar sections with a
+        // collapsible disclosure control, and a header would compete with the
+        // window title. The title bar already identifies the app.
+        List(selection: tabSelection) {
+            Label("Control", systemImage: "slider.horizontal.3")
+                .tag(MainTab.control)
+            Label("Library", systemImage: "waveform")
+                .tag(MainTab.library)
+            Label("Diagnostics", systemImage: "stethoscope")
+                .tag(MainTab.diagnostics)
+            Label("Settings", systemImage: "gearshape")
+                .tag(MainTab.settings)
+            Label("About", systemImage: "info.circle")
+                .tag(MainTab.about)
         }
+        .listStyle(.sidebar)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 

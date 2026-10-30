@@ -26,81 +26,57 @@ guard let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil,
 NSGraphicsContext.saveGraphicsState()
 NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmap)
 
-// Transparent canvas.
 NSColor.clear.setFill()
 canvas.fill()
 
 let tile = NSRect(x: 48, y: 48, width: 928, height: 928)
 let rounded = NSBezierPath(roundedRect: tile, xRadius: 210, yRadius: 210)
 
-// Deep navy to teal, the same family as the menu bar waveform.
+// Deep aubergine to teal. The warm ripple is deliberately unlike the green
+// heartbeat line used by Activity Monitor.
 let gradient = NSGradient(colors: [
-    NSColor(calibratedRed: 0.045, green: 0.070, blue: 0.125, alpha: 1),
-    NSColor(calibratedRed: 0.035, green: 0.235, blue: 0.265, alpha: 1),
+    NSColor(calibratedRed: 0.095, green: 0.062, blue: 0.190, alpha: 1),
+    NSColor(calibratedRed: 0.035, green: 0.190, blue: 0.240, alpha: 1),
 ])!
-gradient.draw(in: rounded, angle: -62)
+gradient.draw(in: rounded, angle: -58)
 
-// Keep the rest of the drawing inside the rounded tile.
 rounded.addClip()
 
-// Soft concentric rings: a room around the impulse.
-for index in 0..<5 {
-    let inset = CGFloat(150 + index * 92)
-    let ring = NSBezierPath(ovalIn: tile.insetBy(dx: inset, dy: inset))
-    ring.lineWidth = CGFloat(3 + index)
-    NSColor.white.withAlphaComponent(0.055 - CGFloat(index) * 0.008).setStroke()
-    ring.stroke()
-}
-
-// A subtle top highlight.
-let highlight = NSBezierPath(ovalIn: NSRect(x: 110, y: 560, width: 804, height: 430))
-NSColor.white.withAlphaComponent(0.045).setFill()
+// A quiet highlight across the top.
+let highlight = NSBezierPath(ovalIn: NSRect(x: 100, y: 590, width: 824, height: 380))
+NSColor.white.withAlphaComponent(0.040).setFill()
 highlight.fill()
 
-// Baseline.
-let baseline = NSBezierPath()
-baseline.move(to: NSPoint(x: 150, y: 500))
-baseline.line(to: NSPoint(x: 874, y: 500))
-baseline.lineWidth = 4
-NSColor.white.withAlphaComponent(0.18).setStroke()
-baseline.stroke()
+// A single impulse and the room's response: concentric ripples spreading to
+// the right. The rings are clipped by the left edge of the tile, so the icon
+// reads as a source with a decaying response rather than an EKG trace.
+let center = NSPoint(x: 388, y: 512)
+let rings: [(radius: CGFloat, width: CGFloat, color: NSColor, alpha: CGFloat)] = [
+    (118, 36, NSColor(calibratedRed: 1.000, green: 0.835, blue: 0.690, alpha: 1), 0.98),
+    (218, 30, NSColor(calibratedRed: 1.000, green: 0.690, blue: 0.520, alpha: 1), 0.76),
+    (318, 24, NSColor(calibratedRed: 1.000, green: 0.500, blue: 0.400, alpha: 1), 0.52),
+    (418, 18, NSColor(calibratedRed: 1.000, green: 0.360, blue: 0.360, alpha: 1), 0.32),
+    (512, 13, NSColor(calibratedRed: 0.950, green: 0.260, blue: 0.350, alpha: 1), 0.18),
+]
 
-// The impulse and its decaying tail.
-func waveform(alpha: CGFloat, scale: CGFloat, phase: Double, width: CGFloat) {
-    let path = NSBezierPath()
-    path.lineWidth = width
-    path.lineCapStyle = .round
-    path.lineJoinStyle = .round
-    let count = 720
-    for index in 0...count {
-        let t = Double(index) / Double(count)
-        let x = 178 + CGFloat(t) * 668
-        let envelope = exp(-3.7 * t)
-        let y = 500 + 238 * scale * CGFloat(envelope * cos(t * 26 + phase))
-        let point = NSPoint(x: x, y: y)
-        if index == 0 { path.move(to: point) } else { path.line(to: point) }
-    }
-    NSColor(calibratedRed: 0.72, green: 0.98, blue: 0.96, alpha: alpha).setStroke()
-    path.stroke()
+for ring in rings {
+    let circle = NSBezierPath(ovalIn: NSRect(x: center.x - ring.radius,
+                                            y: center.y - ring.radius,
+                                            width: ring.radius * 2,
+                                            height: ring.radius * 2))
+    circle.lineWidth = ring.width
+    ring.color.withAlphaComponent(ring.alpha).setStroke()
+    circle.stroke()
 }
 
-// Ghost trace for depth, then the bright trace.
-waveform(alpha: 0.22, scale: 1.06, phase: 0.55, width: 26)
-waveform(alpha: 0.96, scale: 1.0, phase: 0.0, width: 19)
-
-// Direct-arrival spike.
-let spike = NSBezierPath()
-spike.move(to: NSPoint(x: 178, y: 500))
-spike.line(to: NSPoint(x: 178, y: 738))
-spike.lineWidth = 19
-spike.lineCapStyle = .round
-NSColor(calibratedRed: 0.72, green: 0.98, blue: 0.96, alpha: 0.96).setStroke()
-spike.stroke()
-
-// A small dot marks the arrival.
-let dot = NSBezierPath(ovalIn: NSRect(x: 158, y: 738, width: 40, height: 40))
-NSColor.white.withAlphaComponent(0.95).setFill()
+// The impulse itself.
+let dot = NSBezierPath(ovalIn: NSRect(x: center.x - 38, y: center.y - 38, width: 76, height: 76))
+NSColor(calibratedRed: 1.000, green: 0.965, blue: 0.900, alpha: 0.98).setFill()
 dot.fill()
+
+let core = NSBezierPath(ovalIn: NSRect(x: center.x - 16, y: center.y - 16, width: 32, height: 32))
+NSColor(calibratedRed: 1.000, green: 0.500, blue: 0.400, alpha: 0.95).setFill()
+core.fill()
 
 NSGraphicsContext.restoreGraphicsState()
 

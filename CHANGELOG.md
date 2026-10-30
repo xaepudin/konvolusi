@@ -56,6 +56,10 @@ All notable user-visible changes are recorded here. The format follows
   folders, documentation, and release artifacts now use the Konvolusi name. The new
   support folder is `~/Library/Application Support/Konvolusi`; the old IRSVerb folders
   are left untouched.
+- The sidebar starts directly with Control/Library/Diagnostics/Settings/About; the
+  redundant brand label above the list was removed.
+- New app icon: a warm impulse/ripple on a deep aubergine-teal tile, replacing the
+  pulse-line design that read like Activity Monitor.
 - Meter updates are observed only by the meter views, and the 20 Hz meter timer
   stops when the main window closes. The menu bar-only profile is typically under
   1% CPU idle and 2–4% while playing a long response; leaving the main window open
