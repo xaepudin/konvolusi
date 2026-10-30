@@ -48,7 +48,7 @@ To verify locally:
 ```sh
 git log --show-signature -1
 git verify-commit HEAD
-git verify-tag v1.0.0
+git verify-tag v1.1.0
 ```
 
 If a signing key is not registered with GitHub, the commit still has a valid local
@@ -94,10 +94,10 @@ scripts/package-release.sh
 The script produces:
 
 ```
-dist/Konvolusi-1.0.0-macos.zip
-dist/Konvolusi-1.0.0-macos.zip.sha256
-dist/Konvolusi-1.0.0.dmg
-dist/Konvolusi-1.0.0.dmg.sha256
+dist/Konvolusi-1.1.0-macos.zip
+dist/Konvolusi-1.1.0-macos.zip.sha256
+dist/Konvolusi-1.1.0.dmg
+dist/Konvolusi-1.1.0.dmg.sha256
 ```
 
 The app is ad-hoc signed. If a Developer ID certificate is available, follow
@@ -119,25 +119,25 @@ gh repo create xaepudin/Konvolusi --public \
 git remote add origin git@github-xaepudin:xaepudin/Konvolusi.git
 
 git push -u origin main
-git push origin v1.0.0
+git push origin v1.1.0
 ```
 
 The tag already exists and is signed. If it needs to be recreated:
 
 ```sh
-git tag -f -s v1.0.0 -m "Konvolusi 1.0.0"
+git tag -f -s v1.1.0 -m "Konvolusi 1.1.0"
 ```
 
 Create the release with the artifacts and generated notes:
 
 ```sh
-gh release create v1.0.0 \
-  dist/Konvolusi-1.0.0-macos.zip \
-  dist/Konvolusi-1.0.0-macos.zip.sha256 \
-  dist/Konvolusi-1.0.0.dmg \
-  dist/Konvolusi-1.0.0.dmg.sha256 \
-  --title "Konvolusi 1.0.0" \
-  --notes-file docs/release-notes/1.0.0.md
+gh release create v1.1.0 \
+  dist/Konvolusi-1.1.0-macos.zip \
+  dist/Konvolusi-1.1.0-macos.zip.sha256 \
+  dist/Konvolusi-1.1.0.dmg \
+  dist/Konvolusi-1.1.0.dmg.sha256 \
+  --title "Konvolusi 1.1.0" \
+  --notes-file docs/release-notes/1.1.0.md
 ```
 
 If the release notes are kept in `CHANGELOG.md`, use `--notes-from-tag` or pass
@@ -164,7 +164,7 @@ describe an ad-hoc build as “signed and notarized”.
 - Releases: attach the zip, DMG, and checksums.
 - CI: `.github/workflows/ci.yml` on pushes and pull requests; release workflow on
   `v*` tags.
-- Do not add a licence that conflicts with `LICENSE` (MIT for code) or
+- Do not add a licence that conflicts with `LICENSE` (GPL-3.0-only for code) or
   `LICENSE-IRS` (CC0 for generated responses).
 
 ## After publication

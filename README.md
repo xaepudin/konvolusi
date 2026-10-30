@@ -328,7 +328,7 @@ committing impulse responses without a clear redistribution licence.
 
 ## Licence
 
-- **Source code:** [MIT](LICENSE).
+- **Source code:** [GPL-3.0-only](LICENSE).
 - **Generated impulse responses** in `Impulse Responses/`: [CC0 1.0](LICENSE-IRS)
   (public domain dedication). Use them in music, videos, and anything else
   without attribution.

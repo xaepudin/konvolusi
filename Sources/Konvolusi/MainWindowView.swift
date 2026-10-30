@@ -310,7 +310,7 @@ struct DiagnosticsView: View {
 
 struct AboutView: View {
     private var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.1.0"
     }
 
     private var build: String {
@@ -334,7 +334,7 @@ struct AboutView: View {
 
             HStack(spacing: 16) {
                 Link("Repository", destination: URL(string: "https://github.com/xaepudin/Konvolusi")!)
-                Link("MIT licence", destination: URL(string: "https://github.com/xaepudin/Konvolusi/blob/main/LICENSE")!)
+                Link("GPL-3.0 licence", destination: URL(string: "https://github.com/xaepudin/Konvolusi/blob/main/LICENSE")!)
                 Link("CC0 responses", destination: URL(string: "https://github.com/xaepudin/Konvolusi/blob/main/LICENSE-IRS")!)
             }
             .font(.callout)

@@ -4,7 +4,7 @@ All notable user-visible changes are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.1.0] — 2026-10-30
 
 ### Added
 
@@ -51,6 +51,8 @@ All notable user-visible changes are recorded here. The format follows
 
 ### Changed
 
+- Switched the source-code licence from MIT to **GPL-3.0-only**. The generated
+  impulse responses remain CC0.
 - Rebranded the app from IRSVerb to **Konvolusi**, with the tagline *Rediscover the
   songs you love.* The app bundle, executable, bundle identifier, support/log
   folders, documentation, and release artifacts now use the Konvolusi name. The new
@@ -118,3 +120,5 @@ First public release.
   redistribution terms are usually unclear.
 
 [1.0.0]: https://github.com/xaepudin/Konvolusi/releases/tag/v1.0.0
+
+[1.1.0]: https://github.com/xaepudin/Konvolusi/releases/tag/v1.1.0

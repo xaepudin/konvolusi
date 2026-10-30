@@ -45,7 +45,8 @@ Acceptable contributions:
   clearly named directory with a `LICENSE`/`README` describing the terms.
 
 The repository's generated responses are dedicated to CC0; see
-[LICENSE-IRS](LICENSE-IRS). Code contributions are MIT; see [LICENSE](LICENSE).
+[LICENSE-IRS](LICENSE-IRS). Code contributions are licensed under GPL-3.0-only; see
+[LICENSE](LICENSE).
 
 ## Commit identity
 

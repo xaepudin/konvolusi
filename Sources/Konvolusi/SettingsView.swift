@@ -65,8 +65,8 @@ struct SettingsView: View {
 
             Section("About") {
                 LabeledContent("Version", value: "\(model.appVersion) (\(model.appBuild))")
-                Text("Source code is MIT licensed. The generated impulse responses are dedicated "
-                    + "to CC0. See the About section for links.")
+                Text("Source code is GPL-3.0-only licensed. The generated impulse responses are "
+                    + "dedicated to CC0. See the About section for links.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

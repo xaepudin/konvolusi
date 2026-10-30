@@ -218,9 +218,9 @@ notarization secrets.
 ## Versioning
 
 - `Resources/Info.plist` → `CFBundleShortVersionString` is the user-facing
-  version (`1.0.0`).
-- `CFBundleVersion` is the build number (`1`).
-- Git tags use `v1.0.0`.
+  version (`1.1.0`).
+- `CFBundleVersion` is the build number (`2`).
+- Git tags use `v1.1.0`.
 - `CHANGELOG.md` records user-visible changes.
 
 Bump all three when cutting a release. The package has no version constant of its
