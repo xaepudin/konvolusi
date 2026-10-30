@@ -31,6 +31,8 @@ All notable user-visible changes are recorded here. The format follows
   never the only way to reach the UI.
 - The Library page uses a fixed sidebar and detail layout. A restored
   `NavigationSplitView` frame could clip the list and hide the sidebar rows.
+- The sidebar no longer uses a collapsible `Section` header. It is a static label
+  plus plain rows, so there is no disclosure control that can hide the navigation.
 - Settings is a normal sidebar section, opened by the menu bar panel or the app
   menu, instead of a separate Settings window. The main sidebar is fixed and
   cannot collapse.

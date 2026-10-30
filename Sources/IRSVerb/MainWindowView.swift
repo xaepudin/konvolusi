@@ -80,8 +80,18 @@ struct MainWindowView: View {
     }
 
     private var sidebar: some View {
-        List(selection: tabSelection) {
-            Section("IRSVerb") {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("IRSVerb")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 16)
+                .padding(.top, 14)
+                .padding(.bottom, 4)
+
+            // Deliberately a plain List without a Section header: macOS renders
+            // sidebar sections with a collapsible disclosure control, which made
+            // the whole navigation disappear if clicked.
+            List(selection: tabSelection) {
                 Label("Control", systemImage: "slider.horizontal.3")
                     .tag(MainTab.control)
                 Label("Library", systemImage: "waveform")
@@ -93,8 +103,8 @@ struct MainWindowView: View {
                 Label("About", systemImage: "info.circle")
                     .tag(MainTab.about)
             }
+            .listStyle(.sidebar)
         }
-        .listStyle(.sidebar)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
