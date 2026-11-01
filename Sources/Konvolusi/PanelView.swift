@@ -40,8 +40,9 @@ struct PanelView: View {
             }
             .controlSize(.small)
         }
-        .padding(14)
+        .padding(12)
         .frame(width: 420)
+        .fixedSize(horizontal: false, vertical: true)
         // The 20 Hz meter timer only runs while a surface is actually on screen.
         .onAppear { model.panelAppeared() }
         .onDisappear { model.panelDisappeared() }

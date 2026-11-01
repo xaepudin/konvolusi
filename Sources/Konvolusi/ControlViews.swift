@@ -184,17 +184,20 @@ struct StatusHeader: View {
 
             Spacer(minLength: 8)
 
-            Text(status.isRunning ? "Running" : "Stopped")
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, 9)
-                .padding(.vertical, 4)
-                .foregroundStyle(status.isRunning ? Color.green : Color.secondary)
-                .background(
-                    status.isRunning ? Color.green.opacity(0.13) : Color.secondary.opacity(0.11),
-                    in: Capsule()
-                )
-                .accessibilityLabel("Status")
-                .accessibilityValue(status.isRunning ? "Running" : "Stopped")
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(status.isRunning ? Color.green : Color.secondary)
+                    .frame(width: 6, height: 6)
+                Text(status.isRunning ? "Running" : "Stopped")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+            }
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
+            .background(Color.primary.opacity(0.07), in: Capsule())
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Status")
+            .accessibilityValue(status.isRunning ? "Running" : "Stopped")
 
             Button(status.isRunning ? "Stop" : "Start") {
                 model.toggleRunning()

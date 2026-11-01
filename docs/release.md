@@ -48,7 +48,7 @@ To verify locally:
 ```sh
 git log --show-signature -1
 git verify-commit HEAD
-git verify-tag v1.1.0
+git verify-tag v1.1.1
 ```
 
 If a signing key is not registered with GitHub, the commit still has a valid local
@@ -94,10 +94,10 @@ scripts/package-release.sh
 The script produces:
 
 ```
-dist/Konvolusi-1.1.0-macos.zip
-dist/Konvolusi-1.1.0-macos.zip.sha256
-dist/Konvolusi-1.1.0.dmg
-dist/Konvolusi-1.1.0.dmg.sha256
+dist/Konvolusi-1.1.1-macos.zip
+dist/Konvolusi-1.1.1-macos.zip.sha256
+dist/Konvolusi-1.1.1.dmg
+dist/Konvolusi-1.1.1.dmg.sha256
 ```
 
 The app is ad-hoc signed. If a Developer ID certificate is available, follow
@@ -116,25 +116,25 @@ The repository is **https://github.com/xaepudin/konvolusi**. Point `origin` at t
 git remote add origin git@github-xaepudin:xaepudin/konvolusi.git
 
 git push -u origin main
-git push origin v1.1.0
+git push origin v1.1.1
 ```
 
 The tag already exists and is signed. If it needs to be recreated:
 
 ```sh
-git tag -f -s v1.1.0 -m "Konvolusi 1.1.0"
+git tag -f -s v1.1.1 -m "Konvolusi 1.1.1"
 ```
 
 Create the release with the artifacts and generated notes:
 
 ```sh
-gh release create v1.1.0 \
-  dist/Konvolusi-1.1.0-macos.zip \
-  dist/Konvolusi-1.1.0-macos.zip.sha256 \
-  dist/Konvolusi-1.1.0.dmg \
-  dist/Konvolusi-1.1.0.dmg.sha256 \
-  --title "Konvolusi 1.1.0" \
-  --notes-file docs/release-notes/1.1.0.md
+gh release create v1.1.1 \
+  dist/Konvolusi-1.1.1-macos.zip \
+  dist/Konvolusi-1.1.1-macos.zip.sha256 \
+  dist/Konvolusi-1.1.1.dmg \
+  dist/Konvolusi-1.1.1.dmg.sha256 \
+  --title "Konvolusi 1.1.1" \
+  --notes-file docs/release-notes/1.1.1.md
 ```
 
 If the release notes are kept in `CHANGELOG.md`, use `--notes-from-tag` or pass

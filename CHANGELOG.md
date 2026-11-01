@@ -4,7 +4,7 @@ All notable user-visible changes are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.1.1] — 2026-11-01
 
 ### Changed
 
@@ -12,6 +12,13 @@ All notable user-visible changes are recorded here. The format follows
   motif. Running uses a solid center; stopped uses a hollow center and dimmed
   rings. The outer ring is thinner, like the app icon, and the menu bar uses a
   16 pt mark.
+
+### Fixed
+
+- The menu bar panel shrink-wraps its content instead of leaving the large top and
+  bottom gaps.
+- The status pill uses primary text on a neutral capsule with a green/grey dot, so
+  “Running” stays readable in light and dark panels.
 
 ## [1.1.0] — 2026-10-30
 
@@ -131,3 +138,5 @@ First public release.
 [1.0.0]: https://github.com/xaepudin/konvolusi/releases/tag/v1.0.0
 
 [1.1.0]: https://github.com/xaepudin/konvolusi/releases/tag/v1.1.0
+
+[1.1.1]: https://github.com/xaepudin/konvolusi/releases/tag/v1.1.1
