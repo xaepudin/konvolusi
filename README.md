@@ -94,7 +94,7 @@ There are two surfaces:
 - **Main window.** Opened on first launch, or from **Open Konvolusi…** in the menu
   bar panel. It has five sections in a fixed sidebar: Control, Library, Diagnostics,
   Settings, and About. The sidebar cannot collapse.
-- **Menu bar panel.** Click the waveform icon for quick access to the response
+- **Menu bar panel.** Click the Konvolusi ring icon for quick access to the response
   picker, mix, gain, bypass, normalization, and meters.
 
 The app appears in the Dock and ⌘-Tab while the main window is open. Closing the

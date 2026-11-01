@@ -4,6 +4,15 @@ All notable user-visible changes are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- The menu bar and in-app status mark now share the app icon’s off-center ring
+  motif. Running uses a solid center; stopped uses a hollow center and dimmed
+  rings. The outer ring is thinner, like the app icon, and the menu bar uses a
+  16 pt mark.
+
 ## [1.1.0] — 2026-10-30
 
 ### Added

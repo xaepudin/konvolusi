@@ -16,7 +16,7 @@ struct OnboardingView: View {
 
             Divider()
 
-            Text("Konvolusi lives in the menu bar. Click the waveform icon to pick a "
+            Text("Konvolusi lives in the menu bar. Click the Konvolusi icon to pick a "
                 + "response, set the mix, and see your input and output levels. The main "
                 + "window appears in the Dock while it is open; closing it returns Konvolusi "
                 + "to the menu bar and keeps audio running.")
