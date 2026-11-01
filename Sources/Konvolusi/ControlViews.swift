@@ -164,9 +164,11 @@ struct StatusHeader: View {
                 Circle()
                     .fill(status.isRunning ? Color.green.opacity(0.14) : Color.secondary.opacity(0.10))
                     .frame(width: 42, height: 42)
-                Image(systemName: status.isRunning ? "waveform.circle.fill" : "waveform.circle")
-                    .font(.system(size: 20, weight: .semibold))
+                Image(nsImage: KonvolusiMark.image(running: status.isRunning, size: 24))
+                    .renderingMode(.template)
+                    .interpolation(.high)
                     .foregroundStyle(status.isRunning ? Color.green : Color.secondary)
+                    .frame(width: 24, height: 24)
             }
             .accessibilityHidden(true)
 

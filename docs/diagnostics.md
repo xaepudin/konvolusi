@@ -6,7 +6,7 @@ panel and logs rather than guessing.
 
 ## First checks
 
-1. **Is the engine running?** The menu bar icon gains a filled waveform and the
+1. **Is the engine running?** The menu bar ring mark gains a filled center and the
    panel header says **Running** when `.running`.
 2. **Is the permission granted?** The panel says **Waiting for System Audio
    Recording permission** if setup failed. Enable Konvolusi under **System Settings

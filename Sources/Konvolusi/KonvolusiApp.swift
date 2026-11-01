@@ -90,7 +90,9 @@ private struct MenuBarLabel: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Image(systemName: status.isRunning ? "waveform.circle.fill" : "waveform.circle")
+        Image(nsImage: KonvolusiMark.image(running: status.isRunning))
+            .renderingMode(.template)
+            .opacity(status.isRunning ? 1 : 0.65)
             .accessibilityLabel("Konvolusi")
             .accessibilityValue(status.isRunning ? "Running" : "Stopped")
             .accessibilityHint("Opens the Konvolusi controls")
