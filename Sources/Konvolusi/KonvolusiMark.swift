@@ -6,6 +6,8 @@ import AppKit
 /// stays legible at menu bar size. The rings are clipped at the left edge on
 /// purpose, matching how the app icon's outer rings leave the tile.
 enum KonvolusiMark {
+    static let menuBarSize: CGFloat = 16
+
     static func image(running: Bool, size: CGFloat = 18) -> NSImage {
         let image = NSImage(size: NSSize(width: size, height: size), flipped: false) { rect in
             NSGraphicsContext.saveGraphicsState()

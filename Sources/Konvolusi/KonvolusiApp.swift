@@ -90,7 +90,7 @@ private struct MenuBarLabel: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Image(nsImage: KonvolusiMark.image(running: status.isRunning))
+        Image(nsImage: KonvolusiMark.image(running: status.isRunning, size: KonvolusiMark.menuBarSize))
             .renderingMode(.template)
             .opacity(status.isRunning ? 1 : 0.65)
             .accessibilityLabel("Konvolusi")

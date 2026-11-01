@@ -10,7 +10,8 @@ All notable user-visible changes are recorded here. The format follows
 
 - The menu bar and in-app status mark now share the app icon’s off-center ring
   motif. Running uses a solid center; stopped uses a hollow center and dimmed
-  rings. The outer ring is thinner, like the app icon.
+  rings. The outer ring is thinner, like the app icon, and the menu bar uses a
+  16 pt mark.
 
 ## [1.1.0] — 2026-10-30
 
